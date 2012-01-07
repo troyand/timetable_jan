@@ -1,0 +1,49 @@
+{% load staticfiles %}
+
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<title>{% block title %}Розклад{% endblock %}</title>
+<meta name="description" content="">
+<meta name="author" content="">
+<link href="{% static "bootstrap.css" %}" rel="stylesheet">
+<script type="text/javascript" src="{% static "jquery.min.js" %}"></script>
+<style type="text/css">
+      /* Override some defaults */
+      html, body {
+        background-color: #eee;
+      }
+      body {
+        padding-top: 40px; /* 40px to make the container go all the way to the bottom of the topbar */
+      }
+      label {
+          width: 400px;
+      }
+      form .input {
+          margin-left: 420px;
+      }
+</style>
+{% block headadd %}
+{% endblock %}
+</head>
+<body>
+<div class="topbar">
+    <div class="fill">
+        <div class="container">
+            <a class="brand" href="/">Розклад</a>
+
+            <ul class="nav">
+                <li class="active"><a href="#">Розклад</a></li>
+                <li><a href="#about">Про проект</a></li>
+                <li><a href="#contact">Контакти</a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+<div class="container">
+{% block content %}
+{% endblock %}
+</div>
+</body>
+</html>

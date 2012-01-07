@@ -1,0 +1,70 @@
+<html>
+<head>
+<title>Edit</title>
+<link rel="stylesheet" href="../static/edit.css">
+<script src="../static/jquery.js"></script>
+<script src="../static/jquery-ui.js"></script>
+<script>
+$(function() {
+    $(".subject").draggable({
+        snap: ".line", snapMode: "inner", revert: true
+    });
+    $(".line").droppable({
+        hoverClass: "line-hover",
+        tolerance: "fit",
+        drop: function(event, ui){
+            var line = this;
+            $.post("../edit-lessons/", {
+                'lesson-number': $(this).data("lesson-number"),
+                'weekday-number': $(this).data("weekday-number"),
+                'lessons': ui.draggable.data("lessons"),
+                'csrfmiddlewaretoken': '{{ csrf_token }}'
+            }, function(data) {
+                console.log(data.result);
+                if (data.result == "ok") {
+                    ui.draggable.appendTo($(".subjects", line));
+                    //ui.draggable.attr("style", "position: relative;");
+                
+                }
+                else {
+                    console.log(data.message);
+                }
+            }, "json");
+            console.log(ui.draggable.data("lessons"));
+            console.log($(this).data("lesson-number"));
+            console.log($(this).data("weekday-number"));
+            console.log(event);
+            console.log(ui);
+        }
+    });
+});
+</script>
+</head>
+<body>
+
+{% for weekday_number, lesson_numbers in day_lesson_mapping.items %}
+<div class="day">
+    <div class="day_title">{{ week_dates|lookup:weekday_number|date:"l"|vertical }}</div>
+
+    <div class="Sub">
+        {% for lesson_number, lessons_container in lesson_numbers.items %}
+        <div class="line" data-lesson-number="{{ lesson_number }}" data-weekday-number="{{ weekday_number }}">
+            <div class="time"><span>{{ lesson_times|lookup:lesson_number|first}}</span></div>
+            <div class="subjects">
+                {% for i in lessons_container %}
+                <div class="subject" data-lessons="{{ i.4 }}">
+                    <span><abbr title="{{ i.0 }}">{{ i.0.abbr }} {{ i.1.number}}</abbr></span>
+                    <ul>
+                        <li>{{ i.2 }}</li>
+                        <li>{{ i.3 }}</li>
+                    </ul>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endfor %}
+</body>
+</html>

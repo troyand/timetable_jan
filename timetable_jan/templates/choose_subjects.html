@@ -1,0 +1,31 @@
+{% extends "base.html" %}                                                      
+{% block title %}Розклад - головна{% endblock %}                               
+{% block content %}
+<div class="page-header">                                                      
+    <h1>Вибір курсів та груп</h1> 
+</div> 
+<form method="POST" action="/render/">
+    {% csrf_token %}
+    {% for course, groups in course_groups.items %}
+    <div class="clearfix">
+        <label for="course-{{ course.id }}">
+            {{ course.discipline.name }}
+        </label>
+        <div class="input">
+            <div class="input-prepend">
+                <label class="add-on">
+                    <input type="checkbox" name="courses" id="" value="{{ course.id }}" checked/>
+                </label>
+                <select class="medium" name="{{ course.id }}" id="course-{{ course.id }}">
+                    {% for group in groups %}
+                    <option value="{{ group.id }}"> {{ group.number }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+    </div><!-- /clearfix -->
+
+    {% endfor %}
+    <button class="btn primary" type="submit">Згенерувати розклад</button>
+</form>
+{% endblock %}

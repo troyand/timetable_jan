@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Розклад - головна{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h1>Вибір спеціальності та року навчання</h1>
+</div>
+<ul>
+{% for timetable in timetables %}
+<li><a href="choose-subjects/{{ timetable.id }}/">{{ timetable.major.name }} - {{ timetable.year }}</a></li>
+{% endfor %}
+</ul>
+{% endblock %}

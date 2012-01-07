@@ -1,0 +1,93 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta http-equiv="content-style-type" content="text/css" />
+	<link rel="stylesheet" media="screen" href="http://usic.org.ua/~robert/projects/tt/css/style.css" />
+	<link rel="stylesheet" media="print" href="http://usic.org.ua/~robert/tt/css/print.css" />
+	<link rel="shortcut icon" href="favicon.ico" />
+	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js"></script>
+	<script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/noisy/1.0/jquery.noisy.min.js"></script>
+	<meta name="keywords" content="" />
+	<meta name="description" content="" />
+	<title>USIC Schedules</title>
+</head>
+<body>
+
+<div id="main_container">
+<div id="header">
+<!-- Usic logotype  -->
+<a href="http://bunker.usic.org.ua/" title="Usic"><div id="Usic_logo"></div></a>
+<!-- TimeTable logotype -->
+<div id="TimeTable_logo"></div>
+</div>
+<!-- Main Menu -->
+<div id="Upper_menu">
+<ul>
+	<li><span class="active" id="week"><a href="#week" title="View the schedule for the week">Week</span></a></li>
+	<li><span class="" id="subject" title="View the schedule in subjects" onclick="document.getElementById('subject').className='active';"><a href="#subj">Subjects</span></a></li>
+	<li><span class="" id="events" title="View events"><a href="#even">Events</span></a></li>
+</ul>
+</div>
+<div id="cont">
+<!-- Change type menu -->
+<span id="Change_type">
+<ul>
+	<li><span class=""><a href="" title="View by Week"><img src="http://usic.org.ua/~robert/tt/images/week_type.png"></a></span></li>
+	<li><span class="active"><a href="" title="View by Days"><img src="http://usic.org.ua/~robert/tt/images/day_type.png"></a></span></li>
+</ul>
+</span>
+<div id="Content">
+
+
+{% for week_number, rows in week_mapping.items %}
+
+{% for row, weekdays in rows.items %}
+<div id="Day">
+{% for weekday, lessons in weekdays.items %}
+<p>
+{{ week_date_mapping|lookup:week_number|lookup:weekday|date:"l" }},
+<span class="date">{{ week_date_mapping|lookup:week_number|lookup:weekday|date:"j E Y" }}</span></p>
+{% endfor %}
+<table>
+{% for lesson_number in lesson_numbers %}
+<tr><td class="time">{{ lesson_times|lookup:lesson_number|first }}</td>
+
+{% for weekday, lessons in weekdays.items %}
+<td>{% with lesson=lessons|lookup:lesson_number %}
+{% if lesson %}
+<span class="subject">{{ lesson.group.course.discipline.name }}</span><br>
+<span class="details">{{ lesson.room }}, {{ lesson.group.lecturer }},
+{% if lesson.group.number == 0 %}
+<span class="type_lecture">лекція</span>
+{% else %}
+<span class="type_practice">практичне-{{ lesson.group.number }}</span>
+{% endif %}
+</span>
+{% endif %}
+{% endwith %}
+</td></tr>
+{% endfor %}
+	
+{% endfor %}
+
+</tr>
+</table>
+</div>
+{% endfor %}
+{% endfor %}
+</div>
+</div>
+
+<!-- Weeks -->
+<div id="Bottom_menu">
+<ul>
+{% for week_number, rows in week_mapping.items %}
+<li>{{ week_number }}</li>
+{% endfor %}
+</ul>
+</div>
+
+</body>
+</html>
+
