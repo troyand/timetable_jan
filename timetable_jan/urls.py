@@ -8,10 +8,7 @@ admin.autodiscover()
 urlpatterns = patterns('',
     (r'^$', 'timetable_jan.university.views.index'),
     (r'^choose-subjects/(?P<timetable_id>\d+)/$', 'timetable_jan.university.views.choose_subjects'),
-    (r'^render/$', 'timetable_jan.university.views.render'),
-    (r'^edit/$', 'timetable_jan.university.views.edit'),
-    (r'^edit-lessons/$', 'timetable_jan.university.views.edit_lessons'),
-    (r'^faculties\.json$', 'timetable_jan.university.views.faculties_json'),
+    (r'^render/(?P<encoded_groups>[\d/]+)/$', 'timetable_jan.university.views.render'),
     # Examples:
     # url(r'^$', 'dj_timetable.views.home', name='home'),
 

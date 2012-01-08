@@ -203,6 +203,19 @@ class Person(models.Model):
     
     class Meta:
         abstract = True
+
+    def short_name(self):
+        parts = self.full_name.split(' ')
+        result = parts[0]
+        if len(parts) > 1:
+            result += ' '
+            for p in parts[1:]:
+                if len(p) > 0:
+                    result += '%s.' % p[0]
+        return result
+
+    def surname(self):
+        return self.full_name.split(' ')[0]
     
 
 class Lecturer(Person):

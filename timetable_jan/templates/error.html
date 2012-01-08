@@ -1,29 +1,5 @@
-<html xmlns="http://www.w3.org/1999/xhtml">
-    <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-        <meta http-equiv="content-style-type" content="text/css" />
- 
-        <link rel="stylesheet" media="screen" href="http://usic.org.ua/~vaultboy/1/css/style.css" />
-        <link rel="stylesheet" media="print" href="http://usic.org.ua/~vaultboy/1/css/print.css" />
-        <link rel="shortcut icon" href="favicon.ico" />
-        <link href='http://fonts.googleapis.com/css?family=Droid+Sans&v1' rel='stylesheet' type='text/css' />
-        <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js"></script>
-
-        <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/noisy/1.0/jquery.noisy.min.js"></script>
-        <script type ="text/javascript">
-           $(document).ready(function(){
-              $('body').noisy({
-                  intensity: 10, 
-                  opacity: 0.09,
-                  monochrome: true
-              });
-           });
-        </script> 
-        <meta name="keywords" content="" />
-        <meta name="description" content="" />
-        <title>USIC Schedules Error</title>
-    </head>
-    <body>      
-        <p><strong>{{ error_message }}</strong></p>
-    </body>
-</html>     
+{% extends "base.html" %}
+{% block title %}Накладка у розкладі{% endblock %}
+{% block header %}
+{{ error_message }}
+{% endblock %}

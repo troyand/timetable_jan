@@ -164,6 +164,8 @@ def choose_subjects(request, timetable_id):
     course_groups = {}
     for course in timetable.courses.all():
         course_groups[course] = sorted(course.group_set.filter(number__gt=0), key=lambda g: g.number)
+        if len(course_groups[course]) == 0:
+            course_groups[course] = course.group_set.all()
     return render_to_response(
             'choose_subjects.html',
             {
@@ -176,13 +178,13 @@ def return_timetable(mapping):
     if min(mapping.keys()).weekday() != 0:
         from datetime import timedelta
         mapping[min(mapping.keys())-timedelta(days=min(mapping.keys()).weekday())]={}
-        print 'First day of study is not Monday!' # add dummy days so that week starts on Monday
+        #print 'First day of study is not Monday!' # add dummy days so that week starts on Monday
     first_monday = min(mapping.keys())
     week_mapping = {}
     week_date_mapping = {}
     number_of_weeks = int(math.ceil(
             float((max(mapping.keys()) - min(mapping.keys())).days) / 7))
-    number_of_rows = 6
+    number_of_rows = 2
     for week_number in range(1, number_of_weeks + 1):
         week_mapping[week_number] = {}
         week_date_mapping[week_number] = {}
@@ -210,21 +212,18 @@ def return_timetable(mapping):
         'lesson_numbers': range(1,8),
         })
 
-def render(request):
+def render(request, encoded_groups):
     groups = []
-    for course_id in request.POST.getlist(u'courses'):
-        course = get_object_or_404(Course, pk=course_id)
+    group_ids = [int(g) for g in encoded_groups.split('/')]
+    for group_id in group_ids:
+        # add practice group
+        group = get_object_or_404(Group, pk=group_id)
+        groups.append(group)
+        # add lecture group if it is present
         try:
-            group = course.group_set.get(number=0)
-            groups.append(group)
-        except:
-            # No lecture group
-            pass
-        try:
-            group = Group.objects.get(pk=request.POST[u'%s' % course_id])
-            groups.append(group)
-        except:
-            # No practice group
+            lecture_group = group.course.group_set.get(number=0)
+            groups.append(lecture_group)
+        except Group.DoesNotExist:
             pass
     mapping = {} # mapping[date][lesson_number]=Lesson()
     lessons = []

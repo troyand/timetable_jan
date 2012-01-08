@@ -1,31 +1,64 @@
 {% extends "base.html" %}                                                      
-{% block title %}Розклад - головна{% endblock %}                               
+{% block title %}Розклад - Вибір курсів та груп{% endblock %} 
+{% block headadd %}
+<script type="text/javascript">
+    function recomputeLink() {
+        var accumulator = "/";
+        $(".group-btn.primary").each(
+        function(i, btn){
+            if($(btn).attr("value") != ""){
+                accumulator += $(btn).attr("value") + '/';
+            }
+        });
+        $("#ical-link").attr("href", "/ical" + accumulator);
+        $("#render-link").attr("href", "/render" + accumulator);
+    }
+    $(function() {
+        $(".group-btn").click(function(event){
+            event.preventDefault();
+            $(this).parent("div").children(".btn").removeClass("primary");
+            $(this).addClass("primary");
+            recomputeLink();
+        });
+        recomputeLink();
+    });
+</script>
+{% endblock %}
+{% block header %}Вибір курсів та груп{% endblock %}
 {% block content %}
-<div class="page-header">                                                      
-    <h1>Вибір курсів та груп</h1> 
-</div> 
-<form method="POST" action="/render/">
-    {% csrf_token %}
-    {% for course, groups in course_groups.items %}
-    <div class="clearfix">
-        <label for="course-{{ course.id }}">
-            {{ course.discipline.name }}
-        </label>
-        <div class="input">
-            <div class="input-prepend">
-                <label class="add-on">
-                    <input type="checkbox" name="courses" id="" value="{{ course.id }}" checked/>
-                </label>
-                <select class="medium" name="{{ course.id }}" id="course-{{ course.id }}">
-                    {% for group in groups %}
-                    <option value="{{ group.id }}"> {{ group.number }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-        </div>
-    </div><!-- /clearfix -->
+{% for course, groups in course_groups.items %}
+<div class="row add-margins">
+    <div class="span3">
+        {{ course.discipline.name }}
+    </div>
+    <div class="span13">
+        <a href="#" class="btn group-btn none-btn" value="">
+            X
+        </a>
+        {% for group in groups %}
+        <a href="#" class="btn {% if forloop.first %}primary{% endif %} group-btn" value="{{ group.id }}">
+            <strong>
+                {{ group.number }}
+            </strong>
+            <span class="small-text">
+                ({{ group.lecturer.surname }})
+            </span>
+        </a>
+        {% endfor %}
+    </div>
+</div>
+{% endfor %}
 
-    {% endfor %}
-    <button class="btn primary" type="submit">Згенерувати розклад</button>
-</form>
+<div class="row add-margins">
+    <div class="span8">
+        <a class="btn success wide" href="/render/" id="render-link" target="_blank">
+            Показати Online-версію розкладу
+        </a>
+    </div>
+    <div class="span8">
+        <a class="btn success wide" href="/ical/" id="ical-link">
+            Експортувати розклад у форматі iCal
+        </a>
+    </div>
+</div>
 {% endblock %}
