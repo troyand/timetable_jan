@@ -1,5 +1,4 @@
 {% load staticfiles %}
-
 <!DOCTYPE html>
 <html lang="uk">
 <head>
@@ -7,6 +6,7 @@
 <title>{% block title %}Розклад{% endblock %}</title>
 <meta name="description" content="">
 <meta name="author" content="">
+<link rel="shortcut icon" href="{% static "favicon.ico" %}">
 <link href="{% static "bootstrap.css" %}" rel="stylesheet">
 <script type="text/javascript" src="{% static "jquery.min.js" %}"></script>
 <style type="text/css">
@@ -60,6 +60,12 @@
     .span5 {
         background-color: #eee;
     }
+    td.lesson {
+        width: 31%;
+    }
+    td.lesson-time {
+        width: 7%;
+    }
 </style>
 {% block headadd %}
 {% endblock %}
@@ -71,9 +77,9 @@
             <a class="brand" href="/">Розклад</a>
 
             <ul class="nav">
-                <li class="active"><a href="#">Розклад</a></li>
-                <li><a href="#about">Про проект</a></li>
-                <li><a href="#contact">Контакти</a></li>
+                <li><a href="/help/">Допомога</a></li>
+                <li><a href="/about/">Про проект</a></li>
+                <li><a href="/contact/">Контакти</a></li>
             </ul>
         </div>
     </div>

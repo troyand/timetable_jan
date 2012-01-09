@@ -1,42 +1,76 @@
 {% extends "base.html" %}
 {% block title %}Розклад - Online-версія{% endblock %}
-
+{% block header %}Персональний розклад{% endblock %}
 {% block content %}
+    {% if clashing_lessons %}
+        <div class="alert-message block-message error">
+            <h3>У розкладі виявлено такі накладки:</h3>
+            <ul>
+                {% for lesson1, lesson2 in clashing_lessons %}
+                    <li>
+                    {{ lesson1.date|date:"j E Y" }} - {{ lesson_times|lookup:lesson1.lesson_number|first }} - 
+                    {{ lesson1.group.course.discipline.name }}
+                    {% if lesson1.group.number != 0 %}
+                        - {{ lesson1.group.number }}
+                    {% endif %}
+                    vs
+                    {{ lesson2.group.course.discipline.name }}
+                    {% if lesson2.group.number != 0 %}
+                        - {{ lesson2.group.number }}
+                    {% endif %}
+                    </li>
+                {% endfor %}
+            </ul>
+            <strong>Відображено лише першу пару з конфліктних</strong>
+        </div>
+    {% endif %}
+    <table class="bordered-table zebra-striped">
+        <tbody>
+            {% for week_number, rows in week_mapping.items %}
+                <tr>
+                    <td colspan="4">
+                        <h2>Тиждень {{ week_number }}</h2>
+                    </td>
+                </tr>
+                {% for row, weekdays in rows.items %}
+                    <tr>
+                        <td class="lesson-time">&nbsp;</td>
+                        {% for weekday, lessons in weekdays.items %}
+                            <td class="lesson">
+                                <h3>{{ week_date_mapping|lookup:week_number|lookup:weekday|date:"l" }}</h3>
+                                <strong class="date">{{ week_date_mapping|lookup:week_number|lookup:weekday|date:"j E Y" }}</strong>
+                            </td>
+                        {% endfor %}
+                    </tr>
+                    {% for lesson_number in lesson_numbers %}
+                        <tr>
+                            <td>
+                                <h4>
+                                    {{ lesson_times|lookup:lesson_number|first }}
+                                </h4>
+                            </td>
 
-{% for week_number, rows in week_mapping.items %}
-
-{% for row, weekdays in rows.items %}
-<div class="row">
-    <div class="span1">&nbsp;</div>
-    {% for weekday, lessons in weekdays.items %}
-    <div class="span5">
-        {{ week_date_mapping|lookup:week_number|lookup:weekday|date:"l" }},
-        <strong class="date">{{ week_date_mapping|lookup:week_number|lookup:weekday|date:"j E Y" }}</strong>
-    </div>
-    {% endfor %}
-</div>
-{% for lesson_number in lesson_numbers %}
-<div class="row lesson-row">
-    <div class="span1">{{ lesson_times|lookup:lesson_number|first }}</div>
-
-    {% for weekday, lessons in weekdays.items %}
-    <div class="span5">{% with lesson=lessons|lookup:lesson_number %}
-        {% if lesson %}
-        <span class="subject">{{ lesson.group.course.discipline.name }}</span><br>
-        <span class="details"><strong>{{ lesson.room }}</strong>, <em>{{ lesson.group.lecturer.short_name }}</em>
-            {% if lesson.group.number == 0 %}
-            <span class="label success">лекція</span>
-            {% else %}
-            <span class="label warning">практичне-{{ lesson.group.number }}</span>
-            {% endif %}
-        </span>
-        {% endif %}
-        {% endwith %}
-    </div>
-    {% endfor %}
-</div>
-{% endfor %}
-{% endfor %}
-{% endfor %}
+                            {% for weekday, lessons in weekdays.items %}
+                                {% with lesson=lessons|lookup:lesson_number %}
+                                <td>
+                                    {% if lesson %}
+                                        <span class="subject">{{ lesson.group.course.discipline.name }}</span><br>
+                                        <span class="details"><strong>{{ lesson.room }}</strong>, <em>{{ lesson.group.lecturer.short_name }}</em>
+                                            {% if lesson.group.number == 0 %}
+                                                <span class="label">лекція</span>
+                                            {% else %}
+                                                <span class="label">практика-{{ lesson.group.number }}</span>
+                                            {% endif %}
+                                        </span>
+                                    {% endif %}
+                                {% endwith %}
+                            </td>
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+            {% endfor %}
+        {% endfor %}
+    </tbody>
+    </table>
 {% endblock %}
 

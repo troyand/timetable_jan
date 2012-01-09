@@ -324,18 +324,17 @@ class Lesson(models.Model):
             lesson_end_hour,
             lesson_end_minute,
             tzinfo=tz))
-        print dtstart, dtend
         event = icalendar.Event()
         if self.group.number != 0:
             summary_str = u'%s-%d' % (
-                    self.group.course.abbr(),
+                    self.group.course.discipline.name,
                     self.group.number,
                     )
         else:
-            summary_str = self.group.course.abbr()
+            summary_str = u'%s' % self.group.course.discipline.name
         event.add('summary', summary_str)
         event.add('location', unicode(self.room))
         event.add('dtstart', dtstart)
         event.add('dtend', dtend)
-        event['uid'] = 'lesson-%d@timetable.usic.org.ua' % self.id
+        event['uid'] = 'lesson-%d@universitytimetable.org.ua' % self.id
         return event
