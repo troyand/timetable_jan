@@ -180,7 +180,6 @@ class Department(models.Model):
 
 
 class Major(models.Model):
-    """Speciality"""
     faculty = models.ForeignKey(Faculty)
     code = models.CharField(max_length=64)
     name = models.CharField(max_length=255)

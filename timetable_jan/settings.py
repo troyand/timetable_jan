@@ -2,6 +2,9 @@
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
+#import logging
+#logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
+
 
 import os
 
