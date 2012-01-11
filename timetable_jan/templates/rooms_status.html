@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Розклад - Використання аудиторій{% endblock %}
+{% block headadd %}
+    <style type="text/css">
+        table td {
+            text-align: center;
+        }
+    </style>
+{% endblock %}
+{% block header %}Використання аудиторій{% endblock %}
+{% block content %}
+    <table class="bordered-table zebra-striped">
+        <thead>
+            <tr>
+            {% for element in header %}
+                    <td>{{ element }}</td>
+            {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+        {% for row in table %}
+            <tr>
+                {% for element in row %}
+                    <td>
+                        <abbr title="{{ element.0 }}-{{ element.1 }}">{{ element.2 }}</abbr>
+                    </td>
+                {% endfor %}
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
