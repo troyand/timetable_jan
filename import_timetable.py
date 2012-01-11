@@ -98,7 +98,8 @@ def create_lecturer_mapping(lecturers):
             for lecturer in lecturers_surname:
                 # if capital letters are the same
                 f_f = lambda l: l.isupper()
-                if filter(f_f, lecturer_str) == filter(f_f, lecturer.full_name):
+                if filter(f_f, lecturer.full_name).startswith(
+                        filter(f_f, lecturer_str)):
                     mapping[lecturer_str] = lecturer
             if not mapping.has_key(lecturer_str):
                 logging.warn('Could not find match in %s' % (
