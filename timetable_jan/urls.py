@@ -8,9 +8,13 @@ from django.conf import settings
 urlpatterns = patterns('',
     (r'^favicon\.ico$', 'django.views.generic.simple.redirect_to', {'url': '/static/favicon.ico'}),
     (r'^$', 'timetable_jan.university.views.index'),
+    (r'^help/$', 'timetable_jan.university.views.help'),
+    (r'^about/$', 'timetable_jan.university.views.about'),
+    (r'^contacts/$', 'timetable_jan.university.views.contacts'),
     (r'^choose-subjects/(?P<timetable_id>\d+)/$', 'timetable_jan.university.views.choose_subjects'),
     url(r'^render/(?P<encoded_groups>[\d/]+)/$', 'timetable_jan.university.views.timetable', {'action': 'render'}, name='render'),
     url(r'^ical/(?P<encoded_groups>[\d/]+)/$', 'timetable_jan.university.views.timetable', {'action': 'ical'}, name='ical'),
+    (r'^rooms-status/(?P<year>\d+)/(?P<month>\d+)/(?P<day>\d+)/$', 'timetable_jan.university.views.rooms_status'),
     # Examples:
     # url(r'^$', 'dj_timetable.views.home', name='home'),
 

@@ -30,6 +30,23 @@ def index(request):
                 }
             )
 
+def help(request):
+    return render_to_response(
+            'help.html',
+            {}
+            )
+
+def about(request):
+    return render_to_response(
+            'about.html',
+            {}
+            )
+
+def contacts(request):
+    return render_to_response(
+            'contacts.html',
+            {}
+            )
 
 def ical(request, lessons=Lesson.objects.all()):
     import icalendar
@@ -134,3 +151,51 @@ def timetable(request, encoded_groups, **kwargs):
         return return_timetable(mapping, clashing_lessons)
 
 
+def rooms_status(request, year, month, day):
+    import datetime
+    #def daterange(start_date, end_date):
+    #    for n in range((end_date - start_date).days):
+    #        yield start_date + datetime.timedelta(n)
+    #TODO change to more flexible
+    #start_date = datetime.date(2012, 1, 9)
+    #end_date = datetime.date(2012, 1, 12)
+    # evaluate the queryset by converting it to the list
+    #lessons = list(Lesson.objects.select_related().filter(
+    #        date__gt=start_date).filter(
+    #                date__lt=end_date)
+    #        )
+    lessons = list(Lesson.objects.select_related().filter(
+        date=datetime.date(int(year), int(month), int(day))
+        ))
+    mapping = {}
+    rooms = set()
+    for lesson in lessons:
+        first_key = (lesson.date, lesson.lesson_number)
+        second_key = lesson.room.pk
+        mapping.setdefault(first_key, {}
+                )[second_key] = lesson
+        rooms.add(lesson.room)
+    rooms = sorted(rooms, key=lambda x: u'%s' % x)
+    table = []
+    header = [u''] + [u'%s' % r for r in rooms]
+    for first_key in sorted(mapping.keys()):
+        row = [(u'', u'', u'%d' % first_key[1])]
+        for room in rooms:
+            try:
+                row.append(
+                        (
+                        mapping[first_key][room.pk].group.course.discipline.name,
+                        mapping[first_key][room.pk].group.number or u'лекція',
+                        mapping[first_key][room.pk].group.course.discipline.abbr()
+                        )
+                        )
+            except KeyError:
+                row.append(u'')
+        table.append(row)
+    return render_to_response(
+            'rooms_status.html',
+            {
+                'header': header,
+                'table': table
+                }
+            )
