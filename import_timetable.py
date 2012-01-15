@@ -155,7 +155,6 @@ def populate_timetable(timetable, academic_term, table, room_mapping, course_map
                             room=room, lesson_number=lesson_number, date=academic_term[week][day_number])
                     logging.error('Conflict: %s - %d - %s:  %s <=> %s' % (
                         room, lesson_number, academic_term[week][day_number], course,
-                        academic_term[week][day_number], lesson_number, room, course,
                         conflicting_lesson.group.course.discipline.name
                         ))
         except Exception, e:
