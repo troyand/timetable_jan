@@ -25,6 +25,17 @@ python add_courses.py -f 6.050103 -y 1 -t 6.040301 -z 1 -n "Екологія"
 python add_courses.py -f 6.050103 -y 2 -t 6.040301 -z 2 -n "Англійська мова"
 python add_courses.py -f 6.050103 -y 2 -t 6.040301 -z 2 -n "Об’єктно-орієнтоване програмування"
 python add_courses.py -f 6.050103 -y 2 -t 6.040301 -z 2 -n "Історія України"
+python add_courses.py -f 6.050103 -y 2 -t 6.040301 -z 2 -n "Українська мова (за професійним спрямуванням)"
+python add_courses.py -f 7.05010101 -y 1 -t 8.05010101 -z 2 -n "Цивільний захист"
+python add_courses.py -f 7.05010101 -y 1 -t 8.04030302 -z 2 -n "Цивільний захист"
+python add_courses.py -f 7.05010101 -y 1 -t 8.05010203 -z 2 -n "Цивільний захист"
+python add_courses.py -f 8.05010101 -y 1 -t 7.05010101 -z 1 -n "Інформаційні системи та структури даних"
+python add_courses.py -f 8.05010101 -y 1 -t 7.05010101 -z 1 -n "Побудова масштабованих мереж"
+python add_courses.py -f 8.05010101 -y 1 -t 7.05010101 -z 1 -n "Розподілені операційні системи"
+python add_courses.py -f 8.05010101 -y 1 -t 8.04030302 -z 1 -n "Англійська мова"
+python add_courses.py -f 8.05010101 -y 1 -t 8.04030302 -z 1 -n "Інформаційні системи та структури даних"
+python add_courses.py -f 8.05010101 -y 1 -t 8.05010203 -z 1 -n "Англійська мова"
+python add_courses.py -f 8.05010101 -y 2 -t 8.04030302 -z 2 -n "Декларативне програмування та розробка баз знань"
 
 # FLS
 python import_timetable.py -f timetable_jan/unified_docs/2011_2012_vesna_fls_1.csv -y 1 -c 6.030401 -i
