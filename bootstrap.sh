@@ -20,11 +20,11 @@ python import_timetable.py -f timetable_jan/unified_docs/2011_2012_vesna_ispr_2.
 python import_timetable.py -f timetable_jan/unified_docs/2011_2012_vesna_pzas_2.csv -y 2 -c 8.05010203 -i
 
 # foreign courses
-python add_courses.py -f 6.050103 -y 1 -t 6.030301 -z 1 -n "Англійська мова"
-python add_courses.py -f 6.050103 -y 1 -t 6.030301 -z 1 -n "Екологія"
-python add_courses.py -f 6.050103 -y 2 -t 6.030301 -z 2 -n "Англійська мова"
-python add_courses.py -f 6.050103 -y 2 -t 6.030301 -z 2 -n "Об’єктно-орієнтоване програмування"
-python add_courses.py -f 6.050103 -y 2 -t 6.030301 -z 2 -n "Історія України"
+python add_courses.py -f 6.050103 -y 1 -t 6.040301 -z 1 -n "Англійська мова"
+python add_courses.py -f 6.050103 -y 1 -t 6.040301 -z 1 -n "Екологія"
+python add_courses.py -f 6.050103 -y 2 -t 6.040301 -z 2 -n "Англійська мова"
+python add_courses.py -f 6.050103 -y 2 -t 6.040301 -z 2 -n "Об’єктно-орієнтоване програмування"
+python add_courses.py -f 6.050103 -y 2 -t 6.040301 -z 2 -n "Історія України"
 
 # FLS
 python import_timetable.py -f timetable_jan/unified_docs/2011_2012_vesna_fls_1.csv -y 1 -c 6.030401 -i
