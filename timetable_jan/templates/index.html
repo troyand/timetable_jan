@@ -6,7 +6,7 @@
     {% for timetable in timetables %}
     <li>
     <a href="/choose-subjects/{{ timetable.id }}/">
-        {{ timetable.major.name }} - {{ timetable.year }}
+        {{ timetable.major.name }} - {{ timetable.major.kind }} - {{ timetable.year }}
     </a>
     </li>
     {% endfor %}
