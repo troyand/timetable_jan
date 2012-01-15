@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/bin/bash
 rm timetable_jan/db.sqlite
 python manage.py syncdb
 
