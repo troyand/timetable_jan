@@ -80,7 +80,7 @@ STATICFILES_FINDERS = (
 )
 
 # Make this unique, and don't share it with anybody.
-SECRET_KEY = 'r#v$auf2*=yjz+)f_t)dxm^l(l$se*a#ul))dh+d+g6c0q8yqc'
+SECRET_KEY = 'insecure-override-in-settings-local'
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
