@@ -151,9 +151,12 @@ def populate_timetable(timetable, academic_term, table, room_mapping, course_map
                             )
                 except IntegrityError:
                     transaction.rollback()
-                    logging.error('Integrity error for %s %d %s %s - conflict with %s' % (
+                    conflicting_lesson = Lesson.objects.get(
+                            room=room, lesson_number=lesson_number, date=academic_term[week][day_number])
+                    logging.error('Conflict: %s - %d - %s:  %s <=> %s' % (
                         room, lesson_number, academic_term[week][day_number], course,
-                        Lesson.objects.get(room=room, lesson_number=lesson_number, date=academic_term[week][day_number])
+                        academic_term[week][day_number], lesson_number, room, course,
+                        conflicting_lesson.course.discipline.name
                         ))
         except Exception, e:
             logging.error('%s in %s' %(e, ' '.join(line)))
