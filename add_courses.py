@@ -31,7 +31,6 @@ def main():
             or not options.to_major_code or not options.to_year:
         parser.print_help()
         return
-    print options
     timetable_from = Timetable.objects.get(year=int(options.from_year), major=Major.objects.get(code=options.from_major_code))
     timetable_to = Timetable.objects.get(year=int(options.to_year), major=Major.objects.get(code=options.to_major_code))
     course = timetable_from.courses.get(discipline__name=options.name)
