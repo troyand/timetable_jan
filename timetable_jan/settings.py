@@ -2,8 +2,6 @@
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
-#import logging
-#logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
 
 
 import os
@@ -16,10 +14,8 @@ ADMINS = (
 
 MANAGERS = ADMINS
 
-from timetable_jan import db_settings
 
 DATABASES = {
-    'default': db_settings.default
 }
 
 # Local time zone for this installation. Choices can be found here:
@@ -157,3 +153,5 @@ LOGGING = {
         },
     }
 }
+
+from settings_local import *
