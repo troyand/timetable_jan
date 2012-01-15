@@ -1,0 +1,26 @@
+import os
+
+SITE_ROOT = os.path.dirname(os.path.realpath(__file__))
+
+
+DEBUG = True
+TEMPLATE_DEBUG = DEBUG
+
+# uncomment to see all the SQL queries
+#import logging
+#logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
+
+DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': os.path.join(SITE_ROOT, 'db.sqlite'),
+            'USER': '',
+            'PASSWORD': '',
+            'HOST': '',
+            'PORT': '',
+            }
+        }
+
+
+SECRET_KEY = 'generate-me-and-keep-secret'
+
