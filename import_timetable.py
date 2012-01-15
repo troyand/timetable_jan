@@ -153,9 +153,10 @@ def populate_timetable(timetable, academic_term, table, room_mapping, course_map
                     transaction.rollback()
                     conflicting_lesson = Lesson.objects.get(
                             room=room, lesson_number=lesson_number, date=academic_term[week][day_number])
-                    logging.error('Conflict: %s - %d - %s:  %s <=> %s' % (
-                        room, lesson_number, academic_term[week][day_number], course,
-                        conflicting_lesson.group.course.discipline.name
+                    logging.error('Conflict: %s - %d - %s:  %s %s <=> %s - %s' % (
+                        room, lesson_number, academic_term[week][day_number], course, lecturer,
+                        conflicting_lesson,
+                        conflicting_lesson.group.lecturer,
                         ))
         except Exception, e:
             logging.error('%s in %s' %(e, ' '.join(line)))
