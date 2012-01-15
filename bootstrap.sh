@@ -1,6 +1,6 @@
 #!/bin/bash
 rm timetable_jan/db.sqlite
-python manage.py syncdb
+python manage.py syncdb --noinput
 
 # FCSS
 python import_timetable.py -f timetable_jan/unified_docs/2011_2012_vesna_cs_1.csv -y 1 -c 6.050103 -i
