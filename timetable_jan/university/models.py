@@ -314,7 +314,6 @@ class Lesson(models.Model):
         lesson_start_hour, lesson_start_minute = map(int, lesson_start_time.split(':'))
         lesson_end_hour, lesson_end_minute = map(int, lesson_end_time.split(':'))
         tz = tzlocal()#pytz.timezone('Europe/Kiev')
-        print tz
         dtstart = datetime.datetime.combine(self.date, datetime.time(
             lesson_start_hour,
             lesson_start_minute,
