@@ -1,5 +1,20 @@
 {% extends "base.html" %}
 {% block title %}Розклад - Online-версія{% endblock %}
+{% block headadd %}
+    <style type="text/css">
+        .current-week {
+            background-color: #3333ff;
+        }
+    </style>
+    <script type="text/javascript">
+        $(function(){
+            var today = new Date();
+            var today_element_id = "#date-" + today.getFullYear().toString() + "-" + (today.getMonth()+1).toString() + "-" + today.getDate().toString();
+            $('html, body').animate({scrollTop: $(today_element_id).offset().top - 80}, 2000);
+            $(today_element_id).closest('tr').children('td').css('background-color', '#d5d5d5');
+        });
+    </script>
+{% endblock %}
 {% block header %}Персональний розклад{% endblock %}
 {% block content %}
     {% if clashing_lessons %}
@@ -38,7 +53,9 @@
                         {% for weekday, lessons in weekdays.items %}
                             <td class="lesson">
                                 <h3>{{ week_date_mapping|lookup:week_number|lookup:weekday|date:"l" }}</h3>
-                                <strong class="date">{{ week_date_mapping|lookup:week_number|lookup:weekday|date:"j E Y" }}</strong>
+                                <strong class="date" id="date-{{ week_date_mapping|lookup:week_number|lookup:weekday|date:"Y-n-j" }}">
+                                    {{ week_date_mapping|lookup:week_number|lookup:weekday|date:"j E Y" }}
+                                </strong>
                             </td>
                         {% endfor %}
                     </tr>
