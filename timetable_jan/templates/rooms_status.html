@@ -9,24 +9,42 @@
 {% endblock %}
 {% block header %}Використання аудиторій{% endblock %}
 {% block content %}
-    <table class="bordered-table zebra-striped">
-        <thead>
-            <tr>
-            {% for element in header %}
-                    <td>{{ element }}</td>
-            {% endfor %}
-            </tr>
-        </thead>
-        <tbody>
-        {% for row in table %}
-            <tr>
-                {% for element in row %}
-                    <td>
-                        <abbr title="{{ element.0 }}-{{ element.1 }}">{{ element.2 }}</abbr>
-                    </td>
+    {% for building, table in building_tables %}
+        <h3>Корпус {{ building.number }}</h3>
+        <table class="bordered-table zebra-striped">
+            {% for row in table %}
+                {% if forloop.first %}
+                    <thead>
+                        <tr>
+                            {% for element in row %}
+                                <td>{{ element }}</td>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% else %}
+                        <tr>
+                            {% for element in row %}
+                                <td>
+                                    {% if forloop.first %}
+                                        {{ element }}
+                                    {% else %}
+                                        {% if element %}
+                                            <abbr title="{{ element.group.course.discipline.name }}">
+                                                {{ element.group.course.discipline.abbr }}
+                                                {% if element.group.number %}
+                                                    {{ element.group.number }}
+                                                {% endif %}
+                                            </abbr>
+                                        {% endif %}
+                                    {% endif %}
+                                    <!--<abbr title="{{ element.0 }}-{{ element.1 }}">{{ element.2 }}</abbr>-->
+                                </td>
+                            {% endfor %}
+                        </tr>
+                    {% endif %}
                 {% endfor %}
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+            </tbody>
+        </table>
+    {% endfor %}
 {% endblock %}

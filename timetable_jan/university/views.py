@@ -153,49 +153,38 @@ def timetable(request, encoded_groups, **kwargs):
 
 def rooms_status(request, year, month, day):
     import datetime
-    #def daterange(start_date, end_date):
-    #    for n in range((end_date - start_date).days):
-    #        yield start_date + datetime.timedelta(n)
-    #TODO change to more flexible
-    #start_date = datetime.date(2012, 1, 9)
-    #end_date = datetime.date(2012, 1, 12)
-    # evaluate the queryset by converting it to the list
-    #lessons = list(Lesson.objects.select_related().filter(
-    #        date__gt=start_date).filter(
-    #                date__lt=end_date)
-    #        )
+    status_date = datetime.date(int(year), int(month), int(day))
     lessons = list(Lesson.objects.select_related().filter(
-        date=datetime.date(int(year), int(month), int(day))
+        date=status_date
         ))
+    # mapping[building][lesson_number][room] = lesson
     mapping = {}
-    rooms = set()
+    # building_rooms[building] = set(room, room, room)
+    building_rooms = {}
     for lesson in lessons:
-        first_key = (lesson.date, lesson.lesson_number)
-        second_key = lesson.room.pk
-        mapping.setdefault(first_key, {}
-                )[second_key] = lesson
-        rooms.add(lesson.room)
-    rooms = sorted(rooms, key=lambda x: u'%s' % x)
-    table = []
-    header = [u''] + [u'%s' % r for r in rooms]
-    for first_key in sorted(mapping.keys()):
-        row = [(u'', u'', u'%d' % first_key[1])]
-        for room in rooms:
-            try:
-                row.append(
-                        (
-                        mapping[first_key][room.pk].group.course.discipline.name,
-                        mapping[first_key][room.pk].group.number or u'лекція',
-                        mapping[first_key][room.pk].group.course.discipline.abbr()
-                        )
-                        )
-            except KeyError:
-                row.append(u'')
-        table.append(row)
+        building = lesson.room.building
+        room = lesson.room
+        building_rooms.setdefault(
+                building, set()).add(room)
+        mapping.setdefault(building, {}).setdefault(
+                lesson.lesson_number, {})[room] = lesson
+    building_tables = []
+    for building in sorted(building_rooms.keys(), key=lambda x: (x.number, x.label)):
+        table = []
+        rooms = sorted(building_rooms[building], key=lambda x: u'%s' % x)
+        table.append([u''] + [u'%s' % r for r in rooms])
+        for lesson_number in sorted(mapping[building].keys()):
+            row = [u'%s' % lesson_times[lesson_number][0]]
+            for room in rooms:
+                try:
+                    row.append(
+                            mapping[building][lesson_number][room]
+                            )
+                except:
+                    row.append(None)
+            table.append(row)
+        building_tables.append((building, table))
     return render_to_response(
-            'rooms_status.html',
-            {
-                'header': header,
-                'table': table
-                }
-            )
+            'rooms_status.html', {
+                'building_tables': building_tables,
+                })
