@@ -180,7 +180,7 @@ def rooms_status(request, year, month, day):
                     row.append(
                             mapping[building][lesson_number][room]
                             )
-                except:
+                except KeyError:
                     row.append(None)
             table.append(row)
         building_tables.append((building, table))
