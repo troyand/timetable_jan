@@ -224,3 +224,7 @@ def lecturer_timetable(request):
             'lecturer_timetable.html', {
                 'department_lecturer_groups_mapping': department_lecturer_groups_mapping,
                 })
+
+def robots_txt(request):
+    return HttpResponse("User-agent: *\nDisallow: /\n", mimetype="text/plain")
+
