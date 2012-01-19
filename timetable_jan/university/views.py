@@ -199,9 +199,10 @@ def lecturer_timetable(request):
     department_lecturer_groups = {}
     for group in groups:
         lecturer = group.lecturer
-        for department in lecturer.departments.all():
-            department_lecturer_groups.setdefault(department, {}).setdefault(
-                    group.lecturer, set()).add(group.pk)
+        if lecturer.departments.count() > 0:
+            for department in lecturer.departments.all():
+                department_lecturer_groups.setdefault(department, {}).setdefault(
+                        group.lecturer, set()).add(group.pk)
         else:
             department = u"Інша"
             department_lecturer_groups.setdefault(department, {}).setdefault(
