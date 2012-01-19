@@ -15,6 +15,7 @@ urlpatterns = patterns('',
     url(r'^render/(?P<encoded_groups>[\d/]+)/$', 'timetable_jan.university.views.timetable', {'action': 'render'}, name='render'),
     url(r'^ical/(?P<encoded_groups>[\d/]+)/$', 'timetable_jan.university.views.timetable', {'action': 'ical'}, name='ical'),
     (r'^rooms-status/(?P<year>\d+)/(?P<month>\d+)/(?P<day>\d+)/$', 'timetable_jan.university.views.rooms_status'),
+    (r'^lecturer-timetable/$', 'timetable_jan.university.views.lecturer_timetable'),
     # Examples:
     # url(r'^$', 'dj_timetable.views.home', name='home'),
 

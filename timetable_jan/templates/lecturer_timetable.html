@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Розклад викладачів{% endblock %}
+{% block header %}Розклад викладачів{% endblock %}
+{% block content %}
+    {% for department, lecturer_groups_list in department_lecturer_groups_mapping.items %}
+        <h4>{{ department }}</h4>
+        <ul>
+            {% for lecturer, render_group_ids in lecturer_groups_list %}
+                <li>
+                <a href="/render/{{ render_group_ids }}/">
+                    {{ lecturer.short_name }}
+                </a>
+                </li>
+            {% endfor %}
+        </ul>
+    {% endfor %}
+{% endblock %}

@@ -188,3 +188,39 @@ def rooms_status(request, year, month, day):
             'rooms_status.html', {
                 'building_tables': building_tables,
                 })
+
+
+def lecturer_timetable(request):
+    import locale
+    locale.setlocale(locale.LC_ALL, "en_US.utf8")
+    #add filtering for only current academic term
+    groups = Group.objects.select_related().all()
+    # department_lecturer_groups[department][lecturer] = set(group_id1, group_id2)
+    department_lecturer_groups = {}
+    for group in groups:
+        lecturer = group.lecturer
+        for department in lecturer.departments.all():
+            department_lecturer_groups.setdefault(department, {}).setdefault(
+                    group.lecturer, set()).add(group.pk)
+        else:
+            department = u"Інша"
+            department_lecturer_groups.setdefault(department, {}).setdefault(
+                    group.lecturer, set()).add(group.pk)
+    department_lecturer_groups_mapping = {}
+    for department in department_lecturer_groups.keys():
+        lecturer_groups_list = []
+        lecturer_groups = department_lecturer_groups[department]
+        for lecturer in sorted(
+                lecturer_groups.keys(),
+                cmp=lambda x,y : locale.strcoll(x.full_name, y.full_name)):
+            lecturer_groups_list.append(
+                    (
+                        lecturer, 
+                        '/'.join(map(unicode, lecturer_groups[lecturer]))
+                        )
+                    )
+        department_lecturer_groups_mapping[department] = lecturer_groups_list
+    return render_to_response(
+            'lecturer_timetable.html', {
+                'department_lecturer_groups_mapping': department_lecturer_groups_mapping,
+                })
