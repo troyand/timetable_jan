@@ -7,7 +7,7 @@
         }
     </style>
 {% endblock %}
-{% block header %}Використання аудиторій{% endblock %}
+{% block header %}Використання аудиторій {{ status_date|date:"j E Y" }}{% endblock %}
 {% block content %}
     {% for building, table in building_tables %}
         <h3>Корпус {{ building.number }}</h3>

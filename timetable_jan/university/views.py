@@ -186,6 +186,7 @@ def rooms_status(request, year, month, day):
         building_tables.append((building, table))
     return render_to_response(
             'rooms_status.html', {
+                'status_date': status_date,
                 'building_tables': building_tables,
                 })
 
