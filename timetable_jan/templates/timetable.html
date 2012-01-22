@@ -9,6 +9,10 @@
     <script type="text/javascript">
         $(function(){
             var today = new Date();
+            if (today.getDay() == 0) {
+                // if current day is Sunday, add 1 day to get the following Monday
+                today.setTime(today.getTime() + 86400000);
+            }
             var today_element_id = "#date-" + today.getFullYear().toString() + "-" + (today.getMonth()+1).toString() + "-" + today.getDate().toString();
             $('html, body').animate({scrollTop: $(today_element_id).offset().top - 80}, 2000);
             $(today_element_id).closest('tr').children('td').css('background-color', '#d5d5d5');
