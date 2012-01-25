@@ -34,7 +34,6 @@ class LecturerAutocompleteView(AjaxAutocompleteMixin, BaseListView):
     model = Lecturer
     def autocomplete_response(self, query):
         lecturers = [(l.full_name, l.pk) for l in Lecturer.objects.filter(full_name__icontains=query)]
-        print lecturers
         json_response = {
                 'query': query,
                 'suggestions': [name for name, pk in lecturers],
