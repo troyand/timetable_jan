@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% block title %}Тест autocomplete{% endblock %}
+{% block headadd %}
+    <link rel="stylesheet" type="text/css" href="{% static "autocomplete.css" %}" />
+    <link rel="stylesheet" type="text/css" href="{% static "modal.css" %}" />
+    <script type="text/javascript" src="{% static "jquery.leanModal.min.js" %}"></script>
+    <script type="text/javascript" src="{% static "jquery.autocomplete-min.js" %}"></script>
+    <script type="text/javascript">
+        $(document).ready(function() {
+            var weeks = [1,2,3,4,7,8,9,10,11,12];
+            var flag = false;
+            var br='';
+            Array.max = function( array ){
+                return Math.max.apply( Math, array );
+            };
+            $(function() {
+            $('a[rel*=leanModal]').leanModal({ top : 100 ,overlay:0.7});		
+            });
+            var a = $('#room').autocomplete({ 
+                serviceUrl:'/autocomplete/room/',
+                minChars:1, 
+                delimiter: /(,|;)\s*/, // regex or character
+                maxHeight:400,
+                width:300,
+                zIndex: 9999,
+                deferRequestBy: 20, //miliseconds
+                noCache: false, //default is false, set to true to disable caching
+                // callback function:
+                //                onSelect: function(value, data){ alert('You selected: ' + value + ', ' + data); },
+            });
+            var t = $('#teacher').autocomplete({ 
+                serviceUrl:'/autocomplete/lecturer/',
+                minChars:2, 
+                delimiter: /(,|;)\s*/, // regex or character
+                maxHeight:400,
+                width:300,
+                zIndex: 9999,
+                deferRequestBy: 20, //miliseconds
+                noCache: false, //default is false, set to true to disable caching
+                // callback function:
+                //                onSelect: function(value, data){ alert('You selected: ' + value + ', ' + data); },
+            });
+            $('a[id=id]').click(function() {
+                if(flag==false){
+                    flag = true;
+                    for(var i=1;i<=Array.max(weeks);i++) {
+                        var check='';
+                        if($.inArray(i,weeks) > -1) {
+                            check='checked';
+                        }
+                    if(i==(Array.max(weeks)/2)){ br = '<br/>';}
+                        $('<input type="checkbox" id="week" name="week'+i+'" '+check+' /><b>' + i +'</b>&nbsp;'+ br).appendTo('.weeks');
+                        br = '';
+                    }
+                }
+            });
+            $('#send').click(function() {
+                //    $('input[name=week*]');
+                $("input[type=checkbox][checked]").each( 
+                function() { 
+                    //alert('checked');
+                } 
+                );   
+            });
+        });
+    </script>
+{% endblock %}
+{% block content %}
+    <a href="#edit" name="edit" rel="leanModal" id="id">Edit</a> 
+    <div id="edit">
+        <div id="signup-ct">
+            <div class="txt-fld">
+                <label for="">Викладач</label>
+                <input id="teacher" name="teacher" type="text" />
+
+            </div>
+            <div class="txt-fld">
+                <label for="">Аудиторія</label>
+                <input id="room" name="room" type="text" />
+            </div>
+            <div class="txt-fld">
+                <label for="" >Тижні</label>
+                <div class="weeks"></div>
+            </div>
+            <div class="btn-fld">
+                <button type="submit" id="#send">Зберегти</button>
+            </div>
+        </div>
+    </div>
+{% endblock %}

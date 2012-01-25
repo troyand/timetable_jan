@@ -1,5 +1,7 @@
 from django.conf.urls.defaults import patterns, include, url
 from django.conf import settings
+from timetable_jan.university.ajax_views import RoomAutocompleteView, LecturerAutocompleteView
+from django.views.generic import TemplateView
 
 # Uncomment the next two lines to enable the admin:
 #from django.contrib import admin
@@ -17,6 +19,9 @@ urlpatterns = patterns('',
     (r'^rooms-status/(?P<year>\d+)/(?P<month>\d+)/(?P<day>\d+)/$', 'timetable_jan.university.views.rooms_status'),
     (r'^lecturer-timetable/$', 'timetable_jan.university.views.lecturer_timetable'),
     (r'^robots.txt$', 'timetable_jan.university.views.robots_txt'),
+    (r'autocomplete/room/$', RoomAutocompleteView.as_view()),
+    (r'autocomplete/lecturer/$', LecturerAutocompleteView.as_view()),
+    (r'autocomplete/test/$', TemplateView.as_view(template_name='autocomplete_test.html')),
     # Examples:
     # url(r'^$', 'dj_timetable.views.home', name='home'),
 
