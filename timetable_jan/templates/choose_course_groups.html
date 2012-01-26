@@ -1,0 +1,20 @@
+<div class="row add-margins">
+    <div class="span3">
+        {{ course.discipline.name }}
+    </div>
+    <div class="span13">
+        <a href="#" class="btn group-btn none-btn" value="">
+            X
+        </a>
+        {% for group in groups %}
+        <a href="#" class="btn {% if forloop.first %}primary active{% endif %} group-btn" value="{{ group.id }}">
+            <strong>
+                {{ group.number }}
+            </strong>
+            <span class="small-text">
+                ({{ group.lecturer.surname }})
+            </span>
+        </a>
+        {% endfor %}
+    </div>
+</div>

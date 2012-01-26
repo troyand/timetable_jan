@@ -1,6 +1,9 @@
 {% extends "base.html" %}                                                      
+{% load staticfiles %}
 {% block title %}Розклад - Вибір курсів та груп{% endblock %} 
 {% block headadd %}
+<link rel="stylesheet" type="text/css" href="{% static "autocomplete.css" %}" />
+<script type="text/javascript" src="{% static "jquery.autocomplete-min.js" %}"></script>
 <script type="text/javascript">
     function recomputeLink() {
         var accumulator = "/";
@@ -14,39 +17,51 @@
         $("#render-link").attr("href", "/render" + accumulator);
     }
     $(function() {
-        $(".group-btn").click(function(event){
+        var btnClickHandler = function(event){
             event.preventDefault();
-            $(this).parent("div").children(".btn").removeClass("primary");
-            $(this).addClass("primary");
+            $(this).parent("div").children(".btn").removeClass("primary").removeClass("active");
+            $(this).addClass("primary").addClass("active");
             recomputeLink();
-        });
+        }
+        $(".group-btn").click(btnClickHandler);
         recomputeLink();
+        $("#extra-courses").autocomplete({ 
+                serviceUrl:"/autocomplete/extra-courses/",
+                minChars:1, 
+                maxHeight:400,
+                width:578,
+                deferRequestBy: 20, //miliseconds
+                onSelect: function(value, data){
+                    var node = $(data).insertAfter($("#extra-courses-hr"));
+                    $("#extra-courses").val("");
+                    console.log(node.children(".group-btn"));
+                    node.find(".group-btn").click(btnClickHandler);
+                    recomputeLink();
+                },
+            });
     });
 </script>
 {% endblock %}
 {% block header %}Вибір курсів та груп{% endblock %}
 {% block content %}
-{% for course, groups in course_groups.items %}
+
 <div class="row add-margins">
-    <div class="span3">
-        {{ course.discipline.name }}
-    </div>
-    <div class="span13">
-        <a href="#" class="btn group-btn none-btn" value="">
-            X
-        </a>
-        {% for group in groups %}
-        <a href="#" class="btn {% if forloop.first %}primary{% endif %} group-btn" value="{{ group.id }}">
+    <div class="span6">
+        <label for="extra-courses" style="width:320px">
             <strong>
-                {{ group.number }}
-            </strong>
-            <span class="small-text">
-                ({{ group.lecturer.surname }})
-            </span>
-        </a>
-        {% endfor %}
+                Додати вибірковий курс (із іншого розкладу)
+        </strong>
+    </label>
+    </div>
+    <div class="span10">
+        <input id="extra-courses" name="extra-courses" style="width:570px" type="text">
     </div>
 </div>
+
+<hr id="extra-courses-hr"/>
+
+{% for course, groups in course_groups.items %}
+    {% include "choose_course_groups.html" %}
 {% endfor %}
 
 <div class="row add-margins">

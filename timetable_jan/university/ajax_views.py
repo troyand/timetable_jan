@@ -29,6 +29,31 @@ class AjaxAutocompleteMixin(object):
             return HttpResponseForbidden('Forbidden')
 
 
+class ExtraCoursesAutocompleteView(AjaxAutocompleteMixin, BaseListView):
+    model = Course
+    def autocomplete_response(self, query):
+        query_upper = query.upper()
+        unicode_course_pairs = [
+                (unicode(course.discipline.name), course)
+                for course in self.model.objects.select_related().all()]
+        objects = filter(
+                lambda course: query_upper in course[0].upper(), unicode_course_pairs)[:15]
+        from django.template.loader import get_template
+        from django.template import Context
+        choose_course_groups = get_template('choose_course_groups.html')
+        json_response = {
+                'query': query,
+                'suggestions': [u for u, c in objects],
+                'data': [choose_course_groups.render(Context({
+                    'course': c,
+                    'groups': sorted(c.group_set.filter(number__gt=0), key=lambda g: g.number)
+                    })) for u, c in objects],
+                }
+        return HttpResponse(
+                json.dumps(json_response)
+                )
+
+
 class RoomAutocompleteView(AjaxAutocompleteMixin, BaseListView):
     model = Room
     def autocomplete_response_(self, query):
