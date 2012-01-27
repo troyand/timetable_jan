@@ -34,7 +34,6 @@
                 onSelect: function(value, data){
                     var node = $(data).insertAfter($("#extra-courses-hr"));
                     $("#extra-courses").val("");
-                    console.log(node.children(".group-btn"));
                     node.find(".group-btn").click(btnClickHandler);
                     recomputeLink();
                 },
