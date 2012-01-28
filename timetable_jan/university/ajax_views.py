@@ -6,12 +6,14 @@ import json
 
 
 class AjaxAutocompleteMixin(object):
+    def unicode_format_object(self, o):
+        return unicode(o)
     def autocomplete_response(self, query):
         '''implementation should return json response
         in a more effective way (e.g. via icontains)'''
         query_upper = query.upper()
         object_unicode_pk_pairs = [
-                (unicode(o), o.pk) for o in self.model.objects.select_related().all()]
+                (self.unicode_format_object(o), o.pk) for o in self.model.objects.select_related().all()]
         objects = filter(
                 lambda o: o[0].upper().startswith(query_upper), object_unicode_pk_pairs)
         json_response = {
@@ -80,3 +82,8 @@ class LecturerAutocompleteView(AjaxAutocompleteMixin, BaseListView):
         return HttpResponse(
                 json.dumps(json_response)
                 )
+
+class DisciplineAutocompleteView(AjaxAutocompleteMixin, BaseListView):
+    model = Discipline
+    def unicode_format_object(self, o):
+        return o.name

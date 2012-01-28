@@ -1,0 +1,163 @@
+{% extends "base.html" %}                                                      
+{% load staticfiles %}
+{% block title %}Створити розклад{% endblock %} 
+{% block headadd %}
+    <link rel="stylesheet" type="text/css" href="{% static "autocomplete.css" %}" />
+    <script type="text/javascript" src="{% static "jquery.autocomplete-min.js" %}"></script>
+    <script type="text/javascript">
+        $(function() {
+            $("#extra-courses").autocomplete({ 
+                serviceUrl:"/autocomplete/extra-courses/",
+                minChars:1, 
+                maxHeight:400,
+                width:578,
+                deferRequestBy: 20, //miliseconds
+                onSelect: function(value, data){
+                    var node = $(data).insertAfter($("#extra-courses-hr"));
+                    $("#extra-courses").val("");
+                },
+            });
+            var rebindAutocomplete = function(node){
+                /*$(".day").autocomplete({ 
+                    minChars:0, 
+                    lookup: ["ПН", "ВТ", "СР", "ЧТ", "ПТ", "СБ"]
+                });
+                $(".time").autocomplete({ 
+                    minChars:0, 
+                    lookup: ["08:30-09:50", "10:00-11:20", "11:40-13:00", "13:30-14:50", "15:00-16:20", "16:30-17:50", "18:00-19:20"]
+                });*/
+                node.find(".room").autocomplete({
+                    serviceUrl:"/autocomplete/room/",
+                    minChars:1,
+                });
+                node.find(".lecturer").autocomplete({
+                    serviceUrl:"/autocomplete/lecturer/",
+                    minChars:1,
+                });
+                node.find(".course").autocomplete({
+                    serviceUrl:"/autocomplete/discipline/",
+                    minChars:1,
+                });
+                node.find(".copy-button").click(function(){
+                    var clonedItem = node.clone();
+                    $.each([".day", ".time"], function(index, value) { 
+                        clonedItem.find(value).val(node.find(value).val());
+                    });
+                    clonedItem.insertAfter(node);
+                    rebindAutocomplete(clonedItem);
+                });
+                node.find(".delete-button").click(function(){
+                    node.remove();
+                });
+            }
+            rebindAutocomplete($(".lesson-item"));
+            $("#add-lesson").click(function(){
+                var lastItem = $(".lesson-item").last();
+                var clonedItem = lastItem.clone();
+                $.each([".room", ".course", ".group", ".lecturer", ".weeks"], function(index, value) { 
+                    clonedItem.find(value).val("");
+                });
+                clonedItem.insertAfter(lastItem);
+                rebindAutocomplete(clonedItem);
+            });
+            $("#create-timetable").click(function(){
+                var timetableCSVWindow = window.open("","timetableCSVWindow");
+                $.each($(".lesson-item"), function(index, lessonItem) {
+                    $.each([".day", ".time", ".room", ".course", ".group", ".lecturer", ".weeks"], function(i, selector) {
+                        var value = $(lessonItem).find(selector)[0];
+                        var cellText;
+                        try{
+                            cellText = value.val();
+                        }
+                        catch(e) {
+                            cellText = value.value;
+                        }
+                        cellText = cellText.replace(/"/g, '""');
+                        timetableCSVWindow.document.write('"' + cellText + '"');
+                        if (i != 6) {
+                            timetableCSVWindow.document.write(",");
+                        }
+                    });
+                    timetableCSVWindow.document.write("\n");
+                });
+                timetableCSVWindow.document.close();
+            });
+        });
+    </script>
+{% endblock %}
+{% block header %}Створити розклад{% endblock %}
+{% block content %}
+    <div class="row add-margins">
+        <div class="span1">
+            День
+        </div>
+        <div class="span2">
+            Час
+        </div>
+        <div class="span2">
+            Аудиторія
+        </div>
+        <div class="span5">
+            Курс
+        </div>
+        <div class="span1">
+            Група
+        </div>
+        <div class="span3">
+            Викладач
+        </div>
+        <div class="span2">
+            Тижні
+        </div>
+    </div>
+
+    <div class="row add-margins lesson-item">
+        <div class="span1">
+            <select class="day" style="width:50px">
+                <option>ПН</option>
+                <option>ВТ</option>
+                <option>СР</option>
+                <option>ЧТ</option>
+                <option>ПТ</option>
+                <option>СБ</option>
+            </select>
+        </div>
+        <div class="span2">
+            <select class="time" style="width:100px">
+                <option>08:30-09:50</option>
+                <option>10:00-11:20</option>
+                <option>11:40-13:00</option>
+                <option>13:30-14:50</option>
+                <option>15:00-16:20</option>
+                <option>16:30-17:50</option>
+                <option>18:00-19:20</option>
+            </select>
+        </div>
+        <div class="span2">
+            <input class="room" style="width:90px">
+        </div>
+        <div class="span5">
+            <input class="course" style="width:270px">
+        </div>
+        <div class="span1">
+            <input class="group" style="width:28px">
+        </div>
+        <div class="span3">
+            <input class="lecturer" style="width:150px">
+        </div>
+        <div class="span2">
+            <input class="weeks" style="width:60px">
+            <button class="label success copy-button">+</button>
+            <button class="label important delete-button">-</button>
+        </div>
+    </div>
+
+    <div class="row add-margins">
+        <div class="span6">
+            <button class="btn success" id="add-lesson">Додати ще один запис про пару</button>
+        </div>
+        <div class="span6">
+            <button class="btn success" id="create-timetable">Створити розклад (CSV-експорт)</button>
+        </div>
+    </div>
+{% endblock %}
