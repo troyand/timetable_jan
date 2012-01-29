@@ -41,7 +41,6 @@ class UnifiedTimetableProcessView(FormView):
     form_class = CSVUploadForm
 
     def get_context_data(self, **kwargs):
-        print 'get context'
         context = super(UnifiedTimetableProcessView, self).get_context_data(**kwargs)
         try:
             context['table'] = self.table
