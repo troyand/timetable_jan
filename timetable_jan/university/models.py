@@ -210,7 +210,7 @@ class Person(models.Model):
             result += ' '
             for p in parts[1:]:
                 if len(p) > 0:
-                    result += '%s.' % p[0]
+                    result += '%s. ' % p[0]
         return result
 
     def surname(self):

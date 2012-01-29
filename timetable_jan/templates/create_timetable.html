@@ -50,7 +50,9 @@
                     node.remove();
                 });
             }
-            rebindAutocomplete($(".lesson-item"));
+            $.each($(".lesson-item"), function(index, value) {
+                rebindAutocomplete($(value));
+            });
             $("#add-lesson").click(function(){
                 var lastItem = $(".lesson-item").last();
                 var clonedItem = lastItem.clone();
@@ -111,6 +113,42 @@
         </div>
     </div>
 
+    {% for day, time, room, course, group, lecturer, weeks in table %}
+        <div class="row add-margins lesson-item">
+            <div class="span1">
+                <select class="day" style="width:50px">
+                    {% for d in days %}
+                        <option{% if d == day %} selected{% endif %}>{{ d }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="span2">
+                <select class="time" style="width:100px">
+                    {% for t in times %}
+                        <option{% if t == time %} selected{% endif %}>{{ t }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="span2">
+                <input class="room" style="width:90px" value="{{ room }}">
+            </div>
+            <div class="span5">
+                <input class="course" style="width:270px" value="{{ course }}">
+            </div>
+            <div class="span1">
+                <input class="group" style="width:28px" value="{{ group }}">
+            </div>
+            <div class="span3">
+                <input class="lecturer" style="width:150px" value="{{ lecturer }}">
+            </div>
+            <div class="span2">
+                <input class="weeks" style="width:60px" value="{{ weeks }}">
+                <button class="label success copy-button">+</button>
+                <button class="label important delete-button">-</button>
+            </div>
+        </div>
+    {% endfor %}
+
     <div class="row add-margins lesson-item">
         <div class="span1">
             <select class="day" style="width:50px">
@@ -157,7 +195,23 @@
             <button class="btn success" id="add-lesson">Додати ще один запис про пару</button>
         </div>
         <div class="span6">
-            <button class="btn success" id="create-timetable">Створити розклад (CSV-експорт)</button>
+            <button class="btn success" id="create-timetable">Експортувати CSV-файл</button>
         </div>
     </div>
+    <form action="/create-timetable/" method="post" enctype="multipart/form-data">
+        <div class="row add-margins">
+            <div class="span16">
+                {% csrf_token %}
+                {{ form }}
+            </div>
+        </div>
+        <div class="row add-margins">
+            <div class="span7">
+                &nbsp;
+            </div>
+            <div class="span4">
+                <input type="submit" value="Імпортувати CSV-файл">
+            </div>
+        </div>
+    </form>
 {% endblock %}
