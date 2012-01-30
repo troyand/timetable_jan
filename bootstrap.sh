@@ -61,3 +61,6 @@ python add_courses.py -f 6.030101 -y 2 -t 6.130102 -z 2 -n "Українська
 python add_courses.py -f 6.030101 -y 2 -t 6.030104 -z 2 -n "Українська мова (за професійним спрямуванням)"
 python add_courses.py -f 6.030101 -y 1 -t 6.130102 -z 2 -n "Політологія-1"
 python add_courses.py -f 6.130102 -y 2 -t 6.030104 -z 2 -n "Основи права"
+
+# FHS
+python import_timetable.py -f timetable_jan/unified_docs/2011_2012_vesna_history_1.csv -y 1 -c 6.020302 -i
