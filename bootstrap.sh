@@ -50,11 +50,13 @@ python import_timetable.py -f timetable_jan/unified_docs/2011_2012_vesna_sociolo
 python import_timetable.py -f timetable_jan/unified_docs/2011_2012_vesna_politology_1.csv -y 1 -c 6.030104 -i
 python import_timetable.py -f timetable_jan/unified_docs/2011_2012_vesna_sociology_2.csv -y 2 -c 6.030101 -i
 python import_timetable.py -f timetable_jan/unified_docs/2011_2012_vesna_socrob_2.csv -y 2 -c 6.130102 -i
-#python import_timetable.py -f timetable_jan/unified_docs/2011_2012_vesna_politology_2.csv -y 2 -c 6.030104 -i
+python import_timetable.py -f timetable_jan/unified_docs/2011_2012_vesna_politology_2.csv -y 2 -c 6.030104 -i
 
 # foreign courses
 python add_courses.py -f 6.030101 -y 1 -t 6.030104 -z 1 -n "Логіка"
 python add_courses.py -f 6.030101 -y 1 -t 6.030104 -z 1 -n "Історія української культури"
 python add_courses.py -f 6.030101 -y 1 -t 6.030104 -z 1 -n "Безпека життєдіяльності"
 python add_courses.py -f 6.030101 -y 2 -t 6.130102 -z 2 -n "Українська мова (за професійним спрямуванням)"
+python add_courses.py -f 6.030101 -y 2 -t 6.030104 -z 2 -n "Українська мова (за професійним спрямуванням)"
 python add_courses.py -f 6.030101 -y 1 -t 6.130102 -z 2 -n "Політологія-1"
+python add_courses.py -f 6.030101 -y 2 -t 6.030104 -z 2 -n "Основи права"
