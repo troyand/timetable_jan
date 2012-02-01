@@ -64,3 +64,54 @@ python add_courses.py -f 6.130102 -y 2 -t 6.030104 -z 2 -n "Основи пра�
 
 # FHS
 python import_timetable.py -f timetable_jan/unified_docs/2011_2012_vesna_history_1.csv -y 1 -c 6.020302 -i
+
+# FPrN
+# year 1
+python import_timetable.py -f timetable_jan/unified_docs/2011_2012_vesna_biology_1.csv -y 1 -c 6.040102 -i
+python import_timetable.py -f timetable_jan/unified_docs/2011_2012_vesna_ecology_1.csv -y 1 -c 6.040106 -i
+python import_timetable.py -f timetable_jan/unified_docs/2011_2012_vesna_physics_1.csv -y 1 -c 6.040203 -i
+python import_timetable.py -f timetable_jan/unified_docs/2011_2012_vesna_chemistry_1.csv -y 1 -c 6.040101 -i
+
+# foreign courses
+python add_courses.py -f 6.040102 -y 1 -t 6.040106 -z 1 -n "Неорганічна хімія"
+python add_courses.py -f 6.040102 -y 1 -t 6.040106 -z 1 -n "Основи загальної екології"
+python add_courses.py -f 6.040102 -y 1 -t 6.040106 -z 1 -n "Вища математика-2"
+python add_courses.py -f 6.040102 -y 1 -t 6.040203 -z 1 -n "Основи загальної екології"
+python add_courses.py -f 6.040102 -y 1 -t 6.040101 -z 1 -n "Основи загальної екології"
+python add_courses.py -f 6.040102 -y 1 -t 6.040101 -z 1 -n "Вища математика-2"
+python add_courses.py -f 6.040102 -y 1 -t 6.040101 -z 1 -n "Загальна фізика"
+python add_courses.py -f 6.040102 -y 1 -t 6.040101 -z 1 -n "Практикум з загальної фізики"
+python add_courses.py -f 6.040203 -y 1 -t 6.040101 -z 1 -n "Вступ до загальної біології"
+
+# year 2
+python import_timetable.py -f timetable_jan/unified_docs/2011_2012_vesna_biology_2.csv -y 2 -c 6.040102 -i
+python import_timetable.py -f timetable_jan/unified_docs/2011_2012_vesna_ecology_2.csv -y 2 -c 6.040106 -i
+python import_timetable.py -f timetable_jan/unified_docs/2011_2012_vesna_physics_2.csv -y 2 -c 6.040203 -i
+python import_timetable.py -f timetable_jan/unified_docs/2011_2012_vesna_chemistry_2.csv -y 2 -c 6.040101 -i
+
+# foreign courses
+python add_courses.py -f 6.040102 -y 2 -t 6.040106 -z 2 -n "Історія Часу та Всесвіту:елементи сучасної космогонії та космології"
+python add_courses.py -f 6.040102 -y 2 -t 6.040203 -z 2 -n "Історія Часу та Всесвіту:елементи сучасної космогонії та космології"
+python add_courses.py -f 6.040106 -y 2 -t 6.040203 -z 2 -n "Українська мова за професійним спрямуванням"
+python add_courses.py -f 6.040102 -y 2 -t 6.040101 -z 2 -n "Історія Часу та Всесвіту:елементи сучасної космогонії та космології"
+
+# year 3
+python import_timetable.py -f timetable_jan/unified_docs/2011_2012_vesna_biology_3.csv -y 3 -c 6.040102 -i
+python import_timetable.py -f timetable_jan/unified_docs/2011_2012_vesna_ecology_3.csv -y 3 -c 6.040106 -i
+python import_timetable.py -f timetable_jan/unified_docs/2011_2012_vesna_physics_3.csv -y 3 -c 6.040203 -i
+python import_timetable.py -f timetable_jan/unified_docs/2011_2012_vesna_chemistry_3.csv -y 3 -c 6.040101 -i
+
+# foreign courses
+python add_courses.py -f 6.040102 -y 2 -t 6.040102 -z 3 -n "Історія Часу та Всесвіту:елементи сучасної космогонії та космології"
+python add_courses.py -f 6.040102 -y 2 -t 6.040106 -z 3 -n "Історія Часу та Всесвіту:елементи сучасної космогонії та космології"
+python add_courses.py -f 6.040102 -y 2 -t 6.040203 -z 3 -n "Історія Часу та Всесвіту:елементи сучасної космогонії та космології"
+python add_courses.py -f 6.040102 -y 2 -t 6.040101 -z 3 -n "Історія Часу та Всесвіту:елементи сучасної космогонії та космології"
+python add_courses.py -f 6.040102 -y 3 -t 6.040106 -z 3 -n "Соціологія"
+python add_courses.py -f 6.040102 -y 3 -t 6.040203 -z 3 -n "Соціологія"
+python add_courses.py -f 6.040102 -y 3 -t 6.040101 -z 3 -n "Соціологія"
+
+# year 4
+python import_timetable.py -f timetable_jan/unified_docs/2011_2012_vesna_biology_4.csv -y 4 -c 6.040102 -i
+python import_timetable.py -f timetable_jan/unified_docs/2011_2012_vesna_ecology_4.csv -y 4 -c 6.040106 -i
+python import_timetable.py -f timetable_jan/unified_docs/2011_2012_vesna_physics_4.csv -y 4 -c 6.040203 -i
+python import_timetable.py -f timetable_jan/unified_docs/2011_2012_vesna_chemistry_4.csv -y 4 -c 6.040101 -i
