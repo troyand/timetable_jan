@@ -1,5 +1,23 @@
 #!/bin/bash
-rm timetable_jan/db.sqlite
+
+if [ ! -f timetable_jan/settings_local.py ]
+then
+    echo "Copying timetable_jan/settings_local.sample to timetable_jan/settings_local.py"
+    cp timetable_jan/settings_local.sample timetable_jan/settings_local.py
+fi
+
+if [ ! -d venv_dir ]
+then
+    echo "Creating virtualenv"
+    virtualenv --no-site-packages venv_dir
+fi
+
+source venv_dir/bin/activate
+
+pip install -r requirements.txt
+
+mv timetable_jan/db.sqlite timetable_jan/db.sqlite.backup
+
 python manage.py syncdb --noinput
 
 
