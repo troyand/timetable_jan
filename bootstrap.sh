@@ -16,7 +16,7 @@ source venv_dir/bin/activate
 
 pip install -r requirements.txt
 
-if [ -f timetable_jan/db.sqlite]
+if [ -f timetable_jan/db.sqlite ]
 then
     echo "Backing up existing sqlite DB to timetable_jan/db.sqlite.backup"
     mv timetable_jan/db.sqlite timetable_jan/db.sqlite.backup
