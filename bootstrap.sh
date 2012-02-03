@@ -14,6 +14,8 @@ fi
 
 source venv_dir/bin/activate
 
+export PIP_DOWNLOAD_CACHE=/tmp/
+
 pip install -r requirements.txt
 
 if [ -f timetable_jan/db.sqlite ]
