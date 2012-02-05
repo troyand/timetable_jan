@@ -96,6 +96,9 @@ python add_courses.py -f 6.130102 -y 2 -t 6.030104 -z 2 -n "Основи пра�
 
 # FHS
 python import_timetable.py -f timetable_jan/unified_docs/2011_2012_vesna_history_1.csv -y 1 -c 6.020302 -i
+python import_timetable.py -f timetable_jan/unified_docs/2011_2012_vesna_history_2.csv -y 2 -c 6.020302 -i
+python import_timetable.py -f timetable_jan/unified_docs/2011_2012_vesna_history_3.csv -y 3 -c 6.020302 -i
+python import_timetable.py -f timetable_jan/unified_docs/2011_2012_vesna_history_4.csv -y 4 -c 6.020302 -i
 
 # FPrN
 # year 1
