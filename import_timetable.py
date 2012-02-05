@@ -153,7 +153,7 @@ def populate_timetable(timetable, academic_term, table, room_mapping, course_map
                     transaction.rollback()
                     conflicting_lesson = Lesson.objects.select_related().get(
                             room=room, lesson_number=lesson_number, date=academic_term[week][day_number])
-                    error_message = u'Conflict: %s тиждень %s - %s - %s\n' % (room, week, days[day_number], lesson_times[lesson_number])
+                    error_message = u'Conflict: %s тиждень %s - %s - %s\n' % (room, week, days[day_number], lesson_times[lesson_number-1])
                     error_message += u'%s - %s - %s\n' % (timetable, course, lecturer)
                     error_message += u'%s - %s - %s' % (
                             ','.join(map(unicode, conflicting_lesson.group.course.timetable_set.all())),
