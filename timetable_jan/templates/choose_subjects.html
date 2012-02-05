@@ -1,6 +1,6 @@
 {% extends "base.html" %}                                                      
 {% load staticfiles %}
-{% block title %}Розклад - Вибір курсів та груп{% endblock %} 
+{% block title %}Розклад - Вибір курсів та груп - {{ timetable.major.name }} - {{ timetable.major.kind }} - {{ timetable.year }}{% endblock %} 
 {% block headadd %}
 <link rel="stylesheet" type="text/css" href="{% static "autocomplete.css" %}" />
 <script type="text/javascript" src="{% static "jquery.autocomplete-min.js" %}"></script>
@@ -41,7 +41,7 @@
     });
 </script>
 {% endblock %}
-{% block header %}Вибір курсів та груп{% endblock %}
+{% block header %}Вибір курсів та груп - {{ timetable.major.name }} - {{ timetable.major.kind }} - {{ timetable.year }}{% endblock %}
 {% block content %}
 
 <div class="row add-margins">

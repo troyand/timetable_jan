@@ -22,7 +22,7 @@ def vertical(string):
 
 
 def index(request):
-    timetables = Timetable.objects.all()
+    timetables = Timetable.objects.select_related().all()
     return render_to_response(
             'index.html',
             {
@@ -75,6 +75,7 @@ def choose_subjects(request, timetable_id):
             'choose_subjects.html',
             {
                 'course_groups': course_groups,
+                'timetable': timetable,
                 },
             context_instance=RequestContext(request)
             )
