@@ -82,6 +82,7 @@ python import_timetable.py -f timetable_jan/unified_docs/2011_2012_vesna_politol
 python import_timetable.py -f timetable_jan/unified_docs/2011_2012_vesna_sociology_3.csv -y 3 -c 6.030101 -i
 python import_timetable.py -f timetable_jan/unified_docs/2011_2012_vesna_socrob_3.csv -y 3 -c 6.130102 -i
 python import_timetable.py -f timetable_jan/unified_docs/2011_2012_vesna_sociology_4.csv -y 4 -c 6.030101 -i
+python import_timetable.py -f timetable_jan/unified_docs/2011_2012_vesna_socrob_4.csv -y 4 -c 6.130102 -i
 
 # foreign courses
 python add_courses.py -f 6.030101 -y 1 -t 6.030104 -z 1 -n "Логіка"
