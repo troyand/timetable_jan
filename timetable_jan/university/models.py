@@ -136,7 +136,7 @@ class Room(models.Model):
         else:
             room_part += u''
         #Identification of building
-        if self.building.number:
+        if self.building.number is not None:
             building_part = u'%d' % self.building.number
             if self.building.label:
                 building_part += u'%d' % self.building.label
