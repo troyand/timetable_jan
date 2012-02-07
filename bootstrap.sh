@@ -100,6 +100,15 @@ python import_timetable.py -f timetable_jan/unified_docs/2011_2012_vesna_history
 python import_timetable.py -f timetable_jan/unified_docs/2011_2012_vesna_history_3.csv -y 3 -c 6.020302 -i
 python import_timetable.py -f timetable_jan/unified_docs/2011_2012_vesna_history_4.csv -y 4 -c 6.020302 -i
 
+# history ma
+#python import_timetable.py -f timetable_jan/unified_docs/2011_2012_vesna_history_m_1.csv -y 1 -c 8.02030201 -i
+#python import_timetable.py -f
+#timetable_jan/unified_docs/2011_2012_vesna_history_m_2.csv -y 2 -c
+#8.02030201 -i
+# as ba 5, 6 years
+python import_timetable.py -f timetable_jan/unified_docs/2011_2012_vesna_history_m_1.csv -y 5 -c 6.020302 -i
+python import_timetable.py -f timetable_jan/unified_docs/2011_2012_vesna_history_m_2.csv -y 6 -c 6.020302 -i
+
 # FPrN
 # year 1
 python import_timetable.py -f timetable_jan/unified_docs/2011_2012_vesna_biology_1.csv -y 1 -c 6.040102 -i
