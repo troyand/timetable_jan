@@ -305,7 +305,7 @@
   </object>
   <object pk="23" model="university.major">
     <field to="university.faculty" name="faculty" rel="ManyToOneRel">1</field>
-    <field type="CharField" name="code">8.02030201</field>
+    <field type="CharField" name="code">8.02030202</field>
     <field type="CharField" name="name">Історія. Археологія та давня історія України</field>
     <field type="CharField" name="kind">маґістр</field>
   </object>

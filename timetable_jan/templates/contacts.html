@@ -1,11 +1,68 @@
 {% extends "base.html" %}
+{% load staticfiles %}
 {% block title %}Розклад - Контакти{% endblock %}
+{% block headadd %}
+    <link rel="stylesheet" type="text/css" href="{% static "contacts.css" %}" />
+{% endblock %}
 {% block header %}Контакти{% endblock %}
 {% block content %}
-    <p>
-    Питання, побажання та пропозиції направляти на web-dev цуцик mail.usic.ukma.kiev.ua
-    </p>
-    <p>
-    Команда розробників складається із USIC-активістів факультетів ФПрН та ФІН.
-    </p>
+    <div id="Photos">
+        <ul>
+            <div><li id="first"></li></div>
+            <div><li id="second"></li></div>
+            <div><li id="third"></li></div>
+            <div><li id="fouth"></li></div>
+            <div><li id="fifth"></li></div>
+        </ul>
+        <div>
+            <div id="Information">
+                <div id="first-info">
+                    <ul>
+                        <li>Михайло Трояновський</li>
+                        <li>головний розробник</li>
+                        <li>проектування</li>
+                        <li>серверна частина</li>
+                        <li>ФІН, 2011 магістр</li>
+                    </ul>
+                </div>
+                <div id="second-info">
+                    <ul>
+                        <li>Сергій Кібрік</li>
+                        <li>проектування</li>
+                        <li>ФІН, 2011 спеціаліст</li>
+                    </ul>
+                </div>
+                <div id="third-info">
+                    <ul>
+                        <li>Іван Криворучко</li>
+                        <li>серверна частина</li>
+                        <li>розробка парсерів</li>
+                        <li>ФІН 4, прогр. інженерія</li>
+                    </ul>
+                </div>
+                <div id="fouth-info">
+                    <ul>
+                        <li>Дмитро Дзюбенко</li>
+                        <li>ініціатор</li>
+                        <li>проектування</li>
+                        <li>клієнтська частина</li>
+                        <li>ФПрН 3, фізик</li>
+                    </ul>
+                </div>
+                <div id="fifth-info">
+                    <ul>
+                        <li>Вадим Пшебильський</li>
+                        <li>дизайнер інтерфейсу</li>
+                        <li>верстальник</li>
+                        <li>ФПрН 3, фізик</li>
+                    </ul>
+                </div>
+                <div>
+                    <div id="line"></div>
+                    <p id="dev_mail">Пошта для побажань та пропозицій: NOSPAM</p>
+                    <div id="usic_logo"></div>
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}
