@@ -199,16 +199,21 @@ def lecturer_timetable(request):
     groups = Group.objects.select_related().all()
     # department_lecturer_groups[department][lecturer] = set(group_id1, group_id2)
     department_lecturer_groups = {}
+    # lecturer_groups[lecturer] = set(group_id1, group_id2)
+    lecturer_groups = {}
     for group in groups:
         lecturer = group.lecturer
-        if lecturer.departments.count() > 0:
-            for department in lecturer.departments.all():
-                department_lecturer_groups.setdefault(department, {}).setdefault(
-                        group.lecturer, set()).add(group.pk)
+        lecturer_groups.setdefault(lecturer, set()).add(group.pk)
+    for lecturer in lecturer_groups.keys():
+        departments = list(lecturer.departments.all())
+        if len(departments) > 0:
+            for department in departments:
+                department_lecturer_groups.setdefault(
+                        department, {})[lecturer] = lecturer_groups[lecturer]
         else:
             department = u"Інша"
-            department_lecturer_groups.setdefault(department, {}).setdefault(
-                    group.lecturer, set()).add(group.pk)
+            department_lecturer_groups.setdefault(
+                    department, {})[lecturer] = lecturer_groups[lecturer]
     department_lecturer_groups_mapping = {}
     for department in department_lecturer_groups.keys():
         lecturer_groups_list = []
