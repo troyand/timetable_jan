@@ -1,14 +1,13 @@
-body {background: #eee;}
 ul {padding: 0; margin: 0;}
 ul li {list-style-type: none;}
 
 #Container {max-width: 980px; padding: 10px; background: #fff; margin: 0 auto 0 auto;}
 
-#Title {font: 22px  Helvetica, Arial; letter-spacing: 1px; text-align: left; margin: 4px 0 22px 4px;}
+#Title {font: 22px Arial; letter-spacing: 1px; text-align: left; margin: 4px 0 22px 4px;}
 
 .developer {text-align: left; display: inline-block; vertical-align: top; margin: 0 5px 0 5px; width: 172px;}
 
-.developer ul .name {font: bold 14px Helvetica, Arial; margin: 12px 0 12px 0; color: #000;}
+.developer ul .name {font: bold 14px Arial; margin: 12px 0 12px 0; color: #000;}
 .developer ul li {text-align: left; font: 12px Helvetica, Arial; color: #b6b6b6; line-height: 22px;}
 .developer ul li:first-child {width: 129px; height: 163px;}
 .developer ul li:last-child {margin-bottom: 20px !important;}
@@ -26,8 +25,8 @@ ul li {list-style-type: none;}
 #fifth li:last-child {margin: 42px 0 0 0;}
 
 #line {width: 906px; height: 1px; background: #eee; margin: 20px 0 0 0;}
-#usic_logo {width: 100px; height: 100px; background: url(usic_logotype.png); margin: 10px 0 0 0;}
+#usic_logo {width: 100px; height: 100px; background: url(/static/img/usic_logotype.png); margin: 10px 0 0 0;}
 
-#dev_mail {font: 14px Helvetica, Arial; margin: 20px 0 10px 0; display: block; text-align: right;}
+#dev_mail {font: 14px Arial; margin: 20px 0 10px 0; display: block; text-align: right;}
 #dev_mail a {color: #7298f7; text-decoration: none;}
 #dev_mail a:hover {color: #000;}
