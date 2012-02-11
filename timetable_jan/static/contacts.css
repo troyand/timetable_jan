@@ -5,7 +5,7 @@ ul li {list-style-type: none;}
 
 #Title {font: 22px Arial; letter-spacing: 1px; text-align: left; margin: 4px 0 22px 4px;}
 
-.developer {text-align: left; display: inline-block; vertical-align: top; margin: 0 5px 0 5px; width: 172px;}
+.developer {text-align: left; display: inline-block; vertical-align: top; margin: 0 5px 0 5px; width: 168px;}
 
 .developer ul .name {font: bold 14px Arial; margin: 12px 0 12px 0; color: #000;}
 .developer ul li {text-align: left; font: 12px Helvetica, Arial; color: #b6b6b6; line-height: 22px;}
@@ -18,7 +18,7 @@ ul li {list-style-type: none;}
 #fouth li:first-child {background: url(/static/img/photos.jpg) -387px 0;}
 #fifth li:first-child {background: url(/static/img/photos.jpg) -516px 0;}
 
-#first li:last-child {margin: 20px 0 0 0;}
+#first li:last-child {margin: 4px 0 0 0;}
 #second li:last-child {margin: 64px 0 0 0;}
 #third li:last-child {margin: 42px 0 0 0;}
 #fouth li:last-child {margin: 20px 0 0 0;}
