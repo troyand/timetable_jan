@@ -1,26 +1,33 @@
-#Photos ul {margin: 0; padding: 0;}
-#Photos ul div {list-style-type: none; display: inline-block;}
-#Photos ul div {width: 137px; height: 171px; border-radius: 4px; border: 1px solid #b6b6b6; margin: 0 25px 0 25px;}
-#Photos ul div li {width: 129px; height: 163px; margin: 4px 0 0 0;}
-#first {background: url(photos.jpg);}
-#second {background: url(photos.jpg) -129px 0;}
-#third {background: url(photos.jpg) -258px 0;}
-#fouth {background: url(photos.jpg) -387px 0;}
-#fifth {background: url(photos.jpg) -516px 0;}
+body {background: #eee;}
+ul {padding: 0; margin: 0;}
+ul li {list-style-type: none;}
 
-#Information {text-align: left; margin: 4px 0 0 34px;}
-#Information div {display: inline-block; vertical-align: top;}
-#Information div ul li:first-child {font: bold 14px Helvetica, Arial; color: #000; margin: 0 0 10px 0;}
-#Information div ul li {list-style-type: none; font: 12px Helvetica, Arial; text-align: left; color: #7d7d7d; line-height: 22px;}
-#first-info ul li:last-child {margin: 31px 0 0 0;}
-#second-info ul li:last-child {margin: 75px 0 0 0;}
-#second-info {margin: 0 0 0 18px;}
-#third-info ul li:last-child {margin: 53px 0 0 0;}
-#third-info {margin: 0 0 0 74px;}
-#fouth-info ul li:last-child {margin: 31px 0 0 0;}
-#fouth-info {margin: 0 0 0 56px;}
-#fifth-info ul li:last-child {margin: 53px 0 0 0;}
-#fifth-info {margin: 0 0 0 61px;}
+#Container {max-width: 980px; padding: 10px; background: #fff; margin: 0 auto 0 auto;}
+
+#Title {font: 22px  Helvetica, Arial; letter-spacing: 1px; text-align: left; margin: 4px 0 22px 4px;}
+
+.developer {text-align: left; display: inline-block; vertical-align: top; margin: 0 5px 0 5px; width: 172px;}
+
+.developer ul .name {font: bold 14px Helvetica, Arial; margin: 12px 0 12px 0; color: #000;}
+.developer ul li {text-align: left; font: 12px Helvetica, Arial; color: #b6b6b6; line-height: 22px;}
+.developer ul li:first-child {width: 129px; height: 163px;}
+.developer ul li:last-child {margin-bottom: 20px !important;}
+
+#first li:first-child {background: url(/static/img/photos.jpg);}
+#second li:first-child {background: url(/static/img/photos.jpg) -129px 0;}
+#third li:first-child {background: url(/static/img/photos.jpg) -258px 0;}
+#fouth li:first-child {background: url(/static/img/photos.jpg) -387px 0;}
+#fifth li:first-child {background: url(/static/img/photos.jpg) -516px 0;}
+
+#first li:last-child {margin: 20px 0 0 0;}
+#second li:last-child {margin: 64px 0 0 0;}
+#third li:last-child {margin: 42px 0 0 0;}
+#fouth li:last-child {margin: 20px 0 0 0;}
+#fifth li:last-child {margin: 42px 0 0 0;}
 
 #line {width: 906px; height: 1px; background: #eee; margin: 20px 0 0 0;}
 #usic_logo {width: 100px; height: 100px; background: url(usic_logotype.png); margin: 10px 0 0 0;}
+
+#dev_mail {font: 14px Helvetica, Arial; margin: 20px 0 10px 0; display: block; text-align: right;}
+#dev_mail a {color: #7298f7; text-decoration: none;}
+#dev_mail a:hover {color: #000;}
