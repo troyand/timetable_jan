@@ -1,4 +1,4 @@
 http://www.djangoproject.com/download/1.4-alpha-1/tarball/
 icalendar==2.2
 python-dateutil==2.0
-South==0.7.3
+-e hg+http://bitbucket.org/andrewgodwin/south/
