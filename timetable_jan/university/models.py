@@ -3,6 +3,8 @@ from django.db import models
 from django.utils.encoding import smart_str
 from django.contrib.auth.models import User
 import datetime
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 
 lesson_times = {
@@ -222,6 +224,58 @@ class Student(Person):
     def __unicode__(self):
         return self.full_name
 
+    def enroll(self, target):
+        if isinstance(target, Group):
+            StudentGroupMembership.objects.create(
+                    student=self,
+                    group=target,
+                    )
+        elif isinstance(target, Lesson):
+            try:
+                sls = StudentLessonSubscription.objects.get(
+                    student=self,
+                    lesson=target,
+                    via_group_membership__isnull=False
+                    )
+                sls.via_group_membership = None
+                sls.save()
+            except StudentLessonSubscription.DoesNotExist:
+                StudentLessonSubscription.objects.create(
+                        student=self,
+                        lesson=target,
+                        )
+        else:
+            raise NotImplementedError(
+                    'Enroll is not implemented for %s %s' % (
+                        type(target), target
+                        ))
+
+    def quit(self, target):
+        if isinstance(target, Group):
+            StudentGroupMembership.objects.get(
+                    student=self,
+                    group=target,
+                    ).delete()
+        elif isinstance(target, Lesson):
+            StudentLessonSubscription.objects.get(
+                    student=self,
+                    lesson=target,
+                    ).delete()
+        else:
+            raise NotImplementedError(
+                    'Quit is not implemented for %s %s' % (
+                        type(target), target
+                        ))
+
+    def lessons(self, q_filter=None):
+        """q_filter - Q object to provide additional
+        filtering condtions"""
+        lesson_subscriptions = StudentLessonSubscription.objects.select_related(
+                ).filter(student=self)
+        if q_filter:
+            lesson_subscriptions = lesson_subscriptions.filter(q_filter)
+        return [ls.lesson for ls in lesson_subscriptions]
+
 
 class Lecturer(Person):
     departments = models.ManyToManyField(Department)
@@ -296,6 +350,18 @@ class StudentGroupMembership(models.Model):
 
     class Meta:
         unique_together = ('student', 'group')
+
+
+@receiver(post_save, sender=StudentGroupMembership)
+def student_group_membership_post_save(sender, instance, created, raw, using, **kwargs):
+    if created:
+        for lesson in instance.group.lesson_set.all():
+            StudentLessonSubscription.objects.create(
+                    student=instance.student,
+                    lesson=lesson,
+                    via_group_membership=instance)
+
+# delete is handled with cascade DB deletion of related objects
 
 
 class Lesson(models.Model):
