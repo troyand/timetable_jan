@@ -215,7 +215,13 @@ class Person(models.Model):
 
     def surname(self):
         return self.full_name.split(' ')[0]
-    
+
+
+class Student(Person):
+    """Represents student that can enroll to courses"""
+    def __unicode__(self):
+        return self.full_name
+
 
 class Lecturer(Person):
     departments = models.ManyToManyField(Department)
@@ -284,9 +290,12 @@ class Group(models.Model):
                 )
 
 
-class GroupMembership(models.Model):
+class StudentGroupMembership(models.Model):
+    student = models.ForeignKey(Student)
     group = models.ForeignKey(Group)
-    user = models.ForeignKey(User)
+
+    class Meta:
+        unique_together = ('student', 'group')
 
 
 class Lesson(models.Model):
@@ -336,3 +345,14 @@ class Lesson(models.Model):
         event.add('dtend', dtend)
         event['uid'] = 'lesson-%d@universitytimetable.org.ua' % self.id
         return event
+
+
+class StudentLessonSubscription(models.Model):
+    student = models.ForeignKey(Student)
+    lesson = models.ForeignKey(Lesson)
+    # remember the group membership that caused this object to be created
+    # for easy deletion later.
+    # Single lesson subscriptions have this field to None
+    via_group_membership = models.ForeignKey(StudentGroupMembership, null=True, blank=True)
+    class Meta:
+        unique_together = ('student', 'lesson')
