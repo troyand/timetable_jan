@@ -107,63 +107,63 @@ class TestStudentEnrollment(TestCase):
                 set(self.student.lessons())
                 )
 
-    def test_lesson_quitting_phy_lecture(self):
-        """Test that a student can quit a separate lesson"""
+    def test_lesson_unenrollment_phy_lecture(self):
+        """Test that a student can unenroll from a separate lesson"""
         lesson = self.phy_0.lesson_set.all()[0]
         self.student.enroll(lesson)
         self.assertEqual(
                 set([lesson]),
                 set(self.student.lessons())
                 )
-        self.student.quit(lesson)
+        self.student.unenroll(lesson)
         self.assertEqual(
                 set(),
                 set(self.student.lessons())
                 )
 
-    def test_group_quitting_phy_lectures(self):
+    def test_group_unenrollment_phy_lectures(self):
         """Test that individual StudentLessonSubscription objects are deleted when
-        a student quits a group (should be triggerred by cascade DB delete)"""
+        a student unenrolls from a group (should be triggerred by cascade DB delete)"""
         self.student.enroll(self.phy_0)
         self.assertEqual(
                 set(self.phy_0.lesson_set.all()),
                 set(self.student.lessons())
                 )
-        self.student.quit(self.phy_0)
+        self.student.unenroll(self.phy_0)
         self.assertEqual(
                 set(),
                 set(self.student.lessons())
                 )
 
-    def test_group_and_lesson_quitting_mat(self):
-        """Test to verify that a student may quit both a group and
-        a single lesson"""
+    def test_group_and_lesson_unenrollment_mat(self):
+        """Test to verify that a student may unenroll both from a group and
+        from a single lesson"""
         self.student.enroll(self.mat_0)
         self.student.enroll(self.mat_1.lesson_set.all()[0])
         self.assertEqual(
                 set(list(self.mat_0.lesson_set.all()) + [self.mat_1.lesson_set.all()[0]]),
                 set(self.student.lessons())
                 )
-        self.student.quit(self.mat_0)
+        self.student.unenroll(self.mat_0)
         self.assertEqual(
                 set([self.mat_1.lesson_set.all()[0]]),
                 set(self.student.lessons())
                 )
-        self.student.quit(self.mat_1.lesson_set.all()[0])
+        self.student.unenroll(self.mat_1.lesson_set.all()[0])
         self.assertEqual(
                 set(),
                 set(self.student.lessons())
                 )
 
-    def test_lesson_group_quitting_override(self):
+    def test_lesson_group_unenrollment_override(self):
         """Test that enrolling for individual lesson
         that was in group series breaks the group link
-        and quitting group does not delete the
+        and unenrollment from group does not delete the
         overriden lesson"""
         self.student.enroll(self.phy_0)
         lesson = self.phy_0.lesson_set.all()[0]
         self.student.enroll(lesson)
-        self.student.quit(self.phy_0)
+        self.student.unenroll(self.phy_0)
         self.assertEqual(
                 set([lesson]),
                 set(self.student.lessons())

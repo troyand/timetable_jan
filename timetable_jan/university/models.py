@@ -250,7 +250,7 @@ class Student(Person):
                         type(target), target
                         ))
 
-    def quit(self, target):
+    def unenroll(self, target):
         if isinstance(target, Group):
             StudentGroupMembership.objects.get(
                     student=self,
@@ -263,7 +263,7 @@ class Student(Person):
                     ).delete()
         else:
             raise NotImplementedError(
-                    'Quit is not implemented for %s %s' % (
+                    'Unenroll is not implemented for %s %s' % (
                         type(target), target
                         ))
 
