@@ -413,6 +413,16 @@ class Lesson(models.Model):
         return event
 
 
+@receiver(post_save, sender=Lesson)
+def lesson_post_save(sender, instance, created, raw, using, **kwargs):
+    if created:
+        for sgm in StudentGroupMembership.objects.filter(group=instance.group):
+            StudentLessonSubscription.objects.create(
+                    student=sgm.student,
+                    lesson=instance,
+                    via_group_membership=sgm)
+
+
 class StudentLessonSubscription(models.Model):
     student = models.ForeignKey(Student)
     lesson = models.ForeignKey(Lesson)

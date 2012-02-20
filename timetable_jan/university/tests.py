@@ -97,6 +97,22 @@ class TestStudentEnrollment(TestCase):
                 self.phy_0
                 )
 
+    def test_group_enrollment_lesson_addition(self):
+        """Test that a lesson added to a group that has students
+        enrolled apears in their lesson list"""
+        self.student.enroll(self.phy_0)
+        lesson = self.phy_0.lesson_set.all()[0]
+        new_lesson = Lesson.objects.create(
+                group=lesson.group,
+                room=lesson.room,
+                date=lesson.date,
+                lesson_number=lesson.lesson_number+1,
+                )
+        self.assertEqual(
+                set(self.phy_0.lesson_set.all()),
+                set(self.student.lessons())
+                )
+
     def test_lesson_group_enrollment_override(self):
         """Test that enrolling for individual lesson
         that was in group series breaks the group link"""
