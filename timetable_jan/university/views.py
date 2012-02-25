@@ -27,25 +27,31 @@ def index(request):
             'index.html',
             {
                 'timetables': timetables,
-                }
+                },
+            context_instance=RequestContext(request)
             )
 
 def help(request):
     return render_to_response(
             'help.html',
-            {}
+            {},
+            context_instance=RequestContext(request)
             )
 
+from django.contrib.auth.decorators import login_required
+@login_required
 def about(request):
     return render_to_response(
             'about.html',
-            {}
+            {},
+            context_instance=RequestContext(request)
             )
 
 def contacts(request):
     return render_to_response(
             'contacts.html',
-            {}
+            {},
+            context_instance=RequestContext(request)
             )
 
 def ical(request, lessons=Lesson.objects.all()):
@@ -80,7 +86,7 @@ def choose_subjects(request, timetable_id):
             context_instance=RequestContext(request)
             )
 
-def return_timetable(mapping, clashing_lessons=[]):
+def return_timetable(request, mapping, clashing_lessons=[]):
     if min(mapping.keys()).weekday() != 0:
         from datetime import timedelta
         mapping[min(mapping.keys())-timedelta(days=min(mapping.keys()).weekday())]={}
@@ -111,13 +117,17 @@ def return_timetable(mapping, clashing_lessons=[]):
                         week_mapping[week_number][row][weekday][lesson_number] = None
 
     #pprint.pprint(mapping)
-    return render_to_response('timetable.html', {
-        'week_mapping': week_mapping,
-        'week_date_mapping': week_date_mapping,
-        'lesson_times': lesson_times,
-        'lesson_numbers': range(1,8),
-        'clashing_lessons': clashing_lessons,
-        })
+    return render_to_response(
+            'timetable.html',
+            {
+                'week_mapping': week_mapping,
+                'week_date_mapping': week_date_mapping,
+                'lesson_times': lesson_times,
+                'lesson_numbers': range(1,8),
+                'clashing_lessons': clashing_lessons,
+                },
+            context_instance=RequestContext(request)
+            )
 
 def timetable(request, encoded_groups, **kwargs):
     groups = []
@@ -149,7 +159,7 @@ def timetable(request, encoded_groups, **kwargs):
     if kwargs['action'] == 'ical':
         return ical(request, lessons)
     elif kwargs['action'] == 'render':
-        return return_timetable(mapping, clashing_lessons)
+        return return_timetable(request, mapping, clashing_lessons)
 
 
 def rooms_status(request, year, month, day):
@@ -186,10 +196,13 @@ def rooms_status(request, year, month, day):
             table.append(row)
         building_tables.append((building, table))
     return render_to_response(
-            'rooms_status.html', {
+            'rooms_status.html',
+            {
                 'status_date': status_date,
                 'building_tables': building_tables,
-                })
+                },
+            context_instance=RequestContext(request)
+            )
 
 
 def lecturer_timetable(request):
@@ -229,9 +242,12 @@ def lecturer_timetable(request):
                     )
         department_lecturer_groups_mapping[department] = lecturer_groups_list
     return render_to_response(
-            'lecturer_timetable.html', {
+            'lecturer_timetable.html',
+            {
                 'department_lecturer_groups_mapping': department_lecturer_groups_mapping,
-                })
+                },
+            context_instance=RequestContext(request)
+            )
 
 def robots_txt(request):
     return HttpResponse("User-agent: *\nDisallow: /\n", mimetype="text/plain")

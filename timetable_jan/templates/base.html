@@ -66,6 +66,9 @@
     td.lesson-time {
         width: 7%;
     }
+    #login {
+        float: right;
+    }
 </style>
 {% block headadd %}
 {% endblock %}
@@ -82,6 +85,20 @@
                 <li><a href="/help/">Допомога</a></li>
                 <li><a href="/about/">Про проект</a></li>
                 <li><a href="/contacts/">Контакти</a></li>
+            </ul>
+            <ul class="nav" id="login">
+                {% if user.is_authenticated %}
+                    <li>
+                    <a>{{ user }}</a>
+                    </li>
+                    <li>
+                    <a href="/accounts/logout/?next={{ request.path }}">Log out</a>
+                    </li>
+                {% else %}
+                    <li>
+                    <a href="/accounts/login/?next={{ request.path }}">Log in</a>
+                    </li>
+                {% endif %}
             </ul>
         </div>
     </div>

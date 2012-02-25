@@ -4,6 +4,7 @@ from django.utils.encoding import smart_str
 from django.contrib.auth.models import User
 import datetime
 from django.db.models.signals import post_save
+from django_auth_ldap.backend import populate_user
 from django.dispatch import receiver
 
 
@@ -218,6 +219,16 @@ class Person(models.Model):
     def surname(self):
         return self.full_name.split(' ')[0]
 
+@receiver(populate_user)
+def ldap_sync(user, ldap_user, **kwargs):
+    print user
+    print ldap_user
+    user.first_name = ldap_user.attrs['givenName'][0]
+    user.last_name = ldap_user.attrs['sn'][0]
+    if ldap_user.attrs['profession'] == u'0':
+        # the user is a Student
+        #
+        pass
 
 class Student(Person):
     """Represents student that can enroll to courses"""

@@ -25,6 +25,8 @@ urlpatterns = patterns('',
     (r'autocomplete/extra-courses/$', ExtraCoursesAutocompleteView.as_view()),
     (r'autocomplete/test/$', TemplateView.as_view(template_name='autocomplete_test.html')),
     (r'create-timetable/$', UnifiedTimetableProcessView.as_view(template_name='create_timetable.html')),
+    (r'^accounts/login/$', 'django.contrib.auth.views.login'),
+    (r'^accounts/logout/$', 'django.contrib.auth.views.logout'),
     # Examples:
     # url(r'^$', 'dj_timetable.views.home', name='home'),
 
