@@ -89,14 +89,14 @@
             <ul class="nav" id="login">
                 {% if user.is_authenticated %}
                     <li>
-                    <a>{{ user }}</a>
+                    <a href="/accounts/profile/">{{ user }}</a>
                     </li>
                     <li>
-                    <a href="/accounts/logout/?next={{ request.path }}">Log out</a>
+                    <a href="/accounts/logout/?next={{ request.path }}">Вихід</a>
                     </li>
                 {% else %}
                     <li>
-                    <a href="/accounts/login/?next={{ request.path }}">Log in</a>
+                    <a href="/accounts/login/?next={{ request.path }}">Вхід</a>
                     </li>
                 {% endif %}
             </ul>

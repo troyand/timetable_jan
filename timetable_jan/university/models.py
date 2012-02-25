@@ -4,9 +4,11 @@ from django.utils.encoding import smart_str
 from django.contrib.auth.models import User
 import datetime
 from django.db.models.signals import post_save
-from django_auth_ldap.backend import populate_user
+from django_auth_ldap.backend import populate_user, populate_user_profile
 from django.dispatch import receiver
 
+import logging
+logger = logging.getLogger(__name__)
 
 lesson_times = {
         1: (u'8:30', u'9:50'),
@@ -201,10 +203,14 @@ class Major(models.Model):
 #TODO finish this class
 class Person(models.Model):
     """Represents generic person"""
+    user = models.OneToOneField(User, null=True, blank=True)
     full_name = models.CharField(max_length=255)
     
     #class Meta:
     #    abstract = True
+
+    def __unicode__(self):
+        return self.full_name
 
     def short_name(self):
         parts = self.full_name.split(' ')
@@ -219,16 +225,44 @@ class Person(models.Model):
     def surname(self):
         return self.full_name.split(' ')[0]
 
+
+@receiver(post_save, sender=User)
+def create_user_profile(sender, instance, created, **kwargs):
+    if created:
+        p = Person(user=instance)
+        p.save()
+
+
 @receiver(populate_user)
 def ldap_sync(user, ldap_user, **kwargs):
-    print user
-    print ldap_user
     user.first_name = ldap_user.attrs['givenName'][0]
     user.last_name = ldap_user.attrs['sn'][0]
-    if ldap_user.attrs['profession'] == u'0':
-        # the user is a Student
-        #
-        pass
+
+
+@receiver(populate_user_profile)
+def ldap_sync_profile(profile, ldap_user, **kwargs):
+    ldap_major_mapping = {
+            # TODO add other majors from
+            # http://wiki.usic.org.ua/wiki/UMS_utilities
+            u'40203': u'6.040203',
+            u'50103': u'6.050103',
+            }
+    person = profile
+    person.full_name = ldap_user.attrs['cn'][0]
+    ldap_profession = ldap_user.attrs['profession'][0]
+    try:
+        if ldap_profession in [u'0', u'1']:
+            # the user is a Student
+            student = Student(person_ptr=person)
+            ldap_faculty = ldap_user.attrs['faculty'][0]
+            if ldap_faculty in ldap_major_mapping.keys():
+                student.major = Major.objects.get(
+                        code=ldap_major_mapping[ldap_faculty]
+                        )
+            student.save()
+    except Exception, e:
+        logging.error(e)
+
 
 class Student(Person):
     """Represents student that can enroll to courses"""

@@ -27,6 +27,7 @@ urlpatterns = patterns('',
     (r'create-timetable/$', UnifiedTimetableProcessView.as_view(template_name='create_timetable.html')),
     (r'^accounts/login/$', 'django.contrib.auth.views.login'),
     (r'^accounts/logout/$', 'django.contrib.auth.views.logout'),
+    (r'^accounts/profile/$', 'timetable_jan.university.views.profile'),
     # Examples:
     # url(r'^$', 'dj_timetable.views.home', name='home'),
 

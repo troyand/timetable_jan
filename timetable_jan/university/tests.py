@@ -24,7 +24,10 @@ class TestStudentEnrollment(TestCase):
     def setUp(self):
         # save group objects for easy retrieval in test cases
         self.phy_0, self.mat_0, self.mat_1, self.mat_2 = Group.objects.select_related().all()
-        self.student = Student.objects.create(full_name='John Doe')
+        self.student = Student.objects.create(
+                full_name='John Doe',
+                major=Major.objects.all()[0]
+                )
 
     def test_lesson_enrollment_phy_lecture(self):
         """Test that a student can enroll to a separate lesson"""

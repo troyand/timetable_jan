@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Розклад - Профіль{% endblock %}
+{% block header %}Профіль{% endblock %}
+{% block content %}
+    {% with user.get_profile as person %}
+        <ul>
+            <li>
+            {{ person.full_name }}
+            </li>
+            {% if person.student %}
+                <li>
+                {{ person.student.major }}
+                </li>
+            {% endif %}
+    {% endwith %}
+{% endblock %}

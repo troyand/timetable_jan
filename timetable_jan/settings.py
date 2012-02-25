@@ -166,4 +166,6 @@ LOGGING = {
 # this is useful for manual testing
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
+AUTH_PROFILE_MODULE = 'university.Person'
+
 from settings_local import *

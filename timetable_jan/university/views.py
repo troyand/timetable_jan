@@ -4,6 +4,7 @@ from django.http import HttpResponse
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
 from timetable_jan.university.models import *
+from django.contrib.auth.decorators import login_required
 import math
 import datetime
 
@@ -38,8 +39,6 @@ def help(request):
             context_instance=RequestContext(request)
             )
 
-from django.contrib.auth.decorators import login_required
-@login_required
 def about(request):
     return render_to_response(
             'about.html',
@@ -50,6 +49,14 @@ def about(request):
 def contacts(request):
     return render_to_response(
             'contacts.html',
+            {},
+            context_instance=RequestContext(request)
+            )
+
+@login_required
+def profile(request):
+    return render_to_response(
+            'profile.html',
             {},
             context_instance=RequestContext(request)
             )
