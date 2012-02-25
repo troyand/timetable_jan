@@ -155,4 +155,9 @@ LOGGING = {
     }
 }
 
+# provide a safe default email backend that will do nothing
+# but output all sent mail to console
+# this is useful for manual testing
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
 from settings_local import *
