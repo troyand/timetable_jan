@@ -202,8 +202,8 @@ class Person(models.Model):
     """Represents generic person"""
     full_name = models.CharField(max_length=255)
     
-    class Meta:
-        abstract = True
+    #class Meta:
+    #    abstract = True
 
     def short_name(self):
         parts = self.full_name.split(' ')
