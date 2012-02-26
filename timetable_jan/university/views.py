@@ -4,6 +4,7 @@ from django.http import HttpResponse
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
 from timetable_jan.university.models import *
+from timetable_jan.university.forms import *
 from django.contrib.auth.decorators import login_required
 import math
 import datetime
@@ -55,9 +56,29 @@ def contacts(request):
 
 @login_required
 def profile(request):
+    try:
+        student = request.user.get_profile().student
+    except Student.DoesNotExist:
+        student = None
+        student_form = None
+    if request.method == 'POST':
+        user_form = UserForm(request.POST, instance=request.user)
+        if user_form.is_valid():
+            user_form.save()
+        if student:
+            student_form = StudentForm(request.POST, instance=student)
+            if student_form.is_valid():
+                student_form.save()
+    else:
+        user_form = UserForm(instance=request.user)
+        if student:
+            student_form = StudentForm(instance=student)
     return render_to_response(
             'profile.html',
-            {},
+            {
+                'user_form': user_form,
+                'student_form': student_form,
+                },
             context_instance=RequestContext(request)
             )
 
