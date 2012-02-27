@@ -25,6 +25,7 @@ then
 fi
 
 python manage.py syncdb --noinput
+python manage.py migrate university --noinput
 
 
 # FLS

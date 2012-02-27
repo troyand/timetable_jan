@@ -1,5 +1,7 @@
 # Django settings for timetable_jan project.
 
+import django.conf.global_settings as DEFAULT_SETTINGS
+
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
@@ -88,6 +90,10 @@ TEMPLATE_LOADERS = (
     'django.template.loaders.app_directories.Loader',
 #     'django.template.loaders.eggs.Loader',
 )
+TEMPLATE_CONTEXT_PROCESSORS = DEFAULT_SETTINGS.TEMPLATE_CONTEXT_PROCESSORS + (
+    'django.core.context_processors.request',
+)
+
 
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
@@ -123,6 +129,7 @@ INSTALLED_APPS = (
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
     'timetable_jan.university',
+    'south',
 )
 
 # A sample logging configuration. The only tangible logging
@@ -153,5 +160,12 @@ LOGGING = {
         },
     }
 }
+
+# provide a safe default email backend that will do nothing
+# but output all sent mail to console
+# this is useful for manual testing
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+AUTH_PROFILE_MODULE = 'university.Person'
 
 from settings_local import *
