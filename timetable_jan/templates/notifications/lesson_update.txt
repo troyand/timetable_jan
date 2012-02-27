@@ -1,0 +1,7 @@
+Зміни у розкладі {{ lesson.date|date:"j E Y" }}
+
+{{ lesson.group.course.discipline.name }} - {% if lesson.group.number == 0 %}лекція{% else %}практика-{{ lesson.group.number }}{% endif %}:
+{% for field_verbose_name, old_value, new_value in changeset %}
+{{ field_verbose_name }}: {{ old_value }} => {{ new_value }}
+{% endfor %}
+Зміну збережено користувачем {{ changer }} ({{ changer.get_profile.full_name }}).

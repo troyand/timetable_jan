@@ -11,3 +11,8 @@ class StudentForm(ModelForm):
     class Meta:
         model = Student
         fields = ('major', )
+
+class LessonForm(ModelForm):
+    class Meta:
+        model = Lesson
+        exclude = ('group', )

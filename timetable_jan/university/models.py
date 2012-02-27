@@ -129,6 +129,7 @@ class Room(models.Model):
 
     class Meta:
         unique_together = ('building', 'number', 'label')
+        ordering = ['building__number', 'number']
 
     def __unicode__(self):
         #Idendification of room itself
@@ -413,9 +414,9 @@ def student_group_membership_post_save(sender, instance, created, raw, using, **
 
 class Lesson(models.Model):
     group = models.ForeignKey(Group)
-    room = models.ForeignKey(Room)
-    date = models.DateField()
-    lesson_number = models.IntegerField()
+    room = models.ForeignKey(Room, verbose_name=u'аудиторія')
+    date = models.DateField(verbose_name=u'дата')
+    lesson_number = models.IntegerField(verbose_name=u'номер пари')
 
     class Meta:
         unique_together = ('room', 'date', 'lesson_number')
@@ -427,6 +428,37 @@ class Lesson(models.Model):
                 self.group.course.discipline.name,
                 self.group.number,
                 )
+
+    def notify_subscribers(self, changer):
+        from django.core.mail import EmailMultiAlternatives
+        from django.template.loader import get_template
+        from django.template import Context
+        old_self = Lesson.objects.get(pk=self.pk)
+        print changer
+        changeset = []
+        for field in Lesson._meta.fields:
+            field_name = field.name
+            field_verbose_name = field.verbose_name
+            old_value = old_self.__getattribute__(field_name)
+            new_value = self.__getattribute__(field_name)
+            if old_value != new_value:
+                changeset.append((field_verbose_name, old_value, new_value))
+        if changeset:
+            context = Context({
+                'changer': changer,
+                'changeset': changeset,
+                'lesson': old_self,
+                })
+            plaintext_template = get_template('notifications/lesson_update.txt')
+            plaintext_message = plaintext_template.render(context)
+            for sls in StudentLessonSubscription.objects.select_related().filter(lesson=old_self):
+                user = sls.student.user
+                if user.email:
+                    user.email_user(
+                            u'Зміни у розкладі',
+                            plaintext_message,
+                            from_email=u'Розклад <noreply@universitytimetable.org.ua>'
+                            )
 
     def icalendar_event(self):
         import icalendar

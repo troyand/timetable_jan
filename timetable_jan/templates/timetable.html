@@ -75,8 +75,17 @@
                                 {% with lesson=lessons|lookup:lesson_number %}
                                 <td>
                                     {% if lesson %}
-                                        <span class="subject">{{ lesson.group.course.discipline.name }}</span><br>
-                                        <span class="details"><strong>{{ lesson.room }}</strong>, <em>{{ lesson.group.lecturer.short_name }}</em>
+                                        <span class="subject">
+                                            {% if user.is_authenticated %}
+                                                <a href="/lesson/{{ lesson.pk }}/">{{ lesson.group.course.discipline.name }}</a>
+                                            {% else %}
+                                                {{ lesson.group.course.discipline.name }}
+                                            {% endif %}
+                                        </span>
+                                        <br>
+                                        <span class="details">
+                                            <strong>{{ lesson.room }}</strong>, 
+                                            <em>{{ lesson.group.lecturer.short_name }}</em>
                                             {% if lesson.group.number == 0 %}
                                                 <span class="label">лекція</span>
                                             {% else %}
