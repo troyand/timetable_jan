@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<django-objects version="1.0">
+  <object pk="1" model="university.building">
+    <field to="university.university" name="university" rel="ManyToOneRel">1</field>
+    <field type="IntegerField" name="number">1</field>
+    <field type="CharField" name="label"><None></None></field>
+  </object>
+  <object pk="2" model="university.building">
+    <field to="university.university" name="university" rel="ManyToOneRel">1</field>
+    <field type="IntegerField" name="number">3</field>
+    <field type="CharField" name="label"><None></None></field>
+  </object>
+  <object pk="1" model="university.room">
+    <field to="university.building" name="building" rel="ManyToOneRel">1</field>
+    <field type="IntegerField" name="number">313</field>
+    <field type="CharField" name="label"><None></None></field>
+    <field type="IntegerField" name="floor">3</field>
+  </object>
+  <object pk="2" model="university.room">
+    <field to="university.building" name="building" rel="ManyToOneRel">2</field>
+    <field type="IntegerField" name="number">302</field>
+    <field type="CharField" name="label"><None></None></field>
+    <field type="IntegerField" name="floor">3</field>
+  </object>
+  <object pk="3" model="university.room">
+    <field to="university.building" name="building" rel="ManyToOneRel">1</field>
+    <field type="IntegerField" name="number">225</field>
+    <field type="CharField" name="label"><None></None></field>
+    <field type="IntegerField" name="floor">2</field>
+  </object>
+  <object pk="1" model="university.course">
+    <field to="university.discipline" name="discipline" rel="ManyToOneRel">768</field>
+    <field to="university.academicterm" name="academic_term" rel="ManyToOneRel">3</field>
+  </object>
+  <object pk="2" model="university.course">
+    <field to="university.discipline" name="discipline" rel="ManyToOneRel">1126</field>
+    <field to="university.academicterm" name="academic_term" rel="ManyToOneRel">3</field>
+  </object>
+  <object pk="1" model="university.timetable">
+    <field to="university.major" name="major" rel="ManyToOneRel">9</field>
+    <field type="IntegerField" name="year">1</field>
+    <field to="university.course" name="courses" rel="ManyToManyRel"><object pk="1"></object><object pk="2"></object></field>
+  </object>
+  <object pk="1" model="university.group">
+    <field to="university.course" name="course" rel="ManyToOneRel">2</field>
+    <field type="IntegerField" name="number">0</field>
+    <field to="university.lecturer" name="lecturer" rel="ManyToOneRel">403</field>
+  </object>
+  <object pk="2" model="university.group">
+    <field to="university.course" name="course" rel="ManyToOneRel">1</field>
+    <field type="IntegerField" name="number">0</field>
+    <field to="university.lecturer" name="lecturer" rel="ManyToOneRel">271</field>
+  </object>
+  <object pk="3" model="university.group">
+    <field to="university.course" name="course" rel="ManyToOneRel">1</field>
+    <field type="IntegerField" name="number">1</field>
+    <field to="university.lecturer" name="lecturer" rel="ManyToOneRel">271</field>
+  </object>
+  <object pk="4" model="university.group">
+    <field to="university.course" name="course" rel="ManyToOneRel">1</field>
+    <field type="IntegerField" name="number">2</field>
+    <field to="university.lecturer" name="lecturer" rel="ManyToOneRel">275</field>
+  </object>
+  <object pk="1" model="university.lesson">
+    <field to="university.group" name="group" rel="ManyToOneRel">1</field>
+    <field to="university.room" name="room" rel="ManyToOneRel">1</field>
+    <field type="DateField" name="date">2012-01-10</field>
+    <field type="IntegerField" name="lesson_number">4</field>
+  </object>
+  <object pk="2" model="university.lesson">
+    <field to="university.group" name="group" rel="ManyToOneRel">1</field>
+    <field to="university.room" name="room" rel="ManyToOneRel">1</field>
+    <field type="DateField" name="date">2012-01-24</field>
+    <field type="IntegerField" name="lesson_number">4</field>
+  </object>
+  <object pk="3" model="university.lesson">
+    <field to="university.group" name="group" rel="ManyToOneRel">2</field>
+    <field to="university.room" name="room" rel="ManyToOneRel">3</field>
+    <field type="DateField" name="date">2012-01-11</field>
+    <field type="IntegerField" name="lesson_number">4</field>
+  </object>
+  <object pk="4" model="university.lesson">
+    <field to="university.group" name="group" rel="ManyToOneRel">2</field>
+    <field to="university.room" name="room" rel="ManyToOneRel">3</field>
+    <field type="DateField" name="date">2012-01-18</field>
+    <field type="IntegerField" name="lesson_number">4</field>
+  </object>
+  <object pk="5" model="university.lesson">
+    <field to="university.group" name="group" rel="ManyToOneRel">3</field>
+    <field to="university.room" name="room" rel="ManyToOneRel">3</field>
+    <field type="DateField" name="date">2012-01-25</field>
+    <field type="IntegerField" name="lesson_number">4</field>
+  </object>
+  <object pk="6" model="university.lesson">
+    <field to="university.group" name="group" rel="ManyToOneRel">3</field>
+    <field to="university.room" name="room" rel="ManyToOneRel">3</field>
+    <field type="DateField" name="date">2012-02-01</field>
+    <field type="IntegerField" name="lesson_number">4</field>
+  </object>
+  <object pk="7" model="university.lesson">
+    <field to="university.group" name="group" rel="ManyToOneRel">3</field>
+    <field to="university.room" name="room" rel="ManyToOneRel">3</field>
+    <field type="DateField" name="date">2012-02-08</field>
+    <field type="IntegerField" name="lesson_number">4</field>
+  </object>
+  <object pk="8" model="university.lesson">
+    <field to="university.group" name="group" rel="ManyToOneRel">4</field>
+    <field to="university.room" name="room" rel="ManyToOneRel">2</field>
+    <field type="DateField" name="date">2012-01-25</field>
+    <field type="IntegerField" name="lesson_number">4</field>
+  </object>
+  <object pk="9" model="university.lesson">
+    <field to="university.group" name="group" rel="ManyToOneRel">4</field>
+    <field to="university.room" name="room" rel="ManyToOneRel">2</field>
+    <field type="DateField" name="date">2012-02-01</field>
+    <field type="IntegerField" name="lesson_number">4</field>
+  </object>
+  <object pk="10" model="university.lesson">
+    <field to="university.group" name="group" rel="ManyToOneRel">4</field>
+    <field to="university.room" name="room" rel="ManyToOneRel">2</field>
+    <field type="DateField" name="date">2012-02-08</field>
+    <field type="IntegerField" name="lesson_number">4</field>
+  </object>
+</django-objects>

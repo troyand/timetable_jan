@@ -9,6 +9,12 @@
 <link rel="shortcut icon" href="{% static "favicon.ico" %}">
 <link href="{% static "bootstrap.css" %}" rel="stylesheet">
 <script type="text/javascript" src="{% static "jquery.min.js" %}"></script>
+<script type="text/javascript" src="{% static "bootstrap-dropdown.js" %}"></script>
+<script type="text/javascript">
+    $(function() {
+        $('.topbar').dropdown();
+    });
+</script>
 <style type="text/css">
     /* Override some defaults */
     html, body {
@@ -66,6 +72,9 @@
     td.lesson-time {
         width: 7%;
     }
+    #login {
+        float: right;
+    }
 </style>
 {% block headadd %}
 {% endblock %}
@@ -74,14 +83,55 @@
 <div class="topbar">
     <div class="fill">
         <div class="container">
-            <a class="brand" href="/">Розклад</a>
 
             <ul class="nav">
-                <li><a href="/lecturer-timetable/">Розклад викладачів</a></li>
-                <li><a href="/rooms-status/{% now "Y/n/j" %}/">Аудиторії</a></li>
-                <li><a href="/help/">Допомога</a></li>
-                <li><a href="/about/">Про проект</a></li>
-                <li><a href="/contacts/">Контакти</a></li>
+                {% with '/' as target_url %}
+                    <li{% if request.path == target_url %} class="active"{% endif %}>
+                    <a class="brand" href="{{ target_url }}">Розклад</a>
+                    </li>
+                {% endwith %}
+                {% with '/lecturer-timetable/' as target_url %}
+                    <li{% if request.path == target_url %} class="active"{% endif %}>
+                    <a href="{{ target_url }}">Розклад викладачів</a>
+                    </li>
+                {% endwith %}
+                <li{% if '/rooms-status/' in request.path %} class="active"{% endif %}>
+                <a href="/rooms-status/{% now "Y/n/j" %}/">Аудиторії</a>
+                </li>
+                {% with '/help/' as target_url %}
+                    <li{% if request.path == target_url %} class="active"{% endif %}>
+                    <a href="{{ target_url }}">Допомога</a>
+                    </li>
+                {% endwith %}
+                {% with '/about/' as target_url %}
+                    <li{% if request.path == target_url %} class="active"{% endif %}>
+                    <a href="{{ target_url }}">Про проект</a>
+                    </li>
+                {% endwith %}
+                {% with '/contacts/' as target_url %}
+                    <li{% if request.path == target_url %} class="active"{% endif %}>
+                    <a href="{{ target_url }}">Контакти</a>
+                    </li>
+                {% endwith %}
+            </ul>
+            <ul class="nav" id="login">
+                {% if user.is_authenticated %}
+                    <li class="dropdown" data-dropdown="dropdown">
+                    <a class="dropdown-toggle" href="#">{{ user }}</a>
+                    <ul class="dropdown-menu">
+                        <li>
+                        <a href="/accounts/profile/">Профіль</a>
+                        </li>
+                        <li>
+                        <a href="/accounts/logout/?next={{ request.path }}">Вихід</a>
+                        </li>
+                    </ul>
+                    </li>
+                {% else %}
+                    <li>
+                    <a href="/accounts/login/?next={{ request.path }}">Вхід</a>
+                    </li>
+                {% endif %}
             </ul>
         </div>
     </div>

@@ -1,6 +1,7 @@
 from django.conf.urls.defaults import patterns, include, url
 from django.conf import settings
 from timetable_jan.university.ajax_views import *
+from timetable_jan.university.cb_views import *
 from timetable_jan.university.api import urls
 from django.views.generic import TemplateView
 
@@ -27,6 +28,10 @@ urlpatterns = patterns('',
     (r'autocomplete/test/$', TemplateView.as_view(template_name='autocomplete_test.html')),
     (r'create-timetable/$', UnifiedTimetableProcessView.as_view(template_name='create_timetable.html')),
     (r'^api/', include(urls)),
+    (r'^accounts/login/$', 'django.contrib.auth.views.login'),
+    (r'^accounts/logout/$', 'django.contrib.auth.views.logout'),
+    (r'^accounts/profile/$', 'timetable_jan.university.views.profile'),
+    url(r'^lesson/(?P<pk>\d+)/$', LessonDetailView.as_view(template_name="lesson.html"), name='lesson'),
     # Examples:
     # url(r'^$', 'dj_timetable.views.home', name='home'),
 

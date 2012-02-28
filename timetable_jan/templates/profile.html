@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Розклад - Профіль{% endblock %}
+{% block header %}Профіль{% endblock %}
+{% block content %}
+    <form method="post" action="">
+        {% csrf_token %}
+        {{ user_form.as_p }}
+        {% if student_form %}
+            {{ student_form.as_p }}
+        {% endif %}
+        <input type="submit" value="Зберегти" />
+    </form>
+    <hr />
+    {% with user.get_profile as person %}
+        <ul>
+            <li>
+            {{ person.full_name }}
+            </li>
+            {% if person.student %}
+                <li>
+                {{ person.student.major }}
+                </li>
+            {% endif %}
+    {% endwith %}
+{% endblock %}
