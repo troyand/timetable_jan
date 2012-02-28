@@ -1,5 +1,5 @@
 #!/bin/bash
-
+# TODO return to initial state
 if [ ! -f timetable_jan/settings_local.py ]
 then
     echo "Copying timetable_jan/settings_local.sample to timetable_jan/settings_local.py"
