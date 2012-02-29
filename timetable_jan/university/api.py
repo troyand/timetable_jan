@@ -51,6 +51,8 @@ class ModelResource(ModelResource):
         for name, field in self.fields.items():
             if isinstance(field, fields.ToManyField):
                 del bundle.data[name]
+                # TODO add link to child resources
+                #bundle.data[field.attribute + u'_uri'] = 
         return bundle
         
         
@@ -58,6 +60,9 @@ class UniversityResource(ModelResource):
     terms = fields.ToManyField(
         'timetable_jan.university.api.AcademicTermResource',
         "terms", "university", null=True)
+    buildings = fields.ToManyField(
+        'timetable_jan.university.api.BuildingResource',
+        "buildings", "university", null=True)
 
     class Meta:
         queryset = University.objects.all()
@@ -76,12 +81,43 @@ class AcademicTermResource(ModelResource):
         filtering = {
             "university": ('exact',),
             }
+
+
+class BuildingResource(ModelResource):
+    university = fields.ForeignKey(UniversityResource, 'university')
+    rooms = fields.ToManyField(
+        'timetable_jan.university.api.RoomResource',
+        'rooms', 'building', null=True)
+    
+    class Meta:
+        queryset = Building.objects.all()
+        resource_name = 'buildings'
+        allowed_methods = ['get']
+
+        filtering = {
+            'university': ('exact',),
+            }
+        
+        
+class RoomResource(ModelResource):
+    building = fields.ForeignKey(BuildingResource, 'building')
+        
+    class Meta:
+        queryset = Room.objects.all()
+        resource_name = 'rooms'
+        allowed_methods = ['get']
+
+        filtering = {
+            'building': ('exact',),
+            }
         
 
 #------------------------ API links ----------------------------------
 v1_api = Api(api_name='v1')
 v1_api.register(UniversityResource())
-#v1_api.register(AcademicTermResource())
+v1_api.register(AcademicTermResource())
+v1_api.register(BuildingResource())
+v1_api.register(RoomResource())
 
 urls = patterns('',
     (r'^', include(v1_api.urls)),
