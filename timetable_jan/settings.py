@@ -130,6 +130,7 @@ INSTALLED_APPS = (
     # 'django.contrib.admindocs',
     'timetable_jan.university',
     'south',
+    'tastypie',
 )
 
 # A sample logging configuration. The only tangible logging
