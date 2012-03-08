@@ -6,6 +6,7 @@ import datetime
 from django.db.models.signals import post_save
 from django_auth_ldap.backend import populate_user, populate_user_profile
 from django.dispatch import receiver
+from timetable_jan.audit.models import Auditable
 
 import logging
 logger = logging.getLogger(__name__)
@@ -97,7 +98,7 @@ class AcademicTerm(models.Model):
                 ))
     
 
-class Building(models.Model):
+class Building(Auditable, models.Model):
     university = models.ForeignKey(University)
     number = models.IntegerField(null=True, blank=True)
     label = models.CharField(max_length=255, null=True, blank=True)
