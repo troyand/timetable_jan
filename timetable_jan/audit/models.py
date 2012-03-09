@@ -26,7 +26,6 @@ class Auditable(object):
 
     def save(self, *args, **kwargs):
         change = Change()
-        change.content_object=self
         try:
             change.changer = kwargs.pop('changer')
         except KeyError:
@@ -43,5 +42,6 @@ class Auditable(object):
             serialized.splitlines(),
             ))
         change.diff = diff
-        change.save()
         super(Auditable, self).save(*args, **kwargs)
+        change.content_object=self
+        change.save()
