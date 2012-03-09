@@ -43,5 +43,5 @@ class Auditable(object):
             serialized.splitlines(),
             ))
         change.diff = diff
-        super(Auditable, self).save(*args, **kwargs)
         change.save()
+        super(Auditable, self).save(*args, **kwargs)
