@@ -26,6 +26,7 @@ fi
 
 python manage.py syncdb --noinput
 python manage.py migrate university --noinput
+python manage.py migrate audit --noinput
 
 
 # FLS
