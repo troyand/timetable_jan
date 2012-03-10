@@ -1,6 +1,9 @@
 *.pyc
 *.sqlite
 *.swp
+*.backup
 settings_local.py
 venv_dir
 \#*\#
+build/
+src/
