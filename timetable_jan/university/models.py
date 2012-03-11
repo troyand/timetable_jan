@@ -203,8 +203,9 @@ class Major(Auditable, StandaloneOwnableAuthorizable, models.Model):
 
 
 #TODO finish this class
-class Person(Auditable, StandaloneOwnableAuthorizable, models.Model):
+class Person(Auditable, AuthorizableBase, models.Model):
     """Represents generic person"""
+    # TODO implement custom can_add, can_edit, can_delete logic here
     user = models.OneToOneField(User, null=True, blank=True)
     full_name = models.CharField(max_length=255)
     
