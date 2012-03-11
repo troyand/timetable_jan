@@ -40,16 +40,16 @@ class Auditable(object):
             change.changer = kwargs.pop('changer')
         except KeyError:
             change.changer = None
-        serialized = serializers.serialize('json', [self], indent=2)
         if self.pk:
             old_self = self._base_manager.get(pk=self.pk)
             old_serialized = serializers.serialize('json', [old_self], indent=2)
         else:
             # if the object is new, then the previous state is treated as empty
             old_serialized = ''
+        super(Auditable, self).save(*args, **kwargs)
+        serialized = serializers.serialize('json', [self], indent=2)
         change.before = old_serialized
         change.after = serialized
-        super(Auditable, self).save(*args, **kwargs)
         change.content_object = self
         change.save()
 
