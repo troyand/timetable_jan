@@ -132,10 +132,9 @@ class OwnableAuthorizableBase(AuthorizableBase):
                     if result == True:
                         return True
             except AttributeError:
-                raise
-                #raise ImproperlyConfigured(
-                #        'No %s attribute in %s' % (related, self)
-                #        )
+                raise ImproperlyConfigured(
+                        'No %s attribute in %s' % (related, self)
+                        )
             return False
 
     def can_delete(self, user):
