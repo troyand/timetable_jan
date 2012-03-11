@@ -6,7 +6,7 @@ import datetime
 from django.db.models.signals import post_save
 from django_auth_ldap.backend import populate_user, populate_user_profile
 from django.dispatch import receiver
-from timetable_jan.audit.models import Auditable
+from timetable_jan.audit.models import *
 
 import logging
 logger = logging.getLogger(__name__)
@@ -22,7 +22,7 @@ lesson_times = {
         }
 
 
-class University(models.Model):
+class University(Auditable, StandaloneOwnableAuthorizable, models.Model):
     name = models.CharField(max_length=255, unique=True)
     abbr = models.CharField(max_length=16, unique=True)
     
@@ -32,7 +32,7 @@ class University(models.Model):
                 )
 
 
-class AcademicTerm(models.Model):
+class AcademicTerm(Auditable, StandaloneOwnableAuthorizable, models.Model):
     ACADEMIC_TERMS = (
             (u'семестр', u'семестр'),
             (u'триместр', u'триместр'),
@@ -98,7 +98,7 @@ class AcademicTerm(models.Model):
                 ))
     
 
-class Building(Auditable, models.Model):
+class Building(Auditable, StandaloneOwnableAuthorizable, models.Model):
     university = models.ForeignKey(University)
     number = models.IntegerField(null=True, blank=True)
     label = models.CharField(max_length=255, null=True, blank=True)
@@ -122,7 +122,7 @@ class Building(Auditable, models.Model):
                 ])
 
 
-class Room(models.Model):
+class Room(Auditable, StandaloneOwnableAuthorizable, models.Model):
     building = models.ForeignKey(Building)
     number = models.IntegerField(null=True, blank=True)
     label = models.CharField(max_length=255, null=True, blank=True)
@@ -157,7 +157,7 @@ class Room(models.Model):
                 ])
 
 
-class Faculty(models.Model):
+class Faculty(Auditable, StandaloneOwnableAuthorizable, models.Model):
     university = models.ForeignKey(University)
     name = models.CharField(max_length=255)
     abbr = models.CharField(max_length=16)
@@ -175,7 +175,7 @@ class Faculty(models.Model):
                 )
 
 
-class Department(models.Model):
+class Department(Auditable, StandaloneOwnableAuthorizable, models.Model):
     faculty = models.ForeignKey(Faculty)
     name = models.CharField(max_length=255)
 
@@ -186,7 +186,7 @@ class Department(models.Model):
         return self.name
 
 
-class Major(models.Model):
+class Major(Auditable, StandaloneOwnableAuthorizable, models.Model):
     faculty = models.ForeignKey(Faculty)
     code = models.CharField(max_length=64)
     name = models.CharField(max_length=255)
@@ -203,7 +203,7 @@ class Major(models.Model):
 
 
 #TODO finish this class
-class Person(models.Model):
+class Person(Auditable, StandaloneOwnableAuthorizable, models.Model):
     """Represents generic person"""
     user = models.OneToOneField(User, null=True, blank=True)
     full_name = models.CharField(max_length=255)
@@ -333,7 +333,7 @@ class Lecturer(Person):
         return self.full_name
 
 
-class Discipline(models.Model):
+class Discipline(Auditable, StandaloneOwnableAuthorizable, models.Model):
     department = models.ForeignKey(Department, null=True, blank=True)
     code = models.IntegerField()
     name = models.CharField(max_length=255)
@@ -356,7 +356,7 @@ class Discipline(models.Model):
                 )
 
 
-class Course(models.Model):
+class Course(Auditable, StandaloneOwnableAuthorizable, models.Model):
     discipline = models.ForeignKey(Discipline)
     academic_term = models.ForeignKey(AcademicTerm)
 
@@ -369,7 +369,7 @@ class Course(models.Model):
                 )
 
 
-class Timetable(models.Model):
+class Timetable(Auditable, StandaloneOwnableAuthorizable, models.Model):
     major = models.ForeignKey(Major)
     year = models.IntegerField()
     courses = models.ManyToManyField(Course)
@@ -381,7 +381,7 @@ class Timetable(models.Model):
                 )
 
 
-class Group(models.Model):
+class Group(Auditable, StandaloneOwnableAuthorizable, models.Model):
     course = models.ForeignKey(Course)
     number = models.IntegerField() # group #0 for lectures
     lecturer = models.ForeignKey(Lecturer)
@@ -393,7 +393,8 @@ class Group(models.Model):
                 )
 
 
-class StudentGroupMembership(models.Model):
+class StudentGroupMembership(Auditable, AuthorizableBase, models.Model):
+    # TODO implement custom can_add, can_edit, can_delete logic here
     student = models.ForeignKey(Student)
     group = models.ForeignKey(Group)
 
@@ -413,7 +414,8 @@ def student_group_membership_post_save(sender, instance, created, raw, using, **
 # delete is handled with cascade DB deletion of related objects
 
 
-class Lesson(models.Model):
+class Lesson(Auditable, RelatedOwnableAuthorizable, models.Model):
+    authorization_related = ['group']
     group = models.ForeignKey(Group)
     room = models.ForeignKey(Room, verbose_name=u'аудиторія')
     date = models.DateField(verbose_name=u'дата')
@@ -503,7 +505,8 @@ def lesson_post_save(sender, instance, created, raw, using, **kwargs):
                     via_group_membership=sgm)
 
 
-class StudentLessonSubscription(models.Model):
+class StudentLessonSubscription(Auditable, AuthorizableBase, models.Model):
+    # TODO implement custom can_add, can_edit, can_delete logic here
     student = models.ForeignKey(Student)
     lesson = models.ForeignKey(Lesson)
     # remember the group membership that caused this object to be created

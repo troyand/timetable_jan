@@ -15,23 +15,56 @@ class Migration(SchemaMigration):
             ('object_id', self.gf('django.db.models.fields.PositiveIntegerField')()),
             ('changer', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['auth.User'], null=True, blank=True)),
             ('date', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
-            ('diff', self.gf('django.db.models.fields.TextField')()),
+            ('before', self.gf('django.db.models.fields.TextField')()),
+            ('after', self.gf('django.db.models.fields.TextField')()),
         ))
         db.send_create_signal('audit', ['Change'])
 
+        # Adding model 'Ownership'
+        db.create_table('audit_ownership', (
+            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('content_type', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['contenttypes.ContentType'])),
+            ('object_id', self.gf('django.db.models.fields.PositiveIntegerField')()),
+            ('owner', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['auth.User'])),
+            ('delegator', self.gf('django.db.models.fields.related.ForeignKey')(blank=True, related_name='delegated', null=True, to=orm['auth.User'])),
+            ('can_delegate', self.gf('django.db.models.fields.BooleanField')(default=False)),
+            ('date', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
+        ))
+        db.send_create_signal('audit', ['Ownership'])
+
+        # Adding unique constraint on 'Ownership', fields ['content_type', 'object_id', 'owner']
+        db.create_unique('audit_ownership', ['content_type_id', 'object_id', 'owner_id'])
+
     def backwards(self, orm):
+        # Removing unique constraint on 'Ownership', fields ['content_type', 'object_id', 'owner']
+        db.delete_unique('audit_ownership', ['content_type_id', 'object_id', 'owner_id'])
+
         # Deleting model 'Change'
         db.delete_table('audit_change')
+
+        # Deleting model 'Ownership'
+        db.delete_table('audit_ownership')
 
     models = {
         'audit.change': {
             'Meta': {'object_name': 'Change'},
+            'after': ('django.db.models.fields.TextField', [], {}),
+            'before': ('django.db.models.fields.TextField', [], {}),
             'changer': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['auth.User']", 'null': 'True', 'blank': 'True'}),
             'content_type': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['contenttypes.ContentType']"}),
             'date': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
-            'diff': ('django.db.models.fields.TextField', [], {}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'object_id': ('django.db.models.fields.PositiveIntegerField', [], {})
+        },
+        'audit.ownership': {
+            'Meta': {'unique_together': "(['content_type', 'object_id', 'owner'],)", 'object_name': 'Ownership'},
+            'can_delegate': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
+            'content_type': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['contenttypes.ContentType']"}),
+            'date': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
+            'delegator': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'delegated'", 'null': 'True', 'to': "orm['auth.User']"}),
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'object_id': ('django.db.models.fields.PositiveIntegerField', [], {}),
+            'owner': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['auth.User']"})
         },
         'auth.group': {
             'Meta': {'object_name': 'Group'},
