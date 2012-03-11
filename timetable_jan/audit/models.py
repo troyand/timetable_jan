@@ -3,7 +3,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import generic
 from django.contrib.auth.models import User
 from django.core import serializers
-from django.core.exceptions import ImproperlyConfigured
+from django.core.exceptions import ImproperlyConfigured, ObjectDoesNotExist
 from difflib import unified_diff
 
 
@@ -40,10 +40,10 @@ class Auditable(object):
             change.changer = kwargs.pop('changer')
         except KeyError:
             change.changer = None
-        if self.pk:
+        try:
             old_self = self._base_manager.get(pk=self.pk)
             old_serialized = serializers.serialize('json', [old_self], indent=2)
-        else:
+        except ObjectDoesNotExist:
             # if the object is new, then the previous state is treated as empty
             old_serialized = ''
         super(Auditable, self).save(*args, **kwargs)
