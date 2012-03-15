@@ -43,6 +43,12 @@
             <strong>Відображено лише першу пару з конфліктних</strong>
         </div>
     {% endif %}
+    {% if week_links %}
+        {% for week_number, week_link in week_links %}
+            <a href={{ week_link }}>{{ week_number }}</a>
+        {% endfor %}
+        <hr>
+    {% endif %}
     <table class="bordered-table zebra-striped">
         <tbody>
             {% for week_number, rows in week_mapping.items %}

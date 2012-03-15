@@ -8,6 +8,7 @@ from timetable_jan.university.forms import *
 from django.contrib.auth.decorators import login_required
 import math
 import datetime
+import re
 
 
 from django.template.defaultfilters import register as rf
@@ -154,6 +155,16 @@ def return_timetable(request, mapping, clashing_lessons=[], week=None):
                         week_mapping[week_number][row][weekday][lesson_number] = mapping[date][lesson_number]
                     else:
                         week_mapping[week_number][row][weekday][lesson_number] = None
+                        
+    week_links = None
+    if week:
+        week_links = []
+        link_prefix = request.path
+        for week_number in range(1, number_of_weeks + 1):
+            week_links.append(
+                (week_number,
+                 re.sub(r'week/\d+', 'week/%i' % week_number, link_prefix))
+            )
 
     #pprint.pprint(mapping)
     return render_to_response(
@@ -164,6 +175,7 @@ def return_timetable(request, mapping, clashing_lessons=[], week=None):
                 'lesson_times': lesson_times,
                 'lesson_numbers': range(1,8),
                 'clashing_lessons': clashing_lessons,
+                'week_links': week_links,
                 },
             context_instance=RequestContext(request)
             )
