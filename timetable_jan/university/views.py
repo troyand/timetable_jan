@@ -114,7 +114,16 @@ def choose_subjects(request, timetable_id):
             context_instance=RequestContext(request)
             )
 
-def return_timetable(request, mapping, clashing_lessons=[]):
+def return_timetable(request, mapping, clashing_lessons=[], week=None):
+    def sanitize_week(week, max_week):
+        # REVIEW Maybe must fire some exception and write error to user
+        result = week
+        if result > max_week:
+            result = max_week
+        if result < 1:
+            result = 1
+        return result
+        
     if min(mapping.keys()).weekday() != 0:
         from datetime import timedelta
         mapping[min(mapping.keys())-timedelta(days=min(mapping.keys()).weekday())]={}
@@ -125,7 +134,9 @@ def return_timetable(request, mapping, clashing_lessons=[]):
     number_of_weeks = int(math.ceil(
             float((max(mapping.keys()) - min(mapping.keys())).days) / 7))
     number_of_rows = 2
-    for week_number in range(1, number_of_weeks + 1):
+    starting_week = sanitize_week(int(week or 1), number_of_weeks) 
+    finishing_week = sanitize_week(int(week or number_of_weeks), number_of_weeks)
+    for week_number in range(starting_week, finishing_week + 1):
         week_mapping[week_number] = {}
         week_date_mapping[week_number] = {}
         for row in range(0, number_of_rows):
@@ -157,7 +168,7 @@ def return_timetable(request, mapping, clashing_lessons=[]):
             context_instance=RequestContext(request)
             )
 
-def timetable(request, encoded_groups, **kwargs):
+def timetable(request, encoded_groups, week=None, **kwargs):
     groups = []
     group_ids = [int(g) for g in encoded_groups.split('/')]
     for group_id in group_ids:
@@ -187,7 +198,7 @@ def timetable(request, encoded_groups, **kwargs):
     if kwargs['action'] == 'ical':
         return ical(request, lessons)
     elif kwargs['action'] == 'render':
-        return return_timetable(request, mapping, clashing_lessons)
+        return return_timetable(request, mapping, clashing_lessons, week) 
 
 
 def rooms_status(request, year, month, day):
