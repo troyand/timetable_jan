@@ -43,7 +43,8 @@ class FeedbackView(FormView):
     def form_valid(self, form):
         send_mail(
                 'Feedback',
-                'Liked:\n%s\n\nDisliked:\n%s\n\nWouldliked:\n%s' % (
+                'Sent from %s\n\nLiked:\n%s\n\nDisliked:\n%s\n\nWouldliked:\n%s' % (
+                    'https://beta.universitytimetable.org.ua/feedback/\n' + '='*40,
                     form.cleaned_data['liked'],
                     form.cleaned_data['disliked'],
                     form.cleaned_data['wouldliked'],
