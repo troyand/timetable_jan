@@ -29,6 +29,8 @@ class LessonDetailView(LoginRequiredMixin, UpdateView):
         # check if user has permission to edit lesson
         #if self.object not in self.user.get_profile().student.lessons():
         #    return HttpResponseForbidden('Forbidden')
+        if not self.object.can_edit(self.user):
+            return HttpResponseForbidden('Forbidden')
         print self.object # unsaved/uncommitted object
         self.object.notify_subscribers(self.user)
         return super(LessonDetailView, self).form_valid(form)
