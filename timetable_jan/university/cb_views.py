@@ -50,7 +50,7 @@ class FeedbackView(FormView):
                     form.cleaned_data['wouldliked'],
                     ),
                 'Timetable <noreply@universitytimetable.org.ua>',
-                ['web-dev@usic.ukma.kiev.ua', 'troyanovsky@gmail.com'],
+                ['web-dev@mail.usic.ukma.kiev.ua', 'troyanovsky@gmail.com'],
                 fail_silently=True
                 )
         return super(FeedbackView, self).form_valid(form)
