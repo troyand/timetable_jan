@@ -41,7 +41,6 @@ class LessonDetailView(LoginRequiredMixin, UpdateView):
 class FeedbackView(FormView):
     form_class = FeedbackForm
     def form_valid(self, form):
-        print form.cleaned_data
         send_mail(
                 'Feedback',
                 'Liked:\n%s\n\nDisliked:\n%s\n\nWouldliked:\n%s' % (
@@ -49,7 +48,7 @@ class FeedbackView(FormView):
                     form.cleaned_data['disliked'],
                     form.cleaned_data['wouldliked'],
                     ),
-                '<Timetable> noreply@universitytimetable.org.ua',
+                'Timetable <noreply@universitytimetable.org.ua>',
                 ['web-dev@usic.ukma.kiev.ua', 'troyanovsky@gmail.com'],
                 fail_silently=True
                 )
