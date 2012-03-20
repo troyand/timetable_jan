@@ -30,6 +30,7 @@ urlpatterns = patterns('',
     (r'^accounts/logout/$', 'django.contrib.auth.views.logout'),
     (r'^accounts/profile/$', 'timetable_jan.university.views.profile'),
     url(r'^lesson/(?P<pk>\d+)/$', LessonDetailView.as_view(template_name="lesson.html"), name='lesson'),
+    url(r'^feedback/$', FeedbackView.as_view(template_name='feedback.html')),
     # Examples:
     # url(r'^$', 'dj_timetable.views.home', name='home'),
 
