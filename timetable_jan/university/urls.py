@@ -25,6 +25,6 @@ urlpatterns = patterns('',
     url(r'^lesson/(?P<pk>\d+)/$', LessonDetailView.as_view(template_name="lesson.html"), name='lesson'),
     (r'^autocomplete/', include(ajax_urls)),
     (r'create-timetable/$', UnifiedTimetableProcessView.as_view(template_name='create_timetable.html')),
-
+    url(r'^feedback/$', FeedbackView.as_view(template_name='feedback.html')),
 )
 

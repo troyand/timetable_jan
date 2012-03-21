@@ -4,6 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from timetable_jan.university.models import *
 from timetable_jan.university.forms import *
+from django.core.mail import send_mail
 
 
 class LoginRequiredMixin(object):
@@ -35,3 +36,24 @@ class LessonDetailView(LoginRequiredMixin, UpdateView):
 
     def get_success_url(self):
         return self.request.path
+
+
+class FeedbackView(FormView):
+    form_class = FeedbackForm
+    def form_valid(self, form):
+        send_mail(
+                'Feedback',
+                'Sent from %s\n\nLiked:\n%s\n\nDisliked:\n%s\n\nWouldliked:\n%s' % (
+                    'https://beta.universitytimetable.org.ua/feedback/\n' + '='*40,
+                    form.cleaned_data['liked'],
+                    form.cleaned_data['disliked'],
+                    form.cleaned_data['wouldliked'],
+                    ),
+                'Timetable <noreply@universitytimetable.org.ua>',
+                ['web-dev@mail.usic.ukma.kiev.ua', 'troyanovsky@gmail.com'],
+                fail_silently=True
+                )
+        return super(FeedbackView, self).form_valid(form)
+
+    def get_success_url(self):
+        return '/'

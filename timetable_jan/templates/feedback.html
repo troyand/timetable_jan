@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Відгук{% endblock %}
+{% block headadd %}
+    <style type="text/css">
+        label {
+            padding-right: 10px;
+            width: 200px;
+        }
+        textarea {
+            width: 600px;
+        }
+    </style>
+{% endblock %}
+{% block header %}Відгук{% endblock %}
+{% block content %}
+    <form method="post" action="">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <input type="submit" value="Надіслати" />
+    </form>
+{% endblock %}

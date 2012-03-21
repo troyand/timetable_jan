@@ -1,6 +1,5 @@
 from django.conf.urls.defaults import patterns, include
 from django.conf import settings
-from timetable_jan.university.ajax_views import ajax_urls, UnifiedTimetableProcessView
 
 
 # Uncomment the next two lines to enable the admin:
