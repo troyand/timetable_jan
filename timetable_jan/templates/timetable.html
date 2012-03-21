@@ -43,6 +43,26 @@
             <strong>Відображено лише першу пару з конфліктних</strong>
         </div>
     {% endif %}
+    {% if week_links %}
+        {% for week_number, week_link in week_links %}
+            {% if week_number == current_week %}
+                {{ week_number }}
+            {% else %}
+                <a href={{ week_link }}>{{ week_number }}</a>
+            {% endif %}
+        {% endfor %}
+        <hr>
+    {% endif %}
+    {% if group_links %}
+        {% for group_name, group_link in group_links %}
+            {% if group_name == current_group %}
+                {{ group_name }}<br />
+            {% else %}
+                <a href={{ group_link }}>{{ group_name }}</a><br />
+            {% endif %}
+        {% endfor %}
+        <hr>
+    {% endif %}
     <table class="bordered-table zebra-striped">
         <tbody>
             {% for week_number, rows in week_mapping.items %}
