@@ -113,6 +113,11 @@
                     <a href="{{ target_url }}">Контакти</a>
                     </li>
                 {% endwith %}
+                {% with '/feedback/' as target_url %}
+                    <li{% if request.path == target_url %} class="active"{% endif %}>
+                    <a href="{{ target_url }}" style="color:#fff">Відгук</a>
+                    </li>
+                {% endwith %}
             </ul>
             <ul class="nav" id="login">
                 {% if user.is_authenticated %}
