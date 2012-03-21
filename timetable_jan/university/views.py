@@ -124,7 +124,10 @@ def return_timetable(request, mapping, groups, clashing_lessons=[], week=None):
         if result < 1:
             result = 1
         return result
-        
+
+    if week:
+        week = int(week)
+    
     if min(mapping.keys()).weekday() != 0:
         from datetime import timedelta
         mapping[min(mapping.keys())-timedelta(days=min(mapping.keys()).weekday())]={}
@@ -135,8 +138,8 @@ def return_timetable(request, mapping, groups, clashing_lessons=[], week=None):
     number_of_weeks = int(math.ceil(
             float((max(mapping.keys()) - min(mapping.keys())).days) / 7))
     number_of_rows = 2
-    starting_week = sanitize_week(int(week or 1), number_of_weeks) 
-    finishing_week = sanitize_week(int(week or number_of_weeks), number_of_weeks)
+    starting_week = sanitize_week(week or 1, number_of_weeks) 
+    finishing_week = sanitize_week(week or number_of_weeks, number_of_weeks)
     for week_number in range(starting_week, finishing_week + 1):
         week_mapping[week_number] = {}
         week_date_mapping[week_number] = {}
@@ -157,15 +160,19 @@ def return_timetable(request, mapping, groups, clashing_lessons=[], week=None):
                         week_mapping[week_number][row][weekday][lesson_number] = None
                         
         
-    week_links = []
     link_prefix = request.path
+    week_links = []
+    if week:
+        week_links.append((u'Всі тижні', re.sub(r'week/.+', u'', link_prefix)))
     for week_number in range(1, number_of_weeks + 1):
-        week_link = None
-        if link_prefix.find(u'week') != -1:
-            week_link = re.sub(r'week/\d+', u'week/%i' % week_number, link_prefix)
-        else:
-            week_link = link_prefix + u'week/%i/' % week_number
-        week_links.append((week_number, week_link))
+        if week_number != week:
+            week_link = None
+            if link_prefix.find(u'week') != -1:
+                week_link = re.sub(r'week/\d+', u'week/%i' % week_number,
+                                   link_prefix)
+            else:
+                week_link = link_prefix + u'week/%i/' % week_number
+            week_links.append((week_number, week_link))
 
     group_links = None
     show_group_links = False
