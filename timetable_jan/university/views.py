@@ -161,31 +161,35 @@ def return_timetable(request, mapping, groups, clashing_lessons=[], week=None):
                         
         
     link_prefix = request.path
-    week_links = []
-    if week:
-        week_links.append((u'Всі тижні', re.sub(r'week/.+?/', u'', link_prefix)))
+    week_links = [(u'Всі тижні', re.sub(r'week/.+?/', u'', link_prefix))]
     for week_number in range(1, number_of_weeks + 1):
-        if week_number != week:
-            week_link = None
-            if link_prefix.find(u'week') != -1:
-                week_link = re.sub(r'week/\d+', u'week/%i' % week_number,
-                                   link_prefix)
-            else:
-                link_parts = re.split('(group/\d+/)', link_prefix)
-                tt_link = link_parts[0]
-                group_link = link_parts[1] if len(link_parts) > 1 else u''
-                week_link = tt_link + u'week/%i/' % week_number + group_link
-            week_links.append((week_number, week_link))
+        #if week_number != week:
+        week_link = None
+        if link_prefix.find(u'week') != -1:
+            week_link = re.sub(r'week/\d+', u'week/%i' % week_number,
+                               link_prefix)
+        else:
+            link_parts = re.split('(group/\d+/)', link_prefix)
+            tt_link = link_parts[0]
+            group_link = link_parts[1] if len(link_parts) > 1 else u''
+            week_link = tt_link + u'week/%i/' % week_number + group_link
+        week_links.append((week_number, week_link))
 
     #group_links = None
     #if week:
-    group_links = []
-    group_links.append((u'Всі пари',
-                        re.sub(r'/group/.*', '/', request.path)))
+    current_group_number = re.search("group/(\d*)", request.path)
+    current_group_number = current_group_number and current_group_number.group(1)
+    current_group_name = u'Всі пари'
+    group_links = [(u'Всі пари', re.sub(r'/group/.*', '/', request.path))]
     for group in groups:
+        group_full_name = group.course.discipline.name + u' - ' + \
+                          unicode(group.number) 
         group_links.append(
-            (group.course.discipline.name + u' - ' + unicode(group.number),
-             re.sub(r'group/.*', '', request.path) + u'group/' + str(group.pk) + u'/'))
+            (group_full_name,
+             re.sub(r'group/.*', '', request.path) + u'group/' + \
+             str(group.pk) + u'/'))
+        if current_group_number and unicode(group.pk) == current_group_number:
+            current_group_name = group_full_name
 
     #pprint.pprint(mapping)
     return render_to_response(
@@ -197,16 +201,23 @@ def return_timetable(request, mapping, groups, clashing_lessons=[], week=None):
                 'lesson_numbers': range(1,8),
                 'clashing_lessons': clashing_lessons,
                 'week_links': week_links,
+                'current_week': week or u'Всі тижні',
                 'group_links': group_links,
+                'current_group': current_group_name, 
             },
             context_instance=RequestContext(request)
             )
 
 def timetable(request, encoded_groups, week_to_show=None, group_to_show=None, **kwargs):
+    # All user's groups (both lecture and practise).
     groups = []
+    # Which groups (lecture + practise) must be shown to a user in a timetable.
     groups_to_show = []
-    user_group_list = []
+    # Which group the user has selected to show. 
     group_to_show = group_to_show and int(group_to_show)
+    # Which groups must be shown to user in a filtering list (lecture groups
+    # aren't include here becaue they're paired with a practise ones)
+    user_group_list = []
     group_ids = [int(g) for g in encoded_groups.split('/')]
     for group_id in group_ids:
         # add practice group
@@ -219,6 +230,8 @@ def timetable(request, encoded_groups, week_to_show=None, group_to_show=None, **
         try:
             lecture_group = group.course.group_set.get(number=0)
             groups.append(lecture_group)
+            # Add lecture group if user has choosen related practise one
+            # as a filtering option.
             if group_to_show and group_id == group_to_show:
                 groups_to_show.append(lecture_group)
         except Group.DoesNotExist:

@@ -45,13 +45,21 @@
     {% endif %}
     {% if week_links %}
         {% for week_number, week_link in week_links %}
-            <a href={{ week_link }}>{{ week_number }}</a>
+            {% if week_number == current_week %}
+                {{ week_number }}
+            {% else %}
+                <a href={{ week_link }}>{{ week_number }}</a>
+            {% endif %}
         {% endfor %}
         <hr>
     {% endif %}
     {% if group_links %}
         {% for group_name, group_link in group_links %}
-            <a href={{ group_link }}>{{ group_name }}</a><br />
+            {% if group_name == current_group %}
+                {{ group_name }}<br />
+            {% else %}
+                <a href={{ group_link }}>{{ group_name }}</a><br />
+            {% endif %}
         {% endfor %}
         <hr>
     {% endif %}
