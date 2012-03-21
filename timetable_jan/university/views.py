@@ -8,6 +8,7 @@ from timetable_jan.university.forms import *
 from django.contrib.auth.decorators import login_required
 import math
 import datetime
+import re
 
 
 from django.template.defaultfilters import register as rf
@@ -114,7 +115,18 @@ def choose_subjects(request, timetable_id):
             context_instance=RequestContext(request)
             )
 
-def return_timetable(request, mapping, clashing_lessons=[]):
+def return_timetable(request, mapping, groups, clashing_lessons=[], week=None):
+    def sanitize_week(week, max_week):
+        # REVIEW Maybe must fire some exception and write error to user
+        result = week
+        if result > max_week:
+            result = max_week
+        if result < 1:
+            result = 1
+        return result
+
+    week = week and int(week)
+    
     if min(mapping.keys()).weekday() != 0:
         from datetime import timedelta
         mapping[min(mapping.keys())-timedelta(days=min(mapping.keys()).weekday())]={}
@@ -125,7 +137,9 @@ def return_timetable(request, mapping, clashing_lessons=[]):
     number_of_weeks = int(math.ceil(
             float((max(mapping.keys()) - min(mapping.keys())).days) / 7))
     number_of_rows = 2
-    for week_number in range(1, number_of_weeks + 1):
+    starting_week = sanitize_week(week or 1, number_of_weeks) 
+    finishing_week = sanitize_week(week or number_of_weeks, number_of_weeks)
+    for week_number in range(starting_week, finishing_week + 1):
         week_mapping[week_number] = {}
         week_date_mapping[week_number] = {}
         for row in range(0, number_of_rows):
@@ -143,6 +157,37 @@ def return_timetable(request, mapping, clashing_lessons=[]):
                         week_mapping[week_number][row][weekday][lesson_number] = mapping[date][lesson_number]
                     else:
                         week_mapping[week_number][row][weekday][lesson_number] = None
+                        
+    link_prefix = request.path
+    week_links = [(u'Всі тижні', re.sub(r'week/.+?/', u'', link_prefix))]
+    for week_number in range(1, number_of_weeks + 1):
+        #if week_number != week:
+        week_link = None
+        if link_prefix.find(u'week') != -1:
+            week_link = re.sub(r'week/\d+', u'week/%i' % week_number,
+                               link_prefix)
+        else:
+            link_parts = re.split('(group/\d+/)', link_prefix)
+            tt_link = link_parts[0]
+            group_link = link_parts[1] if len(link_parts) > 1 else u''
+            week_link = tt_link + u'week/%i/' % week_number + group_link
+        week_links.append((week_number, week_link))
+
+    #group_links = None
+    #if week:
+    current_group_number = re.search("group/(\d*)", request.path)
+    current_group_number = current_group_number and current_group_number.group(1)
+    current_group_name = u'Всі пари'
+    group_links = [(u'Всі пари', re.sub(r'/group/.*', '/', request.path))]
+    for group in groups:
+        group_full_name = group.course.discipline.name + u' - ' + \
+                          unicode(group.number) 
+        group_links.append(
+            (group_full_name,
+             re.sub(r'group/.*', '', request.path) + u'group/' + \
+             str(group.pk) + u'/'))
+        if current_group_number and unicode(group.pk) == current_group_number:
+            current_group_name = group_full_name
 
     #pprint.pprint(mapping)
     return render_to_response(
@@ -153,28 +198,49 @@ def return_timetable(request, mapping, clashing_lessons=[]):
                 'lesson_times': lesson_times,
                 'lesson_numbers': range(1,8),
                 'clashing_lessons': clashing_lessons,
-                },
+                'week_links': week_links,
+                'current_week': week or u'Всі тижні',
+                'group_links': group_links,
+                'current_group': current_group_name, 
+            },
             context_instance=RequestContext(request)
             )
 
-def timetable(request, encoded_groups, **kwargs):
+def timetable(request, encoded_groups, week_to_show=None, group_to_show=None, **kwargs):
+    # All user's groups (both lecture and practise).
     groups = []
+    # Which groups (lecture + practise) must be shown to a user in a timetable.
+    groups_to_show = []
+    # Which group the user has selected to show. 
+    group_to_show = group_to_show and int(group_to_show)
+    # Which groups must be shown to user in a filtering list (lecture groups
+    # aren't include here becaue they're paired with a practise ones)
+    user_group_list = []
     group_ids = [int(g) for g in encoded_groups.split('/')]
     for group_id in group_ids:
         # add practice group
         group = get_object_or_404(Group, pk=group_id)
         groups.append(group)
+        user_group_list.append(group)
+        if group_to_show and group_id == group_to_show:
+            groups_to_show.append(group)
         # add lecture group if it is present
         try:
             lecture_group = group.course.group_set.get(number=0)
             groups.append(lecture_group)
+            # Add lecture group if user has choosen related practise one
+            # as a filtering option.
+            if group_to_show and group_id == group_to_show:
+                groups_to_show.append(lecture_group)
         except Group.DoesNotExist:
             pass
+    if not group_to_show:
+        groups_to_show = groups
     mapping = {} # mapping[date][lesson_number]=Lesson()
     lessons = []
     clashing_lessons = []
     for lesson in Lesson.objects.select_related().filter(
-            group__in=groups):
+            group__in=groups_to_show):
         mapping.setdefault(lesson.date, {})
         if mapping[lesson.date].has_key(lesson.lesson_number):
             clashing_lessons.append((
@@ -187,7 +253,8 @@ def timetable(request, encoded_groups, **kwargs):
     if kwargs['action'] == 'ical':
         return ical(request, lessons)
     elif kwargs['action'] == 'render':
-        return return_timetable(request, mapping, clashing_lessons)
+        return return_timetable(request, mapping, user_group_list,
+                                clashing_lessons, week_to_show) 
 
 
 def rooms_status(request, year, month, day):

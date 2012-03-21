@@ -1,5 +1,6 @@
 #-*- coding: utf-8 -*-
 
+from django.conf.urls.defaults import patterns
 from django.views.generic.list import BaseListView
 from django.views.generic import TemplateView, FormView
 from django.http import HttpResponse, HttpResponseForbidden
@@ -136,3 +137,13 @@ class DisciplineAutocompleteView(AjaxAutocompleteMixin, BaseListView):
     model = Discipline
     def unicode_format_object(self, o):
         return o.name
+
+
+ajax_urls = patterns('',
+    (r'^room/$', RoomAutocompleteView.as_view()),
+    (r'^lecturer/$', LecturerAutocompleteView.as_view()),
+    (r'^discipline/$', DisciplineAutocompleteView.as_view()),
+    (r'^extra-courses/$', ExtraCoursesAutocompleteView.as_view()),
+    (r'^test/$', TemplateView.as_view(template_name='autocomplete_test.html')),
+)
+
