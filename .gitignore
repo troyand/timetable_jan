@@ -3,3 +3,4 @@
 *.swp
 settings_local.py
 venv_dir
+\#*\#
