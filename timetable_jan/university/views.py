@@ -125,8 +125,7 @@ def return_timetable(request, mapping, groups, clashing_lessons=[], week=None):
             result = 1
         return result
 
-    if week:
-        week = int(week)
+    week = week and int(week)
     
     if min(mapping.keys()).weekday() != 0:
         from datetime import timedelta
@@ -159,7 +158,6 @@ def return_timetable(request, mapping, groups, clashing_lessons=[], week=None):
                     else:
                         week_mapping[week_number][row][weekday][lesson_number] = None
                         
-        
     link_prefix = request.path
     week_links = [(u'Всі тижні', re.sub(r'week/.+?/', u'', link_prefix))]
     for week_number in range(1, number_of_weeks + 1):
