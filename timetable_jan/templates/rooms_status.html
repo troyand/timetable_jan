@@ -46,5 +46,7 @@
                 {% endfor %}
             </tbody>
         </table>
+    {% empty %}
+        <h3>{{ status_date|date:"j E" }} пар немає</h3>
     {% endfor %}
 {% endblock %}
