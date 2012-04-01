@@ -14,8 +14,8 @@ academic_term, created = AcademicTerm.objects.get_or_create(
         season=u'літній',
         number_of_weeks=6,
         tcp_week=None,
-        start_date='2012-04-15',
-        exams_start_date='2012-05-27',
-        exams_end_date='2012-06-07',
+        start_date='2012-04-16',
+        exams_start_date='2012-05-26',
+        exams_end_date='2012-06-08',
         )
 print academic_term.pk
