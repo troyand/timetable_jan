@@ -185,7 +185,7 @@ def main():
     table = load_table(options.filename)
     university = University.objects.get()
     if options.academic_term_id:
-        academic_term = AcademicTerm.objects.get(int(options.academic_term_id))
+        academic_term = AcademicTerm.objects.get(pk=int(options.academic_term_id))
     else:
         # fallback to legacy timetable_jan behaviour to keep compatibility with old bootstrap.sh
         academic_term = AcademicTerm.objects.get(number_of_weeks=12)
