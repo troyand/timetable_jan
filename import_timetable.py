@@ -195,10 +195,7 @@ def main():
             room_mapping = create_room_mapping(rooms, university)
             course_mapping = create_course_mapping(disciplines, academic_term)
             lecturer_mapping = create_lecturer_mapping(lecturers)
-            timetable, created = Timetable.objects.get_or_create(
-                    year=int(options.year),
-                    major=Major.objects.get(code=options.major_code),
-                    academic_term=academic_term)
+            timetable, created = Timetable.objects.get_or_create(year=int(options.year), major=Major.objects.get(code=options.major_code))
             populate_timetable(timetable, academic_term, table, room_mapping, course_mapping, lecturer_mapping)
 
 if __name__ == '__main__':
