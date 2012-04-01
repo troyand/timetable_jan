@@ -170,6 +170,8 @@ def main():
             help='read timetable from FILE', metavar='FILE')
     parser.add_option('-c', '--code', dest='major_code',
             help='major code')
+    parser.add_option('-t', '--academictermid', dest='academic_term_id',
+            help='academic term id')
     parser.add_option('-y', '--year', dest='year',
             help='year of study')
     parser.add_option('-a', '--analyze', dest='analyze',
@@ -181,9 +183,12 @@ def main():
         parser.print_help()
         return
     table = load_table(options.filename)
-    #TODO make more generic
     university = University.objects.get()
-    academic_term = AcademicTerm.objects.get(number_of_weeks=12)
+    if options.academic_term_id:
+        academic_term = AcademicTerm.objects.get(int(options.academic_term_id))
+    else:
+        # fallback to legacy timetable_jan behaviour to keep compatibility with old bootstrap.sh
+        academic_term = AcademicTerm.objects.get(number_of_weeks=12)
     if options.analyze or options.import_:
         rooms, disciplines, lecturers = analyze_table(table)
         if options.import_:
