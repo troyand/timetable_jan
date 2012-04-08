@@ -372,6 +372,7 @@ class Timetable(models.Model):
     major = models.ForeignKey(Major)
     year = models.IntegerField()
     courses = models.ManyToManyField(Course)
+    academic_term = models.ForeignKey(AcademicTerm)
 
     def __unicode__(self):
         return u'%s %d р.н.' % (

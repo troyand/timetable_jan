@@ -159,3 +159,7 @@ python import_timetable.py -f timetable_jan/unified_docs/2011_2012_vesna_biology
 python import_timetable.py -f timetable_jan/unified_docs/2011_2012_vesna_ecology_4.csv -y 4 -c 6.040106 -i
 python import_timetable.py -f timetable_jan/unified_docs/2011_2012_vesna_physics_4.csv -y 4 -c 6.040203 -i
 python import_timetable.py -f timetable_jan/unified_docs/2011_2012_vesna_chemistry_4.csv -y 4 -c 6.040101 -i
+
+###  summer continuation
+echo "Running summer_continuation.sh"
+./summer_continuation.sh
