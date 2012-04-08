@@ -26,10 +26,20 @@ def vertical(string):
 
 def index(request):
     timetables = Timetable.objects.select_related().all()
+    academic_term_timetable_mapping = {}
+    for timetable in timetables:
+        academic_term_timetable_mapping.setdefault(
+                timetable.academic_term,
+                []).append(timetable)
+    academic_term_timetable_list = sorted(
+            academic_term_timetable_mapping.items(),
+            key=lambda x: x[0].start_date,
+            reverse=True
+            )
     return render_to_response(
             'index.html',
             {
-                'timetables': timetables,
+                'academic_term_timetable_list': academic_term_timetable_list,
                 },
             context_instance=RequestContext(request)
             )
