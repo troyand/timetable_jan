@@ -357,3 +357,5 @@ def lecturer_timetable(request):
 def robots_txt(request):
     return HttpResponse("User-agent: *\nDisallow: /\n", mimetype="text/plain")
 
+def http_gone(request):
+    return HttpResponse(status=410)
