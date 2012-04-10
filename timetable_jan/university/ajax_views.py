@@ -82,10 +82,22 @@ class UnifiedTimetableProcessView(FormView):
 class ExtraCoursesAutocompleteView(AjaxAutocompleteMixin, BaseListView):
     model = Course
     def autocomplete_response(self, query):
+        def suggestion_format(course):
+            acad_t = course.academic_term
+            timetables = course.timetable_set.select_related().all()
+            together_with = u','.join([u'%s-%d' % (t.major.faculty.abbr, t.year) for t in timetables])
+            return u'%s (%s %s %d-%d, разом із %s)' % (
+                    course.discipline.name,
+                    acad_t.season,
+                    acad_t.kind,
+                    acad_t.year,
+                    acad_t.year + 1,
+                    together_with
+                    )
         query_upper = query.upper()
         unicode_course_pairs = [
                 (unicode(course.discipline.name), course)
-                for course in self.model.objects.select_related().all()]
+                for course in self.model.objects.select_related().all().order_by('-academic_term__start_date')]
         objects = filter(
                 lambda course: query_upper in course[0].upper(), unicode_course_pairs)[:15]
         from django.template.loader import get_template
@@ -93,7 +105,7 @@ class ExtraCoursesAutocompleteView(AjaxAutocompleteMixin, BaseListView):
         choose_course_groups = get_template('choose_course_groups.html')
         json_response = {
                 'query': query,
-                'suggestions': [u for u, c in objects],
+                'suggestions': [suggestion_format(c) for u, c in objects],
                 'data': [choose_course_groups.render(Context({
                     'course': c,
                     'groups': sorted(c.group_set.filter(number__gt=0), key=lambda g: g.number)
