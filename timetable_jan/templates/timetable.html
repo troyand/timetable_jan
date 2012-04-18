@@ -1,9 +1,13 @@
 {% extends "base.html" %}
+{% load staticfiles %}
 {% block title %}Розклад - Online-версія{% endblock %}
 {% block headadd %}
     <style type="text/css">
         .current-week {
             background-color: #3333ff;
+        }
+        .promo {
+            float: right;
         }
     </style>
     <script type="text/javascript">
@@ -75,12 +79,19 @@
                     <tr>
                         <td class="lesson-time">&nbsp;</td>
                         {% for weekday, lessons in weekdays.items %}
-                            <td class="lesson">
-                                <h3>{{ week_date_mapping|lookup:week_number|lookup:weekday|date:"l" }}</h3>
-                                <strong class="date" id="date-{{ week_date_mapping|lookup:week_number|lookup:weekday|date:"Y-n-j" }}">
-                                    {{ week_date_mapping|lookup:week_number|lookup:weekday|date:"j E Y" }}
-                                </strong>
-                            </td>
+                            {% with lesson_date=week_date_mapping|lookup:week_number|lookup:weekday %}
+                                <td class="lesson">
+                                    {% for promo_img, promo_url in promos|lookup:lesson_date %}
+                                        <a href="{{ promo_url }}">
+                                            <img src="{% static promo_img %}" class="promo">
+                                        </a>
+                                    {% endfor %}
+                                    <h3>{{ lesson_date|date:"l" }}</h3>
+                                    <strong class="date" id="date-{{ lesson_date|date:"Y-n-j" }}">
+                                        {{ lesson_date|date:"j E Y" }}
+                                    </strong>
+                                </td>
+                            {% endwith %}
                         {% endfor %}
                     </tr>
                     {% for lesson_number in lesson_numbers %}

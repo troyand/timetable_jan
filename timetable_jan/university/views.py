@@ -23,6 +23,15 @@ def lookup(dictionary, index):
 def vertical(string):
     return ' '.join(list(string))
 
+promos = {
+        datetime.date(2012,4,19): [
+            ('img/promo/ultramarine.png', 'https://www.facebook.com/events/166568366799044/'),
+            ],
+        datetime.date(2012,4,20): [
+            ('img/promo/social_ship.png', 'http://vk.com/social_ship'),
+            ('img/promo/fsnst_day.png', 'http://vk.com/event37945333'),
+            ],
+        }
 
 def index(request):
     timetables = Timetable.objects.select_related().all()
@@ -212,6 +221,7 @@ def return_timetable(request, mapping, groups, clashing_lessons=[], week=None):
                 'current_week': week or u'Всі тижні',
                 'group_links': group_links,
                 'current_group': current_group_name, 
+                'promos': promos,
             },
             context_instance=RequestContext(request)
             )
