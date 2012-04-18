@@ -26,13 +26,28 @@ def main():
             help='to year of study')
     parser.add_option('-n', '--name', dest='name',
             help='course name')
+    parser.add_option('-a', '--academictermid', dest='academic_term_id',
+            help='academic term id')
     (options, args) = parser.parse_args()
     if not options.name or not options.from_major_code or not options.from_year \
             or not options.to_major_code or not options.to_year:
         parser.print_help()
         return
-    timetable_from = Timetable.objects.get(year=int(options.from_year), major=Major.objects.get(code=options.from_major_code))
-    timetable_to = Timetable.objects.get(year=int(options.to_year), major=Major.objects.get(code=options.to_major_code))
+    if options.academic_term_id:
+        academic_term = AcademicTerm.objects.get(pk=int(options.academic_term_id))
+    else:
+        # fallback to legacy timetable_jan behaviour to keep compatibility with old bootstrap.sh
+        academic_term = AcademicTerm.objects.get(number_of_weeks=12)
+    timetable_from = Timetable.objects.get(
+            year=int(options.from_year),
+            major=Major.objects.get(code=options.from_major_code),
+            academic_term=academic_term,
+            )
+    timetable_to = Timetable.objects.get(
+            year=int(options.to_year),
+            major=Major.objects.get(code=options.to_major_code),
+            academic_term=academic_term,
+            )
     course = timetable_from.courses.get(discipline__name=options.name)
     timetable_to.courses.add(course)
 
