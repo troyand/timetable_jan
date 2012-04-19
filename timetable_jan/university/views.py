@@ -144,13 +144,54 @@ def return_timetable(request, mapping, groups, clashing_lessons=[], week=None):
             result = 1
         return result
 
-    week = week and int(week)
+    def generate_week_links(number_of_weeks):
+        """Generates a list of links to pages of a particular weeks."""
+        link_parts = re.split('(group/\d+/)', request.path)
+        all_weeks_link = re.sub(r'week/.+?/', u'', link_parts[0]) + 'weeks/' 
+        all_weeks_link += link_parts[1] if len(link_parts) > 1 else u''
+        week_links = [(u'Всі тижні', all_weeks_link)]
+        for week_number in range(1, number_of_weeks + 1):
+            week_link = None
+            if request.path.find(u'week/') != -1:
+                week_link = re.sub(r'week/\d+', u'week/%i' % week_number,
+                                   request.path)
+            else:
+                link_parts = re.split('(group/\d+/)', request.path)
+                tt_link = re.sub(r'weeks/', u'', link_parts[0])
+                group_link = link_parts[1] if len(link_parts) > 1 else u''
+                week_link = tt_link + u'week/%i/' % week_number + group_link
+            week_links.append((week_number, week_link))
+        return week_links
+
+    def generate_group_links():
+        """Generates a list of links to pages of particular courses and finds current group's name."""
+        current_group_number = re.search("group/(\d*)", request.path)
+        current_group_number = current_group_number and current_group_number.group(1)
+        current_group_name = u'Всі пари'
+        group_links = [(u'Всі пари', re.sub(r'/group/.*', '/', request.path))]
+        for group in groups:
+            group_full_name = group.course.discipline.name + u' - ' + \
+                              unicode(group.number) 
+            group_links.append(
+                (group_full_name,
+                 re.sub(r'group/.*', '', request.path) + u'group/' + \
+                 str(group.pk) + u'/'))
+            if current_group_number and unicode(group.pk) == current_group_number:
+                current_group_name = group_full_name
+        return group_links, current_group_name
     
     if min(mapping.keys()).weekday() != 0:
         from datetime import timedelta
         mapping[min(mapping.keys())-timedelta(days=min(mapping.keys()).weekday())]={}
         #print 'First day of study is not Monday!' # add dummy days so that week starts on Monday
     first_monday = min(mapping.keys())
+    # week number -1 reserved to say 'show current week'
+    if week == -1:
+        today = datetime.date.today()
+        days_diff = abs(today - first_monday).days
+        week = days_diff / 7 + 1
+    else:
+        week = week and int(week)
     week_mapping = {}
     week_date_mapping = {}
     number_of_weeks = int(math.ceil(
@@ -177,36 +218,8 @@ def return_timetable(request, mapping, groups, clashing_lessons=[], week=None):
                     else:
                         week_mapping[week_number][row][weekday][lesson_number] = None
                         
-    link_prefix = request.path
-    week_links = [(u'Всі тижні', re.sub(r'week/.+?/', u'', link_prefix))]
-    for week_number in range(1, number_of_weeks + 1):
-        #if week_number != week:
-        week_link = None
-        if link_prefix.find(u'week') != -1:
-            week_link = re.sub(r'week/\d+', u'week/%i' % week_number,
-                               link_prefix)
-        else:
-            link_parts = re.split('(group/\d+/)', link_prefix)
-            tt_link = link_parts[0]
-            group_link = link_parts[1] if len(link_parts) > 1 else u''
-            week_link = tt_link + u'week/%i/' % week_number + group_link
-        week_links.append((week_number, week_link))
-
-    #group_links = None
-    #if week:
-    current_group_number = re.search("group/(\d*)", request.path)
-    current_group_number = current_group_number and current_group_number.group(1)
-    current_group_name = u'Всі пари'
-    group_links = [(u'Всі пари', re.sub(r'/group/.*', '/', request.path))]
-    for group in groups:
-        group_full_name = group.course.discipline.name + u' - ' + \
-                          unicode(group.number) 
-        group_links.append(
-            (group_full_name,
-             re.sub(r'group/.*', '', request.path) + u'group/' + \
-             str(group.pk) + u'/'))
-        if current_group_number and unicode(group.pk) == current_group_number:
-            current_group_name = group_full_name
+    week_links = generate_week_links(number_of_weeks)
+    group_links, current_group_name = generate_group_links()
 
     #pprint.pprint(mapping)
     return render_to_response(
@@ -225,6 +238,10 @@ def return_timetable(request, mapping, groups, clashing_lessons=[], week=None):
             },
             context_instance=RequestContext(request)
             )
+
+def timetable_index(request, encoded_groups, group_to_show=None, **kwargs):
+    """Main page of a timetable itself - redirects to a page with a current week and all groups."""
+    return timetable(request, encoded_groups, -1, group_to_show, **kwargs)
 
 def timetable(request, encoded_groups, week_to_show=None, group_to_show=None, **kwargs):
     # All user's groups (both lecture and practise).
