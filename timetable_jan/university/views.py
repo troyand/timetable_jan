@@ -36,17 +36,46 @@ promos = {
         }
 
 
+class ICALResponseMixin(object):
+    """Mixin which produces an ical file as a response to a request."""
+    def render_to_response(self, context):
+        lessons = context.get('lessons') or Lesson.objects.all()
+        import icalendar
+        cal = icalendar.Calendar()
+        cal.add('prodid', '-//USIC timetable//')
+        cal.add('version', '2.0')
+        for lesson in lessons:
+            cal.add_component(lesson.icalendar_event())
+        response = HttpResponse(
+                cal.as_string().replace(';VALUE=DATE', ''),
+                mimetype='text/calendar'
+                )
+        response['Content-Disposition'] = 'attachment; filename=universitytimetabe.ics'
+        return response
+        
+
 class BaseTimetableView(View):
+    """
+    Basic view for a timetable.
+
+    Fills context with some initial info: mapping with user's lessons, clashing lessons info,
+    groups which user wants to be shown, week user wants to be shown,
+    list with all of the user's lessons, first monday of studying.
+    """
     def get(self, request, *args, **kwargs):
+        """Renders a page using a generated context in a response to a GET request."""
         return self.render_to_response(self.get_context_data(**kwargs))
 
     def get_context_data(self, **kwargs):
-        return {}
+        """Returns a context data for this request."""
+        return self._get_initial_data()
         
     def _get_initial_data(self):
         """
         Retrieves all initial data required for rendering a timetable page.
-        Returns a map with keys: 'mapping', 'user_group_list', 'clashing_lessons', 'week_to_show', 'lessons'
+
+        Returns a map with keys: 'mapping', 'user_group_list', 'clashing_lessons',
+        'week_to_show', 'lessons', 'first_monday'.
         """
         # Get captured params
         encoded_groups = self.kwargs.get("encoded_groups")
@@ -95,109 +124,58 @@ class BaseTimetableView(View):
             else:
                 mapping[lesson.date][lesson.lesson_number] = lesson
             lessons.append(lesson)
+
+        # Find first monday of studying.
+        if min(mapping.keys()).weekday() != 0:
+            from datetime import timedelta
+            mapping[min(mapping.keys())-timedelta(days=min(mapping.keys()).weekday())]={}
+            #print 'First day of study is not Monday!' # add dummy days so that week starts on Monday
+        first_monday = min(mapping.keys())
+
         data = {}
         data['mapping'] = mapping
         data['user_group_list'] = user_group_list
         data['clashing_lessons'] = clashing_lessons
         data['week_to_show'] = week_to_show
         data['lessons'] = lessons
+        data['first_monday'] = first_monday
         return data
 
                 
-class IcalView(BaseTimetableView):
-    def render_to_response(self, context):
-        lessons = self._get_initial_data().get('lessons') or Lesson.objects.all()
-        import icalendar
-        cal = icalendar.Calendar()
-        cal.add('prodid', '-//USIC timetable//')
-        cal.add('version', '2.0')
-        for lesson in lessons:
-            cal.add_component(lesson.icalendar_event())
-        response = HttpResponse(
-                cal.as_string().replace(';VALUE=DATE', ''),
-                mimetype='text/calendar'
-                )
-        response['Content-Disposition'] = 'attachment; filename=universitytimetabe.ics'
-        return response
+class ICALView(ICALResponseMixin, BaseTimetableView):
+    """View which produces an ical-file with a timetable."""
+    pass
         
 
 class TimetableView(TemplateResponseMixin, BaseTimetableView):
+    """Main timetable view with some filtering options."""
     template_name = "timetable.html"
 
     def get_context_data(self, **kwargs):
+        "Adds info required by a template."
         context = super(TimetableView, self).get_context_data(**kwargs)
-        initial_data = self._get_initial_data()
-        data = self._generate_context_data(initial_data['mapping'], initial_data['user_group_list'], initial_data['clashing_lessons'], initial_data['week_to_show'])
+        data = self._generate_context_data(context)
         context.update(data)
         return context
 
-    def _generate_context_data(self, mapping, groups, clashing_lessons=[], week=None):
-        def sanitize_week(week, max_week):
-            # REVIEW Maybe must fire some exception and write error to user
-            result = week
-            if result > max_week:
-                result = max_week
-            if result < 1:
-                result = 1
-            return result
-
-        def generate_week_links(number_of_weeks):
-            """Generates a list of links to pages of a particular weeks."""
-            link_parts = re.split('(group/\d+/)', request.path)
-            all_weeks_link = re.sub(r'week/.+?/', u'', link_parts[0]) + 'weeks/' 
-            all_weeks_link += link_parts[1] if len(link_parts) > 1 else u''
-            week_links = [(u'Всі тижні', all_weeks_link)]
-            for week_number in range(1, number_of_weeks + 1):
-                week_link = None
-                if request.path.find(u'week/') != -1:
-                    week_link = re.sub(r'week/\d+', u'week/%i' % week_number,
-                                       request.path)
-                else:
-                    link_parts = re.split('(group/\d+/)', request.path)
-                    tt_link = re.sub(r'weeks/', u'', link_parts[0])
-                    group_link = link_parts[1] if len(link_parts) > 1 else u''
-                    week_link = tt_link + u'week/%i/' % week_number + group_link
-                week_links.append((week_number, week_link))
-            return week_links
-
-        def generate_group_links():
-            """Generates a list of links to pages of particular courses and finds current group's name."""
-            current_group_number = re.search("group/(\d*)", request.path)
-            current_group_number = current_group_number and current_group_number.group(1)
-            current_group_name = u'Всі пари'
-            group_links = [(u'Всі пари', re.sub(r'/group/.*', '/', request.path))]
-            for group in groups:
-                group_full_name = group.course.discipline.name + u' - ' + \
-                                  unicode(group.number) 
-                group_links.append(
-                    (group_full_name,
-                     re.sub(r'group/.*', '', request.path) + u'group/' + \
-                     str(group.pk) + u'/'))
-                if current_group_number and unicode(group.pk) == current_group_number:
-                    current_group_name = group_full_name
-            return group_links, current_group_name
-
+    def _generate_context_data(self, context):
+        """Generates all information required by a template from a previously obtained context."""
+        # Acquire initial info
         request = self.request
+        mapping = context.get('mapping')
+        groups = context.get('user_group_list')
+        clashing_lessons = context.get('clashing_lessons') or []
+        week = context.get('week_to_show')
+        week = week and int(week)
+        first_monday = context.get('first_monday')
         
-        if min(mapping.keys()).weekday() != 0:
-            from datetime import timedelta
-            mapping[min(mapping.keys())-timedelta(days=min(mapping.keys()).weekday())]={}
-            #print 'First day of study is not Monday!' # add dummy days so that week starts on Monday
-        first_monday = min(mapping.keys())
-        # week number -1 reserved to say 'show current week'
-        if week == -1:
-            today = datetime.date.today()
-            days_diff = abs(today - first_monday).days
-            week = days_diff / 7 + 1
-        else:
-            week = week and int(week)
         week_mapping = {}
         week_date_mapping = {}
         number_of_weeks = int(math.ceil(
                 float((max(mapping.keys()) - min(mapping.keys())).days) / 7))
         number_of_rows = 2
-        starting_week = sanitize_week(week or 1, number_of_weeks) 
-        finishing_week = sanitize_week(week or number_of_weeks, number_of_weeks)
+        starting_week = self._sanitize_week(week or 1, number_of_weeks) 
+        finishing_week = self._sanitize_week(week or number_of_weeks, number_of_weeks)
         for week_number in range(starting_week, finishing_week + 1):
             week_mapping[week_number] = {}
             week_date_mapping[week_number] = {}
@@ -217,8 +195,8 @@ class TimetableView(TemplateResponseMixin, BaseTimetableView):
                         else:
                             week_mapping[week_number][row][weekday][lesson_number] = None
 
-        week_links = generate_week_links(number_of_weeks)
-        group_links, current_group_name = generate_group_links()
+        week_links = self._generate_week_links(number_of_weeks)
+        group_links, current_group_name = self._generate_group_links_and_name(groups)
 
         #pprint.pprint(mapping)
         return {
@@ -234,10 +212,64 @@ class TimetableView(TemplateResponseMixin, BaseTimetableView):
                     'promos': promos,
                 }
 
-        
-class TimetableIndexView(TimetableView):
-    def _generate_context_data(self, mapping, groups, clashing_lessons=[], week=None):
-        return super(TimetableIndexView, self)._generate_context_data(mapping, groups, clashing_lessons, -1)
+    def _sanitize_week(self, week, max_week):
+        """Ensures that a week is in range [1, max_week]."""
+        # REVIEW Maybe must fire some exception and write error to user
+        result = week
+        if result > max_week:
+            result = max_week
+        if result < 1:
+            result = 1
+        return result
+
+    def _generate_week_links(self, number_of_weeks):
+        """Generates a list of links to timetable pages of a particular weeks."""
+        request = self.request
+        link_parts = re.split('(group/\d+/)', request.path)
+        all_weeks_link = re.sub(r'week/.+?/', u'', link_parts[0]) + 'weeks/' 
+        all_weeks_link += link_parts[1] if len(link_parts) > 1 else u''
+        week_links = [(u'Всі тижні', all_weeks_link)]
+        for week_number in range(1, number_of_weeks + 1):
+            week_link = None
+            if request.path.find(u'week/') != -1:
+                week_link = re.sub(r'week/\d+', u'week/%i' % week_number,
+                                   request.path)
+            else:
+                link_parts = re.split('(group/\d+/)', request.path)
+                tt_link = re.sub(r'weeks/', u'', link_parts[0])
+                group_link = link_parts[1] if len(link_parts) > 1 else u''
+                week_link = tt_link + u'week/%i/' % week_number + group_link
+            week_links.append((week_number, week_link))
+        return week_links
+
+    def _generate_group_links_and_name(self, groups):
+        request = self.request
+        """Generates a list of links to timetable pages of particular courses and finds current group's name."""
+        current_group_number = re.search("group/(\d*)", request.path)
+        current_group_number = current_group_number and current_group_number.group(1)
+        current_group_name = u'Всі пари'
+        group_links = [(u'Всі пари', re.sub(r'/group/.*', '/', request.path))]
+        for group in groups:
+            group_full_name = group.course.discipline.name + u' - ' + \
+                              unicode(group.number) 
+            group_links.append(
+                (group_full_name,
+                 re.sub(r'group/.*', '', request.path) + u'group/' + \
+                 str(group.pk) + u'/'))
+            if current_group_number and unicode(group.pk) == current_group_number:
+                current_group_name = group_full_name
+        return group_links, current_group_name
+
+    
+class TimetableMainView(TimetableView):
+    """Main timetable view - opens a timetable filtering view for a current week."""
+    def _generate_context_data(self, context):
+        "Changes week_to_show in a context to a current week."
+        today = datetime.date.today()
+        days_diff = abs(today - context['first_monday']).days
+        week = days_diff / 7 + 1
+        context['week_to_show'] = week
+        return super(TimetableIndexView, self)._generate_context_data(context)
 
 
 def index(request):
