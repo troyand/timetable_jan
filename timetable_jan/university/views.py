@@ -3,7 +3,7 @@
 from django.http import HttpResponse
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
-from django.views.generic import View, TemplateView
+from django.views.generic import View
 from django.views.generic.base import TemplateResponseMixin
 from timetable_jan.university.models import *
 from timetable_jan.university.forms import *
@@ -243,8 +243,8 @@ class TimetableView(TemplateResponseMixin, BaseTimetableView):
         return week_links
 
     def _generate_group_links_and_name(self, groups):
-        request = self.request
         """Generates a list of links to timetable pages of particular courses and finds current group's name."""
+        request = self.request
         current_group_number = re.search("group/(\d*)", request.path)
         current_group_number = current_group_number and current_group_number.group(1)
         current_group_name = u'Всі пари'
@@ -269,7 +269,7 @@ class TimetableMainView(TimetableView):
         days_diff = abs(today - context['first_monday']).days
         week = days_diff / 7 + 1
         context['week_to_show'] = week
-        return super(TimetableIndexView, self)._generate_context_data(context)
+        return super(TimetableMainView, self)._generate_context_data(context)
 
 
 def index(request):
