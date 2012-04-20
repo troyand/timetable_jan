@@ -41,6 +41,7 @@ class FeedbackForm(Form):
     def ensure_min_width(self, data):
         if len(data) < 10:
             raise ValidationError(u'Ви були не надто багатослівними')
+        return data
     def clean_liked(self):
         return self.ensure_min_width(self.cleaned_data['liked'])
     def clean_disliked(self):
