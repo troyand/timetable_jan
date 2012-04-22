@@ -266,6 +266,9 @@ class TimetableMainView(TimetableView):
     def _generate_context_data(self, context):
         "Changes week_to_show in a context to a current week."
         today = datetime.date.today()
+        # for Sunday show the following Monday
+        if today.isoweekday() == 7:
+            today += datetime.timedelta(days=1)
         days_diff = abs(today - context['first_monday']).days
         week = days_diff / 7 + 1
         context['week_to_show'] = week
