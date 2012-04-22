@@ -3,6 +3,8 @@
 from django.http import HttpResponse
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
+from django.views.generic import View
+from django.views.generic.base import TemplateResponseMixin
 from timetable_jan.university.models import *
 from timetable_jan.university.forms import *
 from django.contrib.auth.decorators import login_required
@@ -32,6 +34,243 @@ promos = {
             ('img/promo/fsnst_day.png', 'http://vk.com/event37945333'),
             ],
         }
+
+
+class ICALResponseMixin(object):
+    """Mixin which produces an ical file as a response to a request."""
+    def render_to_response(self, context):
+        lessons = context.get('lessons') or Lesson.objects.all()
+        import icalendar
+        cal = icalendar.Calendar()
+        cal.add('prodid', '-//USIC timetable//')
+        cal.add('version', '2.0')
+        for lesson in lessons:
+            cal.add_component(lesson.icalendar_event())
+        response = HttpResponse(
+                cal.as_string().replace(';VALUE=DATE', ''),
+                mimetype='text/calendar'
+                )
+        response['Content-Disposition'] = 'attachment; filename=universitytimetabe.ics'
+        return response
+        
+
+class BaseTimetableView(View):
+    """
+    Basic view for a timetable.
+
+    Fills context with some initial info: mapping with user's lessons, clashing lessons info,
+    groups which user wants to be shown, week user wants to be shown,
+    list with all of the user's lessons, first monday of studying.
+    """
+    def get(self, request, *args, **kwargs):
+        """Renders a page using a generated context in a response to a GET request."""
+        return self.render_to_response(self.get_context_data(**kwargs))
+
+    def get_context_data(self, **kwargs):
+        """Returns a context data for this request."""
+        return self._get_initial_data()
+        
+    def _get_initial_data(self):
+        """
+        Retrieves all initial data required for rendering a timetable page.
+
+        Returns a map with keys: 'mapping', 'user_group_list', 'clashing_lessons',
+        'week_to_show', 'lessons', 'first_monday'.
+        """
+        # Get captured params
+        encoded_groups = self.kwargs.get("encoded_groups")
+        week_to_show = self.kwargs.get("week_to_show")
+        group_to_show = self.kwargs.get("group_to_show")
+        # All user's groups (both lecture and practise).
+        groups = []
+        # Which groups (lecture + practise) must be shown to a user in a timetable.
+        groups_to_show = []
+        # Which group the user has selected to show. 
+        group_to_show = group_to_show and int(group_to_show)
+        # Which groups must be shown to user in a filtering list (lecture groups
+        # aren't include here becaue they're paired with a practise ones)
+        user_group_list = []
+        group_ids = [int(g) for g in encoded_groups.split('/')]
+        for group_id in group_ids:
+            # add practice group
+            group = get_object_or_404(Group, pk=group_id)
+            groups.append(group)
+            user_group_list.append(group)
+            if group_to_show and group_id == group_to_show:
+                groups_to_show.append(group)
+            # add lecture group if it is present
+            try:
+                lecture_group = group.course.group_set.get(number=0)
+                groups.append(lecture_group)
+                # Add lecture group if user has choosen related practise one
+                # as a filtering option.
+                if group_to_show and group_id == group_to_show:
+                    groups_to_show.append(lecture_group)
+            except Group.DoesNotExist:
+                pass
+        if not group_to_show:
+            groups_to_show = groups
+        mapping = {} # mapping[date][lesson_number]=Lesson()
+        lessons = []
+        clashing_lessons = []
+        for lesson in Lesson.objects.select_related().filter(
+                group__in=groups_to_show):
+            mapping.setdefault(lesson.date, {})
+            if mapping[lesson.date].has_key(lesson.lesson_number):
+                clashing_lessons.append((
+                        mapping[lesson.date][lesson.lesson_number],
+                        lesson,
+                        ))
+            else:
+                mapping[lesson.date][lesson.lesson_number] = lesson
+            lessons.append(lesson)
+
+        # Find first monday of studying.
+        if min(mapping.keys()).weekday() != 0:
+            from datetime import timedelta
+            mapping[min(mapping.keys())-timedelta(days=min(mapping.keys()).weekday())]={}
+            #print 'First day of study is not Monday!' # add dummy days so that week starts on Monday
+        first_monday = min(mapping.keys())
+
+        data = {}
+        data['mapping'] = mapping
+        data['user_group_list'] = user_group_list
+        data['clashing_lessons'] = clashing_lessons
+        data['week_to_show'] = week_to_show
+        data['lessons'] = lessons
+        data['first_monday'] = first_monday
+        return data
+
+                
+class ICALView(ICALResponseMixin, BaseTimetableView):
+    """View which produces an ical-file with a timetable."""
+    pass
+        
+
+class TimetableView(TemplateResponseMixin, BaseTimetableView):
+    """Main timetable view with some filtering options."""
+    template_name = "timetable.html"
+
+    def get_context_data(self, **kwargs):
+        "Adds info required by a template."
+        context = super(TimetableView, self).get_context_data(**kwargs)
+        data = self._generate_context_data(context)
+        context.update(data)
+        return context
+
+    def _generate_context_data(self, context):
+        """Generates all information required by a template from a previously obtained context."""
+        # Acquire initial info
+        request = self.request
+        mapping = context.get('mapping')
+        groups = context.get('user_group_list')
+        clashing_lessons = context.get('clashing_lessons') or []
+        week = context.get('week_to_show')
+        week = week and int(week)
+        first_monday = context.get('first_monday')
+        
+        week_mapping = {}
+        week_date_mapping = {}
+        number_of_weeks = int(math.ceil(
+                float((max(mapping.keys()) - min(mapping.keys())).days) / 7))
+        number_of_rows = 2
+        starting_week = self._sanitize_week(week or 1, number_of_weeks) 
+        finishing_week = self._sanitize_week(week or number_of_weeks, number_of_weeks)
+        for week_number in range(starting_week, finishing_week + 1):
+            week_mapping[week_number] = {}
+            week_date_mapping[week_number] = {}
+            for row in range(0, number_of_rows):
+                week_mapping[week_number][row] = {}
+                for i in range(0, 6/number_of_rows):
+                    weekday = row*(6/number_of_rows) + i
+                    week_mapping[week_number][row][weekday] = {}
+                    date = first_monday + datetime.timedelta(days=
+                            7*(week_number-1) + weekday)
+                    week_date_mapping[week_number][weekday] = date
+                    if not mapping.has_key(date):
+                        mapping[date] = {}
+                    for lesson_number in range(1, 8):
+                        if mapping[date].has_key(lesson_number):
+                            week_mapping[week_number][row][weekday][lesson_number] = mapping[date][lesson_number]
+                        else:
+                            week_mapping[week_number][row][weekday][lesson_number] = None
+
+        week_links = self._generate_week_links(number_of_weeks)
+        group_links, current_group_name = self._generate_group_links_and_name(groups)
+
+        #pprint.pprint(mapping)
+        return {
+                    'week_mapping': week_mapping,
+                    'week_date_mapping': week_date_mapping,
+                    'lesson_times': lesson_times,
+                    'lesson_numbers': range(1,8),
+                    'clashing_lessons': clashing_lessons,
+                    'week_links': week_links,
+                    'current_week': week or u'Всі тижні',
+                    'group_links': group_links,
+                    'current_group': current_group_name, 
+                    'promos': promos,
+                }
+
+    def _sanitize_week(self, week, max_week):
+        """Ensures that a week is in range [1, max_week]."""
+        # REVIEW Maybe must fire some exception and write error to user
+        result = week
+        if result > max_week:
+            result = max_week
+        if result < 1:
+            result = 1
+        return result
+
+    def _generate_week_links(self, number_of_weeks):
+        """Generates a list of links to timetable pages of a particular weeks."""
+        request = self.request
+        link_parts = re.split('(group/\d+/)', request.path)
+        all_weeks_link = re.sub(r'week/.+?/', u'', link_parts[0]) + 'weeks/' 
+        all_weeks_link += link_parts[1] if len(link_parts) > 1 else u''
+        week_links = [(u'Всі тижні', all_weeks_link)]
+        for week_number in range(1, number_of_weeks + 1):
+            week_link = None
+            if request.path.find(u'week/') != -1:
+                week_link = re.sub(r'week/\d+', u'week/%i' % week_number,
+                                   request.path)
+            else:
+                link_parts = re.split('(group/\d+/)', request.path)
+                tt_link = re.sub(r'weeks/', u'', link_parts[0])
+                group_link = link_parts[1] if len(link_parts) > 1 else u''
+                week_link = tt_link + u'week/%i/' % week_number + group_link
+            week_links.append((week_number, week_link))
+        return week_links
+
+    def _generate_group_links_and_name(self, groups):
+        """Generates a list of links to timetable pages of particular courses and finds current group's name."""
+        request = self.request
+        current_group_number = re.search("group/(\d*)", request.path)
+        current_group_number = current_group_number and current_group_number.group(1)
+        current_group_name = u'Всі пари'
+        group_links = [(u'Всі пари', re.sub(r'/group/.*', '/', request.path))]
+        for group in groups:
+            group_full_name = group.course.discipline.name + u' - ' + \
+                              unicode(group.number) 
+            group_links.append(
+                (group_full_name,
+                 re.sub(r'group/.*', '', request.path) + u'group/' + \
+                 str(group.pk) + u'/'))
+            if current_group_number and unicode(group.pk) == current_group_number:
+                current_group_name = group_full_name
+        return group_links, current_group_name
+
+    
+class TimetableMainView(TimetableView):
+    """Main timetable view - opens a timetable filtering view for a current week."""
+    def _generate_context_data(self, context):
+        "Changes week_to_show in a context to a current week."
+        today = datetime.date.today()
+        days_diff = abs(today - context['first_monday']).days
+        week = days_diff / 7 + 1
+        context['week_to_show'] = week
+        return super(TimetableMainView, self)._generate_context_data(context)
+
 
 def index(request):
     timetables = Timetable.objects.select_related().all()
@@ -102,22 +341,6 @@ def profile(request):
             context_instance=RequestContext(request)
             )
 
-def ical(request, lessons=Lesson.objects.all()):
-    import icalendar
-    cal = icalendar.Calendar()
-    cal.add('prodid', '-//USIC timetable//')
-    cal.add('version', '2.0')
-    for lesson in lessons:
-        cal.add_component(lesson.icalendar_event())
-    response = HttpResponse(
-            cal.as_string().replace(';VALUE=DATE', ''),
-            mimetype='text/calendar'
-            )
-    response['Content-Disposition'] = 'attachment; filename=universitytimetabe.ics'
-    return response
-
-
-
 def choose_subjects(request, timetable_id):
     timetable = get_object_or_404(Timetable, pk=timetable_id)
     course_groups = {}
@@ -133,149 +356,6 @@ def choose_subjects(request, timetable_id):
                 },
             context_instance=RequestContext(request)
             )
-
-def return_timetable(request, mapping, groups, clashing_lessons=[], week=None):
-    def sanitize_week(week, max_week):
-        # REVIEW Maybe must fire some exception and write error to user
-        result = week
-        if result > max_week:
-            result = max_week
-        if result < 1:
-            result = 1
-        return result
-
-    week = week and int(week)
-    
-    if min(mapping.keys()).weekday() != 0:
-        from datetime import timedelta
-        mapping[min(mapping.keys())-timedelta(days=min(mapping.keys()).weekday())]={}
-        #print 'First day of study is not Monday!' # add dummy days so that week starts on Monday
-    first_monday = min(mapping.keys())
-    week_mapping = {}
-    week_date_mapping = {}
-    number_of_weeks = int(math.ceil(
-            float((max(mapping.keys()) - min(mapping.keys())).days) / 7))
-    number_of_rows = 2
-    starting_week = sanitize_week(week or 1, number_of_weeks) 
-    finishing_week = sanitize_week(week or number_of_weeks, number_of_weeks)
-    for week_number in range(starting_week, finishing_week + 1):
-        week_mapping[week_number] = {}
-        week_date_mapping[week_number] = {}
-        for row in range(0, number_of_rows):
-            week_mapping[week_number][row] = {}
-            for i in range(0, 6/number_of_rows):
-                weekday = row*(6/number_of_rows) + i
-                week_mapping[week_number][row][weekday] = {}
-                date = first_monday + datetime.timedelta(days=
-                        7*(week_number-1) + weekday)
-                week_date_mapping[week_number][weekday] = date
-                if not mapping.has_key(date):
-                    mapping[date] = {}
-                for lesson_number in range(1, 8):
-                    if mapping[date].has_key(lesson_number):
-                        week_mapping[week_number][row][weekday][lesson_number] = mapping[date][lesson_number]
-                    else:
-                        week_mapping[week_number][row][weekday][lesson_number] = None
-                        
-    link_prefix = request.path
-    week_links = [(u'Всі тижні', re.sub(r'week/.+?/', u'', link_prefix))]
-    for week_number in range(1, number_of_weeks + 1):
-        #if week_number != week:
-        week_link = None
-        if link_prefix.find(u'week') != -1:
-            week_link = re.sub(r'week/\d+', u'week/%i' % week_number,
-                               link_prefix)
-        else:
-            link_parts = re.split('(group/\d+/)', link_prefix)
-            tt_link = link_parts[0]
-            group_link = link_parts[1] if len(link_parts) > 1 else u''
-            week_link = tt_link + u'week/%i/' % week_number + group_link
-        week_links.append((week_number, week_link))
-
-    #group_links = None
-    #if week:
-    current_group_number = re.search("group/(\d*)", request.path)
-    current_group_number = current_group_number and current_group_number.group(1)
-    current_group_name = u'Всі пари'
-    group_links = [(u'Всі пари', re.sub(r'/group/.*', '/', request.path))]
-    for group in groups:
-        group_full_name = group.course.discipline.name + u' - ' + \
-                          unicode(group.number) 
-        group_links.append(
-            (group_full_name,
-             re.sub(r'group/.*', '', request.path) + u'group/' + \
-             str(group.pk) + u'/'))
-        if current_group_number and unicode(group.pk) == current_group_number:
-            current_group_name = group_full_name
-
-    #pprint.pprint(mapping)
-    return render_to_response(
-            'timetable.html',
-            {
-                'week_mapping': week_mapping,
-                'week_date_mapping': week_date_mapping,
-                'lesson_times': lesson_times,
-                'lesson_numbers': range(1,8),
-                'clashing_lessons': clashing_lessons,
-                'week_links': week_links,
-                'current_week': week or u'Всі тижні',
-                'group_links': group_links,
-                'current_group': current_group_name, 
-                'promos': promos,
-            },
-            context_instance=RequestContext(request)
-            )
-
-def timetable(request, encoded_groups, week_to_show=None, group_to_show=None, **kwargs):
-    # All user's groups (both lecture and practise).
-    groups = []
-    # Which groups (lecture + practise) must be shown to a user in a timetable.
-    groups_to_show = []
-    # Which group the user has selected to show. 
-    group_to_show = group_to_show and int(group_to_show)
-    # Which groups must be shown to user in a filtering list (lecture groups
-    # aren't include here becaue they're paired with a practise ones)
-    user_group_list = []
-    group_ids = [int(g) for g in encoded_groups.split('/')]
-    for group_id in group_ids:
-        # add practice group
-        group = get_object_or_404(Group, pk=group_id)
-        groups.append(group)
-        user_group_list.append(group)
-        if group_to_show and group_id == group_to_show:
-            groups_to_show.append(group)
-        # add lecture group if it is present
-        try:
-            lecture_group = group.course.group_set.get(number=0)
-            groups.append(lecture_group)
-            # Add lecture group if user has choosen related practise one
-            # as a filtering option.
-            if group_to_show and group_id == group_to_show:
-                groups_to_show.append(lecture_group)
-        except Group.DoesNotExist:
-            pass
-    if not group_to_show:
-        groups_to_show = groups
-    mapping = {} # mapping[date][lesson_number]=Lesson()
-    lessons = []
-    clashing_lessons = []
-    for lesson in Lesson.objects.select_related().filter(
-            group__in=groups_to_show):
-        mapping.setdefault(lesson.date, {})
-        if mapping[lesson.date].has_key(lesson.lesson_number):
-            clashing_lessons.append((
-                    mapping[lesson.date][lesson.lesson_number],
-                    lesson,
-                    ))
-        else:
-            mapping[lesson.date][lesson.lesson_number] = lesson
-        lessons.append(lesson)
-    if kwargs['action'] == 'ical':
-        return ical(request, lessons)
-    elif kwargs['action'] == 'render':
-        return return_timetable(request, mapping, user_group_list,
-                                clashing_lessons, week_to_show) 
-
 
 def rooms_status(request, year, month, day):
     import datetime
@@ -318,7 +398,6 @@ def rooms_status(request, year, month, day):
                 },
             context_instance=RequestContext(request)
             )
-
 
 def lecturer_timetable(request):
     import locale
