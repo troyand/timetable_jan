@@ -33,6 +33,12 @@ promos = {
             ('img/promo/social_ship.png', 'http://vk.com/social_ship'),
             ('img/promo/fsnst_day.png', 'http://vk.com/event37945333'),
             ],
+        datetime.date(2012,4,26): [
+            ('img/promo/glasses_party.png', 'http://vk.com/event37852523'),
+            ],
+        datetime.date(2012,4,27): [
+            ('img/promo/vynnyi.png', 'http://vk.com/vynnyi'),
+            ],
         }
 
 
