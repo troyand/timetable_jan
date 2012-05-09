@@ -83,9 +83,13 @@
                             {% with lesson_date=week_date_mapping|lookup:week_number|lookup:weekday %}
                                 <td class="lesson">
                                     {% for promo_img, promo_url in promos|lookup:lesson_date %}
-                                        <a href="{{ promo_url }}">
+                                        {% if promo_url %}
+                                            <a href="{{ promo_url }}">
+                                                <img src="{% static promo_img %}" class="promo">
+                                            </a>
+                                        {% else %}
                                             <img src="{% static promo_img %}" class="promo">
-                                        </a>
+                                        {% endif %}
                                     {% endfor %}
                                     <h3>{{ lesson_date|date:"l" }}</h3>
                                     <strong class="date" id="date-{{ lesson_date|date:"Y-n-j" }}">
