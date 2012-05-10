@@ -39,6 +39,9 @@ promos = {
         datetime.date(2012,4,27): [
             ('img/promo/vynnyi.png', 'http://vk.com/vynnyi'),
             ],
+        datetime.date(2012,5,11): [
+            ('img/promo/perevtilnyi.png', 'http://vk.com/perevtilnyi'),
+            ],
         datetime.date(2012,5,15): [
             ('img/promo/d3-logo.png', ''),
             ],
