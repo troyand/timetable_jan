@@ -7,10 +7,10 @@ import logging
 logging.basicConfig(format='\033[1;31m%(levelname)s\033[1;m:%(message)s', level=logging.INFO)
 
 from django.core.management import setup_environ
-from timetable_jan import settings
+from timetable import settings
 
 setup_environ(settings)
-from timetable_jan.university.models import *
+from timetable.university.models import *
 
 
 
@@ -36,7 +36,7 @@ def main():
     if options.academic_term_id:
         academic_term = AcademicTerm.objects.get(pk=int(options.academic_term_id))
     else:
-        # fallback to legacy timetable_jan behaviour to keep compatibility with old bootstrap.sh
+        # fallback to legacy timetable behaviour to keep compatibility with old bootstrap.sh
         academic_term = AcademicTerm.objects.get(number_of_weeks=12)
     timetable_from = Timetable.objects.get(
             year=int(options.from_year),

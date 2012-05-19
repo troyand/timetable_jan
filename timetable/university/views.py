@@ -5,8 +5,8 @@ from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
 from django.views.generic import View
 from django.views.generic.base import TemplateResponseMixin
-from timetable_jan.university.models import *
-from timetable_jan.university.forms import *
+from timetable.university.models import *
+from timetable.university.forms import *
 from django.contrib.auth.decorators import login_required
 import math
 import datetime

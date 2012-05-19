@@ -1,5 +1,5 @@
 from django.contrib import admin
-from timetable_jan.university.models import *
+from timetable.university.models import *
 
 from django.db.models import get_models, get_app
 

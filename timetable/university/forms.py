@@ -1,7 +1,7 @@
 #-*- coding: utf-8 -*-
 
 from django.forms import ModelForm, Form, CharField, Textarea, ValidationError
-from timetable_jan.university.models import *
+from timetable.university.models import *
 
 class UserForm(ModelForm):
     class Meta:

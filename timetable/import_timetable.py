@@ -6,10 +6,10 @@ import sys
 
 
 from django.core.management import setup_environ
-from timetable_jan import settings
+from timetable import settings
 
 setup_environ(settings)
-from timetable_jan.university.models import *
+from timetable.university.models import *
 
 def main():
     logging.log(University.objects.all())

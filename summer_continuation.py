@@ -1,12 +1,12 @@
 #-*- coding: utf-8 -*-
 
 from django.core.management import setup_environ
-from timetable_jan import settings
+from timetable import settings
 
 setup_environ(settings)
 
 
-from timetable_jan.university.models import *
+from timetable.university.models import *
 academic_term, created = AcademicTerm.objects.get_or_create(
         university=University.objects.get(abbr=u'НаУКМА'),
         year=2011,

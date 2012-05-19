@@ -4,7 +4,7 @@ from django.conf.urls.defaults import patterns
 from django.views.generic.list import BaseListView
 from django.views.generic import TemplateView, FormView
 from django.http import HttpResponse, HttpResponseForbidden
-from timetable_jan.university.models import *
+from timetable.university.models import *
 from django.utils.datastructures import MultiValueDictKeyError
 from django import forms
 import json

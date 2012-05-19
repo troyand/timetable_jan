@@ -2,8 +2,8 @@ from django.views.generic import DetailView, CreateView, DeleteView, UpdateView,
 from django.http import HttpResponseForbidden
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
-from timetable_jan.university.models import *
-from timetable_jan.university.forms import *
+from timetable.university.models import *
+from timetable.university.forms import *
 from django.core.mail import send_mail
 
 

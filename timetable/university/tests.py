@@ -7,7 +7,7 @@ Replace this with more appropriate tests for your application.
 
 from django.test import TestCase
 from django.db import IntegrityError
-from timetable_jan.university.models import *
+from timetable.university.models import *
 
 
 class SimpleTest(TestCase):

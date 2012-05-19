@@ -1,4 +1,4 @@
-# Django settings for timetable_jan project.
+# Django settings for timetable project.
 
 import django.conf.global_settings as DEFAULT_SETTINGS
 
@@ -105,10 +105,10 @@ MIDDLEWARE_CLASSES = (
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
 
-ROOT_URLCONF = 'timetable_jan.urls'
+ROOT_URLCONF = 'timetable.urls'
 
 # Python dotted path to the WSGI application used by Django's runserver.
-WSGI_APPLICATION = 'timetable_jan.wsgi.application'
+WSGI_APPLICATION = 'timetable.wsgi.application'
 
 TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
@@ -128,7 +128,7 @@ INSTALLED_APPS = (
     # 'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
-    'timetable_jan.university',
+    'timetable.university',
     'south',
 )
 
