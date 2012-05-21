@@ -51,6 +51,9 @@ promos = {
         datetime.date(2012,5,18): [
             ('img/promo/fi_day.png', ''),
             ],
+        datetime.date(2012,5,25): [
+            ('img/promo/konvorablyk.png', 'https://plazerazzi.org/konvorablyk'),
+            ],
         }
 
 
