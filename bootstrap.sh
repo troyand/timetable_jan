@@ -25,6 +25,13 @@ then
 fi
 
 python manage.py syncdb --noinput
+
+###  summer continuation
+echo "Running summer_continuation.sh"
+./summer_continuation.sh
+#FIXME: skip spring lessons for now
+exit 0
+
 python manage.py migrate university --noinput
 
 
