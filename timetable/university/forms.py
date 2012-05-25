@@ -5,18 +5,12 @@ from timetable.university.models import *
 
 class UserForm(ModelForm):
     class Meta:
-        model = User
+        model = UserModel
         fields = ('email', )
-
-
-class StudentForm(ModelForm):
-    class Meta:
-        model = Student
-        fields = ('major', )
 
 class LessonForm(ModelForm):
     class Meta:
-        model = Lesson
+        model = TimeTableModel
         exclude = ('group', )
 
 class FeedbackForm(Form):

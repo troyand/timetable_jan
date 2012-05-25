@@ -78,7 +78,7 @@ class UnifiedTimetableProcessView(FormView):
             pass
         return super(UnifiedTimetableProcessView, self).get(request)
 
-
+'''
 class ExtraCoursesAutocompleteView(AjaxAutocompleteMixin, BaseListView):
     model = Course
     def autocomplete_response(self, query):
@@ -114,12 +114,12 @@ class ExtraCoursesAutocompleteView(AjaxAutocompleteMixin, BaseListView):
         return HttpResponse(
                 json.dumps(json_response)
                 )
-
+'''
 
 class RoomAutocompleteView(AjaxAutocompleteMixin, BaseListView):
-    model = Room
+    model = RoomModel
     def autocomplete_response_(self, query):
-        room_name_pk_pairs = [(unicode(r), r.pk) for r in Room.objects.all()]
+        room_name_pk_pairs = [(unicode(r), r.pk) for r in RoomModel.objects.all()]
         rooms = filter(lambda x: x[0].startswith(query), room_name_pk_pairs)
         json_response = {
                 'query': query,
@@ -131,11 +131,11 @@ class RoomAutocompleteView(AjaxAutocompleteMixin, BaseListView):
                 )
 
 class LecturerAutocompleteView(AjaxAutocompleteMixin, BaseListView):
-    model = Lecturer
+    model = LecturerModel
     def unicode_format_object(self, o):
         return o.short_name()
     def autocomplete_response_(self, query):
-        lecturers = [(l.full_name, l.pk) for l in Lecturer.objects.filter(full_name__icontains=query)]
+        lecturers = [(l.name, l.pk) for l in LecturerModel.objects.filter(name__icontains=query)]
         json_response = {
                 'query': query,
                 'suggestions': [name for name, pk in lecturers],
@@ -146,7 +146,7 @@ class LecturerAutocompleteView(AjaxAutocompleteMixin, BaseListView):
                 )
 
 class DisciplineAutocompleteView(AjaxAutocompleteMixin, BaseListView):
-    model = Discipline
+    model = DisciplineModel
     def unicode_format_object(self, o):
         return o.name
 
@@ -155,7 +155,7 @@ ajax_urls = patterns('',
     (r'^room/$', RoomAutocompleteView.as_view()),
     (r'^lecturer/$', LecturerAutocompleteView.as_view()),
     (r'^discipline/$', DisciplineAutocompleteView.as_view()),
-    (r'^extra-courses/$', ExtraCoursesAutocompleteView.as_view()),
+    #(r'^extra-courses/$', ExtraCoursesAutocompleteView.as_view()),
     (r'^test/$', TemplateView.as_view(template_name='autocomplete_test.html')),
 )
 

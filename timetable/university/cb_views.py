@@ -13,9 +13,8 @@ class LoginRequiredMixin(object):
         return super(LoginRequiredMixin, self).dispatch(request, *args, **kwargs)
 
 
-
 class LessonDetailView(LoginRequiredMixin, UpdateView):
-    model = Lesson
+    model = TimeTableModel
     form_class = LessonForm
     context_object_name = "lesson"
 
@@ -36,7 +35,6 @@ class LessonDetailView(LoginRequiredMixin, UpdateView):
 
     def get_success_url(self):
         return self.request.path
-
 
 class FeedbackView(FormView):
     form_class = FeedbackForm
