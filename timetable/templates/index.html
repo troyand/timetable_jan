@@ -1,18 +1,19 @@
 {% extends "base.html" %}
+{% comment %}
+vim: ai ts=4 sts=4 et sw=4
+{% endcomment %}
 {% block title %}Персональний онлайн-розклад{% endblock %}
 {% block header %}Вибір спеціальності та року навчання{% endblock %}
 {% block content %}
     <h4><a href="/feedback/"><u>Залиште відгук про наш ресурс</u></a><h4>
-    {% for academic_term, timetables in academic_term_timetable_list %}
-        <h4>{{ academic_term }}</h4>
-        <ul>
-            {% for timetable in timetables %}
-                <li>
-                <a href="/choose-subjects/{{ timetable.id }}/">
-                    {{ timetable.major.name }} - {{ timetable.major.kind }} - {{ timetable.year }}
-                </a>
-                </li>
-            {% endfor %}
-        </ul>
+    <h4>НаУКМА: літній семестр 2011-2012 навчального року</h4>
+    <ul>
+    {% for group in groups %}
+	<li>
+	<a href="/group/{{ group.group.id }}/">
+	    {{ group.group.name }}
+	</a>
+	</li>
     {% endfor %}
+    </ul>
 {% endblock %}

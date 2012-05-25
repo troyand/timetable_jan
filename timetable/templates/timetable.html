@@ -1,4 +1,7 @@
 {% extends "base.html" %}
+{% comment %}
+vim: ai ts=4 sts=4 et sw=4
+{% endcomment %}
 {% load staticfiles %}
 {% block title %}Розклад - Online-версія{% endblock %}
 {% block headadd %}
@@ -80,7 +83,7 @@
                     <tr>
                         <td class="lesson-time">&nbsp;</td>
                         {% for weekday, lessons in weekdays.items %}
-                            {% with lesson_date=week_date_mapping|lookup:week_number|lookup:weekday %}
+                            {% with lesson_date=lessons.0.time %}
                                 <td class="lesson">
                                     {% for promo_img, promo_url in promos|lookup:lesson_date %}
                                         {% if promo_url %}
@@ -113,19 +116,19 @@
                                     {% if lesson %}
                                         <span class="subject">
                                             {% if user.is_authenticated %}
-                                                <a href="/lesson/{{ lesson.pk }}/">{{ lesson.group.course.discipline.name }}</a>
+                                                <a href="/lesson/{{ lesson.pk }}/">{{ lesson.discipline.name }}</a>
                                             {% else %}
-                                                {{ lesson.group.course.discipline.name }}
+                                                {{ lesson.discipline.name }}
                                             {% endif %}
                                         </span>
                                         <br>
                                         <span class="details">
-                                            <strong>{{ lesson.room }}</strong>, 
-                                            <em>{{ lesson.group.lecturer.short_name }}</em>
-                                            {% if lesson.group.number == 0 %}
+                                            <strong>{{ lesson.location }}</strong>,
+                                            <em>{{ lesson.lecturer.short_name }}</em>
+                                            {% if lesson.academic_group == 0 %}
                                                 <span class="label">лекція</span>
                                             {% else %}
-                                                <span class="label">практика-{{ lesson.group.number }}</span>
+                                                <span class="label">практика-{{ lesson.academic_group }}</span>
                                             {% endif %}
                                         </span>
                                     {% endif %}

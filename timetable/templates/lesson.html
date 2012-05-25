@@ -1,18 +1,18 @@
 {% extends "base.html" %}
-{% block title %}Розклад - {{ lesson.group.course.discipline.name }}{% endblock %}
-{% block header %}{{ lesson.group.course.discipline.name }}{% endblock %}
+{% block title %}Розклад - {{ lesson.discipline.name }}{% endblock %}
+{% block header %}{{ lesson.discipline.name }}{% endblock %}
 {% block content %}
     <span class="subject">
-        <a href="/lesson/{{ lesson.pk }}/">{{ lesson.group.course.discipline.name }}</a>
+        <a href="/lesson/{{ lesson.pk }}/">{{ lesson.discipline.name }}</a>
     </span>
     <br>
     <span class="details">
-        <strong><a href="/room/{{ lesson.room.pk }}">{{ lesson.room }}</a></strong>, 
-        <em><a href="/lecturer/{{ lesson.group.lecturer.pk }}">{{ lesson.group.lecturer.short_name }}</a></em>
-        {% if lesson.group.number == 0 %}
+        <strong><a href="/room/{{ lesson.location.pk }}">{{ lesson.location }}</a></strong>, 
+        <em><a href="/lecturer/{{ lesson.lecturer.pk }}">{{ lesson.lecturer.short_name }}</a></em>
+        {% if lesson.academic_group == 0 %}
             <span class="label">лекція</span>
         {% else %}
-            <span class="label">практика-{{ lesson.group.number }}</span>
+            <span class="label">практика-{{ lesson.academic_group }}</span>
         {% endif %}
     </span>
     <form method="post" action="">

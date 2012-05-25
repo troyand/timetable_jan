@@ -1,4 +1,7 @@
 {% extends "base.html" %}
+{% comment %}
+vim: ai ts=4 sts=4 et sw=4
+{% endcomment %}
 {% block title %}Розклад - Використання аудиторій {{ status_date|date:"j E Y" }}{% endblock %}
 {% block headadd %}
     <style type="text/css">
@@ -30,10 +33,10 @@
                                         {{ element }}
                                     {% else %}
                                         {% if element %}
-                                            <abbr title="{{ element.group.course.discipline.name }}">
-                                                {{ element.group.course.discipline.abbr }}
-                                                {% if element.group.number %}
-                                                    {{ element.group.number }}
+                                            <abbr title="{{ element.discipline.name }}">
+                                                {{ element.discipline.abbr }}
+						{% if element.academic_group > 0 %}
+                                                    {{ element.academic_group }}
                                                 {% endif %}
                                             </abbr>
                                         {% endif %}

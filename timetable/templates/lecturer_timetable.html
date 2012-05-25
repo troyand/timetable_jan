@@ -1,14 +1,17 @@
 {% extends "base.html" %}
+{% comment %}
+vim: ai ts=4 sts=4 et sw=4
+{% endcomment %}
 {% block title %}Розклад викладачів{% endblock %}
 {% block header %}Розклад викладачів{% endblock %}
 {% block content %}
-    {% for department, lecturer_groups_list in department_lecturer_groups_mapping.items %}
+    {% for department, lecturers_list in department_lecturer_mapping.items %}
         <h4>{{ department }}</h4>
         <ul>
-            {% for lecturer, render_group_ids in lecturer_groups_list %}
+            {% for lecturer in lecturers_list %}
                 <li>
-                <a href="/render/{{ render_group_ids }}/">
-                    {{ lecturer.short_name }}
+                <a href="/lecturer-timetable/{{lecturer.lecturer_id}}/">
+                    {{ lecturer }}
                 </a>
                 </li>
             {% endfor %}
