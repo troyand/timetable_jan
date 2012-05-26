@@ -30,7 +30,7 @@ vim: ai ts=4 sts=4 et sw=4
                             {% for element in row %}
                                 <td>
                                     {% if forloop.first %}
-                                        {{ element }}
+                                        {{ element|date:"H:i" }}
                                     {% else %}
                                         {% if element %}
                                             <abbr title="{{ element.discipline.name }}">

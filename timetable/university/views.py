@@ -222,15 +222,14 @@ def rooms_status(request, year, month, day):
         building_rooms.setdefault(
                 building, set()).add(room)
         mapping.setdefault(building, {}).setdefault(
-                "%d:%d" % (lesson.time.hour, lesson.time.minute),
-                {})[room] = lesson
+                lesson.time, {})[room] = lesson
     building_tables = []
     for building in sorted(building_rooms.keys(), key=lambda x: (x.number, x.label)):
         table = []
         rooms = sorted(building_rooms[building], key=lambda x: u'%s' % x)
         table.append([u''] + [u'%s' % r for r in rooms])
         for t in sorted(mapping[building].keys()):
-            row = [u'%s' % t]
+            row = [t]
             for room in rooms:
                 try:
                     row.append(
