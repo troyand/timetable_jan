@@ -40,6 +40,7 @@
     <field to="university.major" name="major" rel="ManyToOneRel">9</field>
     <field type="IntegerField" name="year">1</field>
     <field to="university.course" name="courses" rel="ManyToManyRel"><object pk="1"></object><object pk="2"></object></field>
+    <field to="university.academicterm" name="academic_term" rel="ManyToOneRel">3</field>
   </object>
   <object pk="1" model="university.group">
     <field to="university.course" name="course" rel="ManyToOneRel">2</field>
