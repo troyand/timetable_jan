@@ -13,12 +13,10 @@ python manage.py loaddata timetable/university/fixtures/test_timetable_dataset.x
 
 python manage.py runserver &
 
-server_pid=$!
-
 python blackbox_tests/screenshots.py
 
-echo "Killing server (PID $server_pid)"
-kill $server_pid
+echo "Killing background processes"
+trap "kill 0" SIGINT SIGTERM EXIT
 
 if [ -f timetable/db.sqlite.orig ]
 then
