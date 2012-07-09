@@ -1,0 +1,86 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<title>{% block title %}Розклад{% endblock %}</title>
+<meta name="description" content="">
+<meta name="author" content="">
+<link rel="shortcut icon" href="{% static "favicon.ico" %}">
+<link href="{% static "bootstrap.css" %}" rel="stylesheet">
+<script type="text/javascript" src="{% static "jquery.min.js" %}"></script>
+    <style type="text/css">
+        table.compact td {
+            padding: 0 1px 0 1px;
+        }
+        .room-column {
+            min-width: {{ room_column_width }}px;
+        }
+        .day-column {
+            min-width: 25px;
+        }
+        .time-column {
+            min-width: 45px;
+        }
+        .lesson {
+            width: {{ px_per_day}}px;
+            float: left;
+        }
+        .free {
+            width: {{ px_per_day}}px;
+            float: left;
+        }
+        .yscroll {
+            overflow-x: auto;
+            overflow-y: auto;
+            position: absolute;
+        }
+    </style>
+    <script type="text/javascript" src="{% static "bootstrap-twipsy.js" %}"></script>
+    <script type="text/javascript" src="{% static "bootstrap-popover.js" %}"></script>
+    <script type="text/javascript">
+        $(function(){
+        $(".lesson").popover({"animate": false});
+        $(".free").popover({"animate": false});
+        });
+    </script>
+</head>
+<body>
+{% block content %}
+    <div class="yscroll">
+        <table class="bordered-table zebra-striped compact">
+            <thead>
+                <tr>
+                    <td class="day-column"></td>
+                    <td class="time-column"></td>
+                    {% for room in sorted_rooms %}
+                        <td class="room-column">{{ room }}</td>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in rows %}
+                    <tr>
+                        {% for cell in row %}
+                            {% if forloop.first %}
+                                {% if cell.0 %}
+                                    <td rowspan="{{ number_of_lessons_per_day }}">{{ cell.0 }}</td>
+                                    <td>{{ cell.1 }}</td>
+                                {% else %}
+                                    <td>{{ cell.1 }}</td>
+                                {% endif %}
+                            {% else %}
+                                <td>
+                                    {% for item in cell %}
+                                        <div title="{{ item.title }}" data-content="{{ item.content }}" class="{{ item.css_class }}" style="background-color: {{ item.background_color }}">&nbsp;</div>
+                                    {% endfor %}
+                                </td>
+                            {% endif %}
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}
+</body>
