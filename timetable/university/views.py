@@ -349,32 +349,7 @@ def palette(size):
         hexcolor = '#%02x%02x%02x' % tuple(map(lambda x: int(x*255), rgb_tuple))
         yield hexcolor
 
-def test_palette(request):
-    px_per_day = 200
-    rows = []
-    size = 400
-    for hexcolor in palette(size):
-        rows.append(
-                [(' ', hexcolor),
-                    [{
-                            'css_class': 'lesson',
-                            'background_color': hexcolor
-                            }]]
-                    )
-    return render_to_response(
-            'planning.html',
-            {
-                'number_of_weeks': 1,
-                'room_column_width': px_per_day,
-                'rows': rows,
-                'px_per_day': px_per_day,
-                'sorted_rooms': ['test'],
-                'number_of_lessons_per_day': 1,
-                },
-            context_instance=RequestContext(request)
-            )
-
-@cache_page(1)
+@cache_page(60*60*24)
 def planning(request):
     academic_term = AcademicTerm.objects.all()[2]
     lessons = Lesson.objects.select_related('room', 'room__building', 'group', 'group__course__discipline').filter(
@@ -382,7 +357,7 @@ def planning(request):
             ).filter(
             date__lt=academic_term.exams_start_date
             ).filter(
-            room__building__number__gt=3
+            room__building__number__gt=0
             ).order_by('date')
     # mapping[(1,1)][Room('1-225')]=[(1,Lesson('A')), (2,Lesson('A'))]
     rooms = set()
@@ -408,6 +383,7 @@ def planning(request):
         course_colors[course_id] = hexcolor
     ##
     rows = []
+    time_rows = []
     sorted_rooms = sorted(rooms, key=lambda x: u'%s' % x)
     #print sorted_rooms
     day_names = {
@@ -424,9 +400,9 @@ def planning(request):
             #row_names.append('%s-%s' % (weekday, lesson_times[lesson_number][0]))
             row = []
             if lesson_number == 1:
-                row.append((day_names[weekday], lesson_times[lesson_number][0]))
+                time_rows.append((day_names[weekday], lesson_times[lesson_number][0]))
             else:
-                row.append((None, lesson_times[lesson_number][0]))
+                time_rows.append((None, lesson_times[lesson_number][0]))
             date_timekey = (weekday, lesson_number)
             for room in sorted_rooms:
                 cell = []
@@ -450,7 +426,7 @@ def planning(request):
                                         'css_class': 'free',
                                         'background_color': 'inherit',
                                         'title': u'Тиждень %d' % week_number,
-                                        'content': u'Пари нема',
+                                        'content': u'Пара відсутня',
                                         }
                                     )
                 else:
@@ -472,6 +448,7 @@ def planning(request):
                 'number_of_weeks': academic_term.number_of_weeks,
                 'room_column_width': academic_term.number_of_weeks * px_per_day,
                 'rows': rows,
+                'time_rows': time_rows,
                 'px_per_day': px_per_day,
                 'sorted_rooms': sorted_rooms,
                 'number_of_lessons_per_day': len(lesson_times.keys()),
