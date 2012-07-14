@@ -9,10 +9,12 @@ from timetable.university.models import *
 from timetable.university.forms import *
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.cache import cache_page
+from htmlmin.decorators import minified_response
 import math
 import datetime
 import re
 import itertools
+import json
 
 
 from django.template.defaultfilters import register as rf
@@ -349,7 +351,38 @@ def palette(size):
         hexcolor = '#%02x%02x%02x' % tuple(map(lambda x: int(x*255), rgb_tuple))
         yield hexcolor
 
+def course_stats(request):
+    from django.db.models import Count
+    academic_term = AcademicTerm.objects.all()[2]
+    groups = Group.objects.select_related('course', 'course__discipline').defer('course__discipline__description').filter(course__academic_term=academic_term
+            ).annotate(lesson_count=Count('lesson')).order_by('course', 'number')
+    mapping = {}
+    # mapping[Course] = {0: 13, 1: 6, 2: 6}
+    for group in groups:
+        mapping.setdefault(group.course, {})[group.number] = group.lesson_count
+        #group, group.lesson_count
+    rows = []
+    for course in sorted(mapping.keys(), key=lambda c: c.discipline.name):
+        if len(set([v for k, v in mapping[course].items() if k != 0])) > 1:
+            inconsistent = True
+        else:
+            inconsistent = False
+        rows.append({
+            'name': course.discipline.name,
+            'lectures': mapping[course].get(0, 0),
+            'inconsistent': inconsistent,
+            'non_lectures': [(k,v) for k, v in sorted(mapping[course].items()) if k != 0]
+            })
+    return render_to_response(
+            'course_stats.html',
+            {
+                'rows': rows,
+                },
+            context_instance=RequestContext(request)
+            )
+
 @cache_page(60*60*24)
+#@minified_response
 def planning(request):
     academic_term = AcademicTerm.objects.all()[2]
     lessons = Lesson.objects.select_related('room', 'room__building', 'group', 'group__course__discipline').filter(
@@ -455,6 +488,118 @@ def planning(request):
                 },
             context_instance=RequestContext(request)
             )
+
+#@cache_page(60*60*24)
+#@minified_response
+def planning_light(request):
+    academic_term = AcademicTerm.objects.all()[2]
+    rooms = Room.objects.select_related('building').filter(building__number__gt=0)
+    rows = []
+    time_rows = []
+    sorted_rooms = sorted(rooms, key=lambda x: u'%s' % x)
+    day_names = {
+            1: u'Пн',
+            2: u'Вт',
+            3: u'Ср',
+            4: u'Чт',
+            5: u'Пт',
+            6: u'Сб',
+            7: u'Нд',
+            }
+    for weekday in range(1,7):
+        for lesson_number in lesson_times.keys():
+            row = []
+            if lesson_number == 1:
+                time_rows.append((day_names[weekday], lesson_times[lesson_number][0]))
+            else:
+                time_rows.append((None, lesson_times[lesson_number][0]))
+            for room in sorted_rooms:
+                cell = '%d-%d-%d' % (weekday, lesson_number, room.pk)
+                row.append(cell)
+            rows.append(row)
+    px_per_day = 8
+    return render_to_response(
+            'planning_light.html',
+            {
+                'number_of_weeks': academic_term.number_of_weeks,
+                'room_column_width': academic_term.number_of_weeks * px_per_day,
+                'rows': rows,
+                'time_rows': time_rows,
+                'px_per_day': px_per_day,
+                'sorted_rooms': sorted_rooms,
+                'number_of_lessons_per_day': len(lesson_times.keys()),
+                },
+            context_instance=RequestContext(request)
+            )
+
+color_palette = list(palette(400))
+
+@cache_page(60*60*24)
+def planning_ajax(request, room_id):
+    academic_term = AcademicTerm.objects.all()[2]
+    room = Room.objects.get(pk=room_id)
+    lessons = Lesson.objects.select_related('room', 'room__building', 'group', 'group__course__discipline').filter(
+            date__gte=academic_term.start_date
+            ).filter(
+            date__lt=academic_term.exams_start_date
+            ).filter(
+            room__pk=room_id
+            ).order_by('date')
+    # mapping[(1,1)][Room('1-225')]=[(1,Lesson('A')), (2,Lesson('A'))]
+    mapping = {}
+    course_ids = set()
+    for lesson in lessons:
+        date_timekey = (lesson.date.isoweekday(), lesson.lesson_number)
+        if not mapping.has_key(date_timekey):
+            mapping[date_timekey] = {}
+        if not mapping[date_timekey].has_key(lesson.room):
+            mapping[date_timekey][lesson.room] = []
+        course_ids.add(lesson.group.course_id)
+        mapping[date_timekey][lesson.room].append(
+                (
+                    academic_term.get_week(lesson.date).week_number,
+                    lesson
+                    )
+                )
+    json_response = {}
+    for weekday in range(1,7):
+        for lesson_number in lesson_times.keys():
+            date_timekey = (weekday, lesson_number)
+            cell = []
+            if mapping.has_key(date_timekey) and mapping[date_timekey].has_key(room):
+                cell_mapping = dict(mapping[date_timekey][room])
+                for week_number in range(1, academic_term.number_of_weeks+1):
+                    if week_number in cell_mapping:
+                        cell.append(
+                                {
+                                    'css_class': 'lesson',
+                                    'background_color': color_palette[cell_mapping[week_number].group.course_id % len(color_palette)],
+                                    'title': u'Тиждень %d' % week_number,
+                                    'content': u'%s - %s' % (
+                                        cell_mapping[week_number].group.course.discipline.name,
+                                        cell_mapping[week_number].group.number or u'лекція'),
+                                    }
+                                )
+                    else:
+                        cell.append(
+                                {
+                                    'css_class': 'free',
+                                    'background_color': 'inherit',
+                                    'title': u'Тиждень %d' % week_number,
+                                    'content': u'Пара відсутня',
+                                    }
+                                )
+            else:
+                pass
+            divs = ''.join(['<div class="%s" title="%s" data-content="%s" style="background: %s">&nbsp;</div>' % (
+                item['css_class'],
+                item['title'],
+                item['content'],
+                item['background_color'],
+                ) for item in cell])
+            if cell:
+                json_response['cell-%d-%d-%d' % (weekday, lesson_number, room.pk)] = divs
+    return HttpResponse(json.dumps(json_response), mimetype="application/json")
 
 @login_required
 def profile(request):
