@@ -1,6 +1,6 @@
 #-*- coding: utf-8 -*-
 
-from django.http import HttpResponse
+from django.http import HttpResponse, Http404
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
 from django.views.generic import View
@@ -296,7 +296,6 @@ class TimetableMainView(TimetableView):
         days_diff = abs(today - context['first_monday']).days
         week = days_diff / 7 + 1
         context['week_to_show'] = week
-        
         return super(TimetableMainView, self)._generate_context_data(context)
 
 
@@ -341,6 +340,16 @@ def contacts(request):
             context_instance=RequestContext(request)
             )
 
+def choose_term_for_planning(request):
+    """Renders a page with a chooser of term for term planning."""
+    return render_to_response(
+            'choose_term_for_planning.html',
+            {
+                'terms': AcademicTerm.objects.all(),
+            },
+            context_instance=RequestContext(request)
+            )
+
 def palette(size):
     import colorsys
     for i in range(size):
@@ -352,13 +361,22 @@ def palette(size):
         yield hexcolor
 
 @cache_page(60*60*24)
-def planning(request):
-    academic_term = AcademicTerm.objects.all()[2]
-    lessons = Lesson.objects.select_related('room', 'room__building', 'group', 'group__course__discipline').filter(
+def planning(request, term):
+    """
+    Renders a page with an overall view of a given term.
+
+    term - number of a term to render
+    """
+    term = int(term)
+    if term < 0 or term >= AcademicTerm.objects.count():
+        raise Http404
+    academic_term = AcademicTerm.objects.all()[term]
+    lessons = Lesson.objects.select_related(
+        'room', 'room__building', 'group', 'group__course__discipline').filter(
             date__gte=academic_term.start_date,
             date__lt=academic_term.exams_start_date,
             room__building__number__gt=0
-            ).order_by('date')
+        ).order_by('date')
     # mapping[(1,1)][Room('1-225')]=[(1,Lesson('A')), (2,Lesson('A'))]
     rooms = set()
     mapping = {}
