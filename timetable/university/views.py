@@ -188,17 +188,18 @@ class TimetableView(TemplateResponseMixin, BaseTimetableView):
         mapping = context.get('mapping')
         groups = context.get('user_group_list')
         clashing_lessons = context.get('clashing_lessons') or []
+        number_of_weeks = int(math.ceil(
+                float((max(mapping.keys()) - min(mapping.keys())).days) / 7))
         week = context.get('week_to_show')
-        week = week and int(week)
+        week = week and self._sanitize_week(int(week), number_of_weeks)
         first_monday = context.get('first_monday')
         
         week_mapping = {}
         week_date_mapping = {}
-        number_of_weeks = int(math.ceil(
-                float((max(mapping.keys()) - min(mapping.keys())).days) / 7))
+        
         number_of_rows = 2
-        starting_week = self._sanitize_week(week or 1, number_of_weeks) 
-        finishing_week = self._sanitize_week(week or number_of_weeks, number_of_weeks)
+        starting_week = week or 1
+        finishing_week = week or number_of_weeks
         for week_number in range(starting_week, finishing_week + 1):
             week_mapping[week_number] = {}
             week_date_mapping[week_number] = {}
@@ -295,6 +296,7 @@ class TimetableMainView(TimetableView):
         days_diff = abs(today - context['first_monday']).days
         week = days_diff / 7 + 1
         context['week_to_show'] = week
+        
         return super(TimetableMainView, self)._generate_context_data(context)
 
 
@@ -353,10 +355,8 @@ def palette(size):
 def planning(request):
     academic_term = AcademicTerm.objects.all()[2]
     lessons = Lesson.objects.select_related('room', 'room__building', 'group', 'group__course__discipline').filter(
-            date__gte=academic_term.start_date
-            ).filter(
-            date__lt=academic_term.exams_start_date
-            ).filter(
+            date__gte=academic_term.start_date,
+            date__lt=academic_term.exams_start_date,
             room__building__number__gt=0
             ).order_by('date')
     # mapping[(1,1)][Room('1-225')]=[(1,Lesson('A')), (2,Lesson('A'))]
