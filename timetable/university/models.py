@@ -11,52 +11,55 @@ import logging
 logger = logging.getLogger(__name__)
 
 lesson_times = {
-        1: (u'8:30', u'9:50'),
-        2: (u'10:00', u'11:20'),
-        3: (u'11:40', u'13:00'),
-        4: (u'13:30', u'14:50'),
-        5: (u'15:00', u'16:20'),
-        6: (u'16:30', u'17:50'),
-        7: (u'18:00', u'19:20')
-        }
+    1: (u'8:30', u'9:50'),
+    2: (u'10:00', u'11:20'),
+    3: (u'11:40', u'13:00'),
+    4: (u'13:30', u'14:50'),
+    5: (u'15:00', u'16:20'),
+    6: (u'16:30', u'17:50'),
+    7: (u'18:00', u'19:20')
+}
 
 
 class University(models.Model):
     name = models.CharField(max_length=255, unique=True)
     abbr = models.CharField(max_length=16, unique=True)
-    
+
     def __unicode__(self):
         return u'%s' % (
-                self.abbr
-                )
+            self.abbr
+        )
 
 
 class AcademicTerm(models.Model):
     ACADEMIC_TERMS = (
-            (u'семестр', u'семестр'),
-            (u'триместр', u'триместр'),
-            )
+        (u'семестр', u'семестр'),
+        (u'триместр', u'триместр'),
+    )
     SEASONS = (
-            (u'осінній', u'осінній'),
-            (u'весняний', u'весняний'),
-            (u'літній', u'літній'),
-            )
+        (u'осінній', u'осінній'),
+        (u'весняний', u'весняний'),
+        (u'літній', u'літній'),
+    )
+
     class Week:
         def __init__(self, academic_term, week_number):
-            self.academic_term=academic_term
-            self.week_number=week_number
+            self.academic_term = academic_term
+            self.week_number = week_number
+
         def __getitem__(self, key):
             if type(key) == type(1):
                 return self.academic_term.start_date + datetime.timedelta(
-                        days=7*(self.week_number-1) + key)
+                    days=7 * (self.week_number - 1) + key)
             else:
                 raise AttributeError('Int expected, got %s' % key)
+
         def __repr__(self):
             return smart_str(
-                    u'Week #%d of %s' % (
-                        self.week_number,
-                        self.academic_term
-                        ))
+                u'Week #%d of %s' % (
+                    self.week_number,
+                    self.academic_term
+                ))
     university = models.ForeignKey(University)
     year = models.IntegerField()
     kind = models.CharField(max_length=16, choices=ACADEMIC_TERMS)
@@ -69,14 +72,15 @@ class AcademicTerm(models.Model):
 
     def __unicode__(self):
         return u'%s: %s %s %d-%d навчального року (%d т. із %s)' % (
-                self.university,
-                self.season,
-                self.kind,
-                self.year,
-                self.year+1,
-                self.number_of_weeks,
-                self.start_date,
-                )
+            self.university,
+            self.season,
+            self.kind,
+            self.year,
+            self.year + 1,
+            self.number_of_weeks,
+            self.start_date,
+        )
+
     def __getitem__(self, key):
         """Week getter, at[5][2] gets the wednesday of 5th week"""
         if type(key) == type(1):
@@ -94,8 +98,8 @@ class AcademicTerm(models.Model):
             raise ValueError('There is no week #%d in %s' % (
                 week_number,
                 self,
-                ))
-    
+            ))
+
 
 class Building(models.Model):
     university = models.ForeignKey(University)
@@ -115,10 +119,10 @@ class Building(models.Model):
         else:
             label_part = u''
         return u' - '.join([
-                self.university.abbr,
-                number_part,
-                label_part,
-                ])
+            self.university.abbr,
+            number_part,
+            label_part,
+        ])
 
 
 class Room(models.Model):
@@ -151,27 +155,27 @@ class Room(models.Model):
         else:
             building_part = u''
         return u'-'.join([
-                building_part,
-                room_part,
-                ])
+            building_part,
+            room_part,
+        ])
 
 
 class Faculty(models.Model):
     university = models.ForeignKey(University)
     name = models.CharField(max_length=255)
     abbr = models.CharField(max_length=16)
-    
+
     class Meta:
         unique_together = (
-                ('university', 'name'),
-                ('university', 'abbr'),
-                )
+            ('university', 'name'),
+            ('university', 'abbr'),
+        )
 
     def __unicode__(self):
         return '%s - %s' % (
-                self.university.abbr,
-                self.abbr,
-                )
+            self.university.abbr,
+            self.abbr,
+        )
 
 
 class Department(models.Model):
@@ -196,9 +200,9 @@ class Major(models.Model):
 
     def __unicode__(self):
         return u'%s - %s' % (
-                self.code,
-                self.name,
-                )
+            self.code,
+            self.name,
+        )
 
 
 #TODO finish this class
@@ -206,7 +210,7 @@ class Person(models.Model):
     """Represents generic person"""
     user = models.OneToOneField(User, null=True, blank=True)
     full_name = models.CharField(max_length=255)
-    
+
     #class Meta:
     #    abstract = True
 
@@ -243,11 +247,11 @@ def ldap_sync(user, ldap_user, **kwargs):
 @receiver(populate_user_profile)
 def ldap_sync_profile(profile, ldap_user, **kwargs):
     ldap_major_mapping = {
-            # TODO add other majors from
-            # http://wiki.usic.org.ua/wiki/UMS_utilities
-            u'40203': u'6.040203',
-            u'50103': u'6.050103',
-            }
+        # TODO add other majors from
+        # http://wiki.usic.org.ua/wiki/UMS_utilities
+        u'40203': u'6.040203',
+        u'50103': u'6.050103',
+    }
     person = profile
     person.full_name = ldap_user.attrs['cn'][0]
     ldap_profession = ldap_user.attrs['profession'][0]
@@ -258,8 +262,8 @@ def ldap_sync_profile(profile, ldap_user, **kwargs):
             ldap_faculty = ldap_user.attrs['faculty'][0]
             if ldap_faculty in ldap_major_mapping.keys():
                 student.major = Major.objects.get(
-                        code=ldap_major_mapping[ldap_faculty]
-                        )
+                    code=ldap_major_mapping[ldap_faculty]
+                )
             student.save()
     except Exception, e:
         logging.error(e)
@@ -275,45 +279,45 @@ class Student(Person):
     def enroll(self, target):
         if isinstance(target, Group):
             StudentGroupMembership.objects.create(
-                    student=self,
-                    group=target,
-                    )
+                student=self,
+                group=target,
+            )
         elif isinstance(target, Lesson):
             try:
                 sls = StudentLessonSubscription.objects.get(
                     student=self,
                     lesson=target,
                     via_group_membership__isnull=False
-                    )
+                )
                 sls.via_group_membership = None
                 sls.save()
             except StudentLessonSubscription.DoesNotExist:
                 StudentLessonSubscription.objects.create(
-                        student=self,
-                        lesson=target,
-                        )
+                    student=self,
+                    lesson=target,
+                )
         else:
             raise NotImplementedError(
-                    'Enroll is not implemented for %s %s' % (
-                        type(target), target
-                        ))
+                'Enroll is not implemented for %s %s' % (
+                    type(target), target
+                ))
 
     def unenroll(self, target):
         if isinstance(target, Group):
             StudentGroupMembership.objects.get(
-                    student=self,
-                    group=target,
-                    ).delete()
+                student=self,
+                group=target,
+            ).delete()
         elif isinstance(target, Lesson):
             StudentLessonSubscription.objects.get(
-                    student=self,
-                    lesson=target,
-                    ).delete()
+                student=self,
+                lesson=target,
+            ).delete()
         else:
             raise NotImplementedError(
-                    'Unenroll is not implemented for %s %s' % (
-                        type(target), target
-                        ))
+                'Unenroll is not implemented for %s %s' % (
+                    type(target), target
+                ))
 
     def lessons(self, q_filter=None):
         """q_filter - Q object to provide additional
@@ -346,13 +350,14 @@ class Discipline(models.Model):
             return '.NET'
         else:
             return ''.join(
-                    [word[0].upper() for word in self.name.split(' ') if len(word) > 2])
+                [word[0].upper() for word in self.name.split(' ')
+                 if len(word) > 2])
 
     def __unicode__(self):
         return '%s (%d)' % (
-                self.name,
-                self.code
-                )
+            self.name,
+            self.code
+        )
 
 
 class Course(models.Model):
@@ -364,8 +369,8 @@ class Course(models.Model):
 
     def __unicode__(self):
         return u'%s' % (
-                self.discipline,
-                )
+            self.discipline,
+        )
 
 
 class Timetable(models.Model):
@@ -376,21 +381,21 @@ class Timetable(models.Model):
 
     def __unicode__(self):
         return u'%s %d р.н.' % (
-                self.major.name,
-                self.year,
-                )
+            self.major.name,
+            self.year,
+        )
 
 
 class Group(models.Model):
     course = models.ForeignKey(Course)
-    number = models.IntegerField() # group #0 for lectures
+    number = models.IntegerField()  # group #0 for lectures
     lecturer = models.ForeignKey(Lecturer)
 
     def __unicode__(self):
         return u'%s-%d' % (
-                self.course.abbr(),
-                self.number,
-                )
+            self.course.abbr(),
+            self.number,
+        )
 
 
 class StudentGroupMembership(models.Model):
@@ -402,13 +407,14 @@ class StudentGroupMembership(models.Model):
 
 
 @receiver(post_save, sender=StudentGroupMembership)
-def student_group_membership_post_save(sender, instance, created, raw, using, **kwargs):
+def student_group_membership_post_save(sender, instance, created,
+                                       raw, using, **kwargs):
     if created:
         for lesson in instance.group.lesson_set.all():
             StudentLessonSubscription.objects.create(
-                    student=instance.student,
-                    lesson=lesson,
-                    via_group_membership=instance)
+                student=instance.student,
+                lesson=lesson,
+                via_group_membership=instance)
 
 # delete is handled with cascade DB deletion of related objects
 
@@ -424,11 +430,11 @@ class Lesson(models.Model):
 
     def __unicode__(self):
         return '%s %d %s - %d' % (
-                self.date,
-                self.lesson_number,
-                self.group.course.discipline.name,
-                self.group.number,
-                )
+            self.date,
+            self.lesson_number,
+            self.group.course.discipline.name,
+            self.group.number,
+        )
 
     def notify_subscribers(self, changer):
         from django.core.mail import EmailMultiAlternatives
@@ -449,26 +455,29 @@ class Lesson(models.Model):
                 'changer': changer,
                 'changeset': changeset,
                 'lesson': old_self,
-                })
-            plaintext_template = get_template('notifications/lesson_update.txt')
+            })
+            plaintext_template = get_template(
+                'notifications/lesson_update.txt')
             plaintext_message = plaintext_template.render(context)
             for sls in StudentLessonSubscription.objects.select_related().filter(lesson=old_self):
                 user = sls.student.user
                 if user.email:
                     user.email_user(
-                            u'Зміни у розкладі',
-                            plaintext_message,
-                            from_email=u'Розклад <noreply@universitytimetable.org.ua>'
-                            )
+                        u'Зміни у розкладі',
+                        plaintext_message,
+                        from_email=u'Розклад <noreply@universitytimetable.org.ua>'
+                    )
 
     def icalendar_event(self):
         import icalendar
         from dateutil.tz import tzlocal
         #import pytz
         lesson_start_time, lesson_end_time = lesson_times[self.lesson_number]
-        lesson_start_hour, lesson_start_minute = map(int, lesson_start_time.split(':'))
-        lesson_end_hour, lesson_end_minute = map(int, lesson_end_time.split(':'))
-        tz = tzlocal()#pytz.timezone('Europe/Kiev')
+        lesson_start_hour, lesson_start_minute = map(int,
+                                                     lesson_start_time.split(':'))
+        lesson_end_hour, lesson_end_minute = map(int,
+                                                 lesson_end_time.split(':'))
+        tz = tzlocal()  # pytz.timezone('Europe/Kiev')
         dtstart = datetime.datetime.combine(self.date, datetime.time(
             lesson_start_hour,
             lesson_start_minute,
@@ -480,9 +489,9 @@ class Lesson(models.Model):
         event = icalendar.Event()
         if self.group.number != 0:
             summary_str = u'%s-%d' % (
-                    self.group.course.discipline.name,
-                    self.group.number,
-                    )
+                self.group.course.discipline.name,
+                self.group.number,
+            )
         else:
             summary_str = u'%s' % self.group.course.discipline.name
         event.add('summary', summary_str)
@@ -498,9 +507,9 @@ def lesson_post_save(sender, instance, created, raw, using, **kwargs):
     if created:
         for sgm in StudentGroupMembership.objects.filter(group=instance.group):
             StudentLessonSubscription.objects.create(
-                    student=sgm.student,
-                    lesson=instance,
-                    via_group_membership=sgm)
+                student=sgm.student,
+                lesson=instance,
+                via_group_membership=sgm)
 
 
 class StudentLessonSubscription(models.Model):
@@ -509,6 +518,8 @@ class StudentLessonSubscription(models.Model):
     # remember the group membership that caused this object to be created
     # for easy deletion later.
     # Single lesson subscriptions have this field to None
-    via_group_membership = models.ForeignKey(StudentGroupMembership, null=True, blank=True)
+    via_group_membership = models.ForeignKey(
+        StudentGroupMembership, null=True, blank=True)
+
     class Meta:
         unique_together = ('student', 'lesson')
