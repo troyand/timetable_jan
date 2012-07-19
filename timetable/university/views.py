@@ -249,13 +249,12 @@ class TimetableView(TemplateResponseMixin, BaseTimetableView):
         }
 
     def _sanitize_week(self, week, max_week):
-        """Ensures that a week is in range [1, max_week]."""
+        """Ensures that a week is in range [1, max_week], otherwise makes it
+        None."""
         # REVIEW Maybe must fire some exception and write error to user
         result = week
-        if result > max_week:
-            result = max_week
-        if result < 1:
-            result = 1
+        if result > max_week or result < 1:
+            result = None
         return result
 
     def _generate_week_links(self, number_of_weeks):
@@ -310,8 +309,12 @@ class TimetableMainView(TimetableView):
         # for Sunday show the following Monday
         if today.isoweekday() == 7:
             today += datetime.timedelta(days=1)
-        days_diff = abs(today - context['first_monday']).days
-        week = days_diff / 7 + 1
+        first_monday = context['first_monday']
+        if today < first_monday:
+            week = -1
+        else:
+            days_diff = abs(today - first_monday).days
+            week = days_diff / 7 + 1
         context['week_to_show'] = week
         return super(TimetableMainView, self)._generate_context_data(context)
 
