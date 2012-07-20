@@ -20,6 +20,17 @@ lesson_times = {
         7: (u'18:00', u'19:20')
         }
 
+day_names = {
+        1: u'Пн',
+        2: u'Вт',
+        3: u'Ср',
+        4: u'Чт',
+        5: u'Пт',
+        6: u'Сб',
+        7: u'Нд',
+        }
+
+
 
 class University(models.Model):
     name = models.CharField(max_length=255, unique=True)

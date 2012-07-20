@@ -419,15 +419,6 @@ def planning(request):
     time_rows = []
     sorted_rooms = sorted(rooms, key=lambda x: u'%s' % x)
     #print sorted_rooms
-    day_names = {
-            1: u'Пн',
-            2: u'Вт',
-            3: u'Ср',
-            4: u'Чт',
-            5: u'Пт',
-            6: u'Сб',
-            7: u'Нд',
-            }
     for weekday in range(1,7):
         for lesson_number in lesson_times.keys():
             #row_names.append('%s-%s' % (weekday, lesson_times[lesson_number][0]))
@@ -497,15 +488,6 @@ def planning_light(request):
     rows = []
     time_rows = []
     sorted_rooms = sorted(rooms, key=lambda x: u'%s' % x)
-    day_names = {
-            1: u'Пн',
-            2: u'Вт',
-            3: u'Ср',
-            4: u'Чт',
-            5: u'Пт',
-            6: u'Сб',
-            7: u'Нд',
-            }
     for weekday in range(1,7):
         for lesson_number in lesson_times.keys():
             row = []
@@ -532,9 +514,42 @@ def planning_light(request):
             context_instance=RequestContext(request)
             )
 
+def planning_light_room(request, room_id):
+    academic_term = AcademicTerm.objects.all()[2]
+    #room = Room.objects.select_related('building').get_object_or_404
+    room = get_object_or_404(Room, pk=room_id)
+    rows = []
+    time_rows = []
+    week_numbers = range(1, academic_term.number_of_weeks + 1)
+    for weekday in range(1,7):
+        for lesson_number in lesson_times.keys():
+            row = []
+            if lesson_number == 1:
+                time_rows.append((day_names[weekday], lesson_times[lesson_number][0]))
+            else:
+                time_rows.append((None, lesson_times[lesson_number][0]))
+            for week_number in week_numbers:
+                cell = '%d-%d-%d' % (weekday, lesson_number, week_number)
+                row.append(cell)
+            rows.append(row)
+    column_width = 78
+    return render_to_response(
+            'planning_light_room.html',
+            {
+                'number_of_weeks': academic_term.number_of_weeks,
+                'column_width': column_width,
+                'rows': rows,
+                'time_rows': time_rows,
+                'week_numbers': week_numbers,
+                'room': room,
+                'number_of_lessons_per_day': len(lesson_times.keys()),
+                },
+            context_instance=RequestContext(request)
+            )
+
 color_palette = list(palette(400))
 
-@cache_page(60*60*24)
+#@cache_page(60*60*24)
 def planning_ajax(request, room_id):
     academic_term = AcademicTerm.objects.all()[2]
     room = Room.objects.get(pk=room_id)
@@ -599,6 +614,60 @@ def planning_ajax(request, room_id):
                 ) for item in cell])
             if cell:
                 json_response['cell-%d-%d-%d' % (weekday, lesson_number, room.pk)] = divs
+    return HttpResponse(json.dumps(json_response), mimetype="application/json")
+
+def planning_room_ajax(request, room_id):
+    academic_term = AcademicTerm.objects.all()[2]
+    room = Room.objects.get(pk=room_id)
+    lessons = Lesson.objects.select_related('room', 'room__building', 'group', 'group__course__discipline').filter(
+            date__gte=academic_term.start_date
+            ).filter(
+            date__lt=academic_term.exams_start_date
+            ).filter(
+            room__pk=room_id
+            ).order_by('date')
+    # mapping[(1,1)][Room('1-225')]=[(1,Lesson('A')), (2,Lesson('A'))]
+    mapping = {}
+    course_ids = set()
+    for lesson in lessons:
+        date_timekey = (lesson.date.isoweekday(), lesson.lesson_number)
+        if not mapping.has_key(date_timekey):
+            mapping[date_timekey] = {}
+        if not mapping[date_timekey].has_key(lesson.room):
+            mapping[date_timekey][lesson.room] = []
+        course_ids.add(lesson.group.course_id)
+        mapping[date_timekey][lesson.room].append(
+                (
+                    academic_term.get_week(lesson.date).week_number,
+                    lesson
+                    )
+                )
+    json_response = {}
+    for weekday in range(1,7):
+        for lesson_number in lesson_times.keys():
+            date_timekey = (weekday, lesson_number)
+            if mapping.has_key(date_timekey) and mapping[date_timekey].has_key(room):
+                cell_mapping = dict(mapping[date_timekey][room])
+            else:
+                cell_mapping = {}
+            for week_number in range(1, academic_term.number_of_weeks+1):
+                if week_number in cell_mapping:
+                    item = {
+                            'css_class': 'lesson',
+                            'background_color': color_palette[cell_mapping[week_number].group.course_id % len(color_palette)],
+                            'title': u'Тиждень %d' % week_number,
+                            'content': u'%s - %s' % (
+                                cell_mapping[week_number].group.course.discipline.name,
+                                cell_mapping[week_number].group.number or u'лекція'),
+                            }
+                else:
+                    item = {
+                            'css_class': 'free',
+                            'background_color': 'inherit',
+                            'title': u'Тиждень %d' % week_number,
+                            'content': u'Пара відсутня',
+                            }
+                json_response['cell-%d-%d-%d' % (weekday, lesson_number, week_number)] = item
     return HttpResponse(json.dumps(json_response), mimetype="application/json")
 
 @login_required
