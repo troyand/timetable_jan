@@ -59,9 +59,9 @@ class FeedbackView(FormView):
         return '/'
 
 
-class CourseCreateView(CreateView):
-    #form_class = CourseForm
-    model = Course
+class CourseCreateView(FormView):
+    form_class = CourseForm
+    #model = Course
     context_object_name = 'course'
 
     def get_success_url(self):
