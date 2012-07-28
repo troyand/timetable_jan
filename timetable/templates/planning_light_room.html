@@ -90,7 +90,7 @@
             $(".meta-row").show();
             $.ajax({
                 "type": "GET",
-                "url": "/planning-light/room/"+{{ room.pk }}+"/ajax/"
+                "url": "/planning-light/"+{{ term }}+"/room/"+{{ room.pk }}+"/ajax/"
             }).done(function(json){
                 //console.log(json);
                 for (k in json){

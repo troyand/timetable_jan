@@ -207,13 +207,17 @@ def planning_light(request, term):
                 'px_per_day': px_per_day,
                 'sorted_rooms': sorted_rooms,
                 'number_of_lessons_per_day': len(lesson_times.keys()),
+                'term': term,
                 },
             context_instance=RequestContext(request)
             )
 
 
-def planning_light_room(request, room_id):
-    academic_term = AcademicTerm.objects.all()[2]
+def planning_light_room(request, term, room_id):
+    term = int(term)
+    if term < 0 or term >= AcademicTerm.objects.count():
+        raise Http404
+    academic_term = AcademicTerm.objects.all()[term]
     #room = Room.objects.select_related('building').get_object_or_404
     room = get_object_or_404(Room, pk=room_id)
     rows = []
@@ -241,6 +245,7 @@ def planning_light_room(request, room_id):
                 'week_numbers': week_numbers,
                 'room': room,
                 'number_of_lessons_per_day': len(lesson_times.keys()),
+                'term': term,
                 },
             context_instance=RequestContext(request)
             )
@@ -318,8 +323,11 @@ def planning_ajax(request, term, room_id):
                 json_response['cell-%d-%d-%d' % (weekday, lesson_number, room.pk)] = divs
     return HttpResponse(json.dumps(json_response), mimetype="application/json")
 
-def planning_room_ajax(request, room_id):
-    academic_term = AcademicTerm.objects.all()[2]
+def planning_room_ajax(request, term, room_id):
+    term = int(term)
+    if term < 0 or term >= AcademicTerm.objects.count():
+        raise Http404
+    academic_term = AcademicTerm.objects.all()[term]
     room = Room.objects.get(pk=room_id)
     lessons = Lesson.objects.select_related('room', 'room__building', 'group', 'group__course__discipline').filter(
             date__gte=academic_term.start_date
