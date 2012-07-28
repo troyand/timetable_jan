@@ -3,6 +3,8 @@
 from django.http import HttpResponse, Http404
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
+from django.views.generic import View
+from django.views.generic.base import TemplateResponseMixin
 from timetable.university.models import *
 from django.views.decorators.cache import cache_page
 from htmlmin.decorators import minified_response
@@ -174,81 +176,151 @@ def planning(request, term):
     )
 
 
-#@cache_page(60*60*24)
-#@minified_response
-def planning_light(request, term):
-    term = int(term)
-    if term < 0 or term >= AcademicTerm.objects.count():
-        raise Http404
-    academic_term = AcademicTerm.objects.all()[term]
-    rooms = Room.objects.select_related('building').filter(building__number__gt=0)
-    rows = []
-    time_rows = []
-    sorted_rooms = sorted(rooms, key=lambda x: u'%s' % x)
-    for weekday in range(1,7):
-        for lesson_number in lesson_times.keys():
-            row = []
-            if lesson_number == 1:
-                time_rows.append((day_names[weekday], lesson_times[lesson_number][0]))
-            else:
-                time_rows.append((None, lesson_times[lesson_number][0]))
-            for room in sorted_rooms:
-                cell = '%d-%d-%d' % (weekday, lesson_number, room.pk)
-                row.append(cell)
-            rows.append(row)
-    px_per_day = 8
-    return render_to_response(
-            'planning_light.html',
-            {
-                'number_of_weeks': academic_term.number_of_weeks,
-                'room_column_width': academic_term.number_of_weeks * px_per_day,
-                'rows': rows,
-                'time_rows': time_rows,
-                'px_per_day': px_per_day,
-                'sorted_rooms': sorted_rooms,
-                'number_of_lessons_per_day': len(lesson_times.keys()),
-                'term': term,
-                },
-            context_instance=RequestContext(request)
-            )
+class BasePlanningView(View):
+    """
+    Base view for a planning.
+
+    Fills context with some initial info: term, number of weeks in it, rows and
+    columns for a planning table, number of lessons per day.
+    """
+    def get(self, request, *args, **kwargs):
+        """
+        Response to a GET request.
+
+        Renders a page using a generated context in a response to a GET
+        request.
+        """
+        context = self.get_context_data(**kwargs)
+        print context
+        return self.render_to_response(context)
+
+    def get_context_data(self, **kwargs):
+        """Returns a context data for this request."""
+        context = self._get_initial_data()
+        data = self._generate_context_data(context)
+        context.update(data)
+        return context
+
+    def render_to_response(context):
+        """Renders a given context in a some manner."""
+        raise NotImplementedException
+
+    def _get_initial_data(self):
+        """
+        Retrieves all initial data required for rendering a planning page.
+
+        Main goal - extract captured parameters.
+        Returns a map with pairs: 'term' - id of a term, 'academic_term' -
+        AcademicTerm object from a DB.
+        """
+        data = {}
+        # Get captured params
+        term = int(self.kwargs.get('term'))
+        if term < 0 or term >= AcademicTerm.objects.count():
+            raise Http404
+        academic_term = AcademicTerm.objects.all()[term]
+        data['academic_term'] = academic_term
+        data['term'] = term
+        return data
+
+    def _generate_context_data(self, context):
+        """
+        Generates additional required context data based on a given context.
+
+        Adds such pairs to a context: 'number_of_weeks' - number of weeks in a
+        given term, 'rows' - rows list for a planning table, 'time_rows' -
+        names of rows for a planning table, 'number_of_lessons_per_day' -
+        maximum number of lessons in a day, child-specific columns pair.
+        """
+        rows = []
+        time_rows = []
+        columns = self._get_columns(context)
+        for weekday in range(1,7):
+            for lesson_number in lesson_times.keys():
+                if lesson_number == 1:
+                    time_rows.append((day_names[weekday], lesson_times[lesson_number][0]))
+                else:
+                    time_rows.append((None, lesson_times[lesson_number][0]))
+                rows.append(
+                    self._generate_row(weekday, lesson_number, columns))
+        academic_term = context['academic_term']
+        context['number_of_weeks'] = academic_term.number_of_weeks
+        context['rows'] = rows
+        context['time_rows'] = time_rows
+        context['number_of_lessons_per_day'] = len(lesson_times.keys())
+        context['columns'] = columns
+        return context
+
+    def _generate_row(self, weekday, lesson_number, columns):
+        """Generates a row for a given weekday and lesson number."""
+        row = []
+        for item in columns:
+            cell = '%d-%d-%d' % (weekday, lesson_number,
+                                 self._get_column_name(item))
+            row.append(cell)
+        return row
+
+    def _get_columns(self, context):
+        """Generates columns data source for a planning table."""
+        raise NotImplementedException
+
+    def _get_column_name(self, column):
+        """Returns a name for a given column."""
+        return column
 
 
-def planning_light_room(request, term, room_id):
-    term = int(term)
-    if term < 0 or term >= AcademicTerm.objects.count():
-        raise Http404
-    academic_term = AcademicTerm.objects.all()[term]
-    #room = Room.objects.select_related('building').get_object_or_404
-    room = get_object_or_404(Room, pk=room_id)
-    rows = []
-    time_rows = []
-    week_numbers = range(1, academic_term.number_of_weeks + 1)
-    for weekday in range(1,7):
-        for lesson_number in lesson_times.keys():
-            row = []
-            if lesson_number == 1:
-                time_rows.append((day_names[weekday], lesson_times[lesson_number][0]))
-            else:
-                time_rows.append((None, lesson_times[lesson_number][0]))
-            for week_number in week_numbers:
-                cell = '%d-%d-%d' % (weekday, lesson_number, week_number)
-                row.append(cell)
-            rows.append(row)
-    column_width = 78
-    return render_to_response(
-            'planning_light_room.html',
-            {
-                'number_of_weeks': academic_term.number_of_weeks,
-                'column_width': column_width,
-                'rows': rows,
-                'time_rows': time_rows,
-                'week_numbers': week_numbers,
-                'room': room,
-                'number_of_lessons_per_day': len(lesson_times.keys()),
-                'term': term,
-                },
-            context_instance=RequestContext(request)
-            )
+class PlanningLightView(TemplateResponseMixin, BasePlanningView):
+    """Main planning view that obtains actual info using ajax."""
+    template_name = 'planning_light.html'
+
+    def _generate_context_data(self, context):
+        """Adds some specific info for term planning overview to context."""
+        px_per_day = 8
+        context['px_per_day'] = px_per_day
+        academic_term = context['academic_term']
+        context['room_column_width'] = academic_term.number_of_weeks * px_per_day
+        return super(PlanningLightView, self)._generate_context_data(context)
+
+    def _get_columns(self, _):
+        """Returns all available rooms as a sorted list."""
+        rooms = Room.objects.select_related('building').filter(
+            building__number__gt=0)
+        sorted_rooms = sorted(rooms, key=lambda x: u'%s' % x)
+        return sorted_rooms
+
+    def _get_column_name(self, item):
+        """Returns room's number.'"""
+        return item.pk
+
+
+class PlanningLightRoomView(TemplateResponseMixin, BasePlanningView):
+    """
+    Planning view for a specific room that obtains actual info using ajax.
+    """
+    template_name = 'planning_light_room.html'
+
+    def _get_initial_data(self):
+        """Adds room id to the initial data."""
+        context = super(PlanningLightRoomView, self)._get_initial_data()
+        context['room_id'] = self.kwargs.get('room_id')
+        return context
+
+    def _generate_context_data(self, context):
+        """Adds some specific info for room planning to context."""
+        context = super(PlanningLightRoomView, self)._generate_context_data(
+            context)
+        column_width = 78
+        context['column_width'] = column_width
+        room_id = context['room_id']
+        room = get_object_or_404(Room, pk=room_id)
+        context['room'] = room
+        return context
+
+    def _get_columns(self, context):
+        """Returns all weeks for a given term."""
+        academic_term = context['academic_term']
+        week_numbers = range(1, academic_term.number_of_weeks + 1)
+        return week_numbers
 
 
 color_palette = list(palette(400))

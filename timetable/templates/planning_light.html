@@ -127,7 +127,7 @@
             <table class="bordered-table zebra-striped compact non-fancy">
                 <thead>
                     <tr>
-                        {% for room in sorted_rooms %}
+                        {% for room in columns %}
                             <td class="room-column room-title unloaded" data-room-id="{{ room.id }}">
                               <a href="room/{{ room.id }}">{{ room }}</a>
                             </td>

@@ -7,6 +7,7 @@ from timetable.university.cb_views import *
 from django.views.generic import TemplateView
 from timetable.university.ajax_views import ajax_urls, UnifiedTimetableProcessView
 from timetable.university.views import ICALView, TimetableView, TimetableMainView
+from timetable.university.planning_views import PlanningLightView, PlanningLightRoomView
 
 
 urlpatterns = patterns('',
@@ -20,12 +21,12 @@ urlpatterns = patterns('',
     (r'^planning-light/$', redirect_to, {'url': '/planning/'}),
     (r'^planning/(?P<term>\d+)/$',
      'timetable.university.planning_views.planning'),
-    (r'^planning-light/(?P<term>\d+)/$',
-     'timetable.university.planning_views.planning_light'),
+    url(r'^planning-light/(?P<term>\d+)/$',
+        PlanningLightView.as_view(), name='planning-light'),
     (r'^planning-light/(?P<term>\d+)/(?P<room_id>\d+)/ajax/$',
      'timetable.university.planning_views.planning_ajax'),
-    (r'^planning-light/(?P<term>\d+)/room/(?P<room_id>\d+)/$',
-     'timetable.university.planning_views.planning_light_room'),
+    url(r'^planning-light/(?P<term>\d+)/room/(?P<room_id>\d+)/$',
+        PlanningLightRoomView.as_view(), name='planning-light-room'),
     ('^planning-light/(?P<term>\d+)/room/(?P<room_id>\d+)/ajax/$',
      'timetable.university.planning_views.planning_room_ajax'),
     (r'^choose-subjects/(?P<timetable_id>\d+)/$',
