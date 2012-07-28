@@ -91,7 +91,7 @@
                 console.log($(value).data("room-id"));
                 $.ajax({
                     "type": "GET",
-                    "url": "/planning-light/"+$(value).data("room-id")+"/"
+                    "url": window.location.pathname+$(value).data("room-id")+"/ajax/"
                 }).done(function(json){
                     //console.log(json);
                     for (k in json){

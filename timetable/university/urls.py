@@ -2,6 +2,7 @@
 
 from django.conf.urls.defaults import patterns, include, url
 from django.conf import settings
+from django.views.generic.simple import redirect_to
 from timetable.university.cb_views import *
 from django.views.generic import TemplateView
 from timetable.university.ajax_views import ajax_urls, UnifiedTimetableProcessView
@@ -13,19 +14,22 @@ urlpatterns = patterns('',
     (r'^help/$', 'timetable.university.views.help'),
     (r'^about/$', 'timetable.university.views.about'),
     (r'^contacts/$', 'timetable.university.views.contacts'),
-    (r'^planning/(?P<term>\d+)/$',
-     'timetable.university.planning_views.planning'),
+    (r'^course-stats/$', 'timetable.university.planning_views.course_stats'),
     (r'^planning/$',
      'timetable.university.planning_views.choose_term_for_planning'),
-    (r'^planning-light/$',
+    (r'^planning-light/$', redirect_to, {'url': '/planning/'}),
+    (r'^planning/(?P<term>\d+)/$',
+     'timetable.university.planning_views.planning'),
+    (r'^planning-light/(?P<term>\d+)/$',
      'timetable.university.planning_views.planning_light'),
-    (r'^course-stats/$', 'timetable.university.planning_views.course_stats'),
-    (r'^planning-light/(?P<room_id>\d+)/$',
+    (r'^planning-light/(?P<term>\d+)/(?P<room_id>\d+)/ajax/$',
      'timetable.university.planning_views.planning_ajax'),
+
     (r'^planning-light/room/(?P<room_id>\d+)/$',
      'timetable.university.planning_views.planning_light_room'),
     ('^planning-light/room/(?P<room_id>\d+)/ajax/$',
      'timetable.university.planning_views.planning_room_ajax'),
+
     (r'^choose-subjects/(?P<timetable_id>\d+)/$',
      'timetable.university.views.choose_subjects'),
     url(r'^render/(?P<encoded_groups>[\d/]+)/$',

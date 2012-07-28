@@ -176,8 +176,11 @@ def planning(request, term):
 
 #@cache_page(60*60*24)
 #@minified_response
-def planning_light(request):
-    academic_term = AcademicTerm.objects.all()[2]
+def planning_light(request, term):
+    term = int(term)
+    if term < 0 or term >= AcademicTerm.objects.count():
+        raise Http404
+    academic_term = AcademicTerm.objects.all()[term]
     rooms = Room.objects.select_related('building').filter(building__number__gt=0)
     rows = []
     time_rows = []
@@ -246,8 +249,11 @@ def planning_light_room(request, room_id):
 color_palette = list(palette(400))
 
 #@cache_page(60*60*24)
-def planning_ajax(request, room_id):
-    academic_term = AcademicTerm.objects.all()[2]
+def planning_ajax(request, term, room_id):
+    term = int(term)
+    if term < 0 or term >= AcademicTerm.objects.count():
+        raise Http404
+    academic_term = AcademicTerm.objects.all()[term]
     room = Room.objects.get(pk=room_id)
     lessons = Lesson.objects.select_related('room', 'room__building', 'group', 'group__course__discipline').filter(
             date__gte=academic_term.start_date
