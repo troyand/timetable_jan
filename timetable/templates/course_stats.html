@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Розклад - Звіт із курсів{% endblock %}
+{% block header %}Звіт із курсів{% endblock %}
+{% block content %}
+    <table class="bordered-table zebra-striped">
+        <thead>
+            <tr>
+                <td>
+                    Курс
+                </td>
+                <td>
+                    Лекційних
+                </td>
+                <td>
+                    Практичних (семінарських)
+                </td>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in rows %}
+                <tr>
+                    <td>
+                        {{ row.name }}
+                    </td>
+                    <td>
+                        {{ row.lectures }}
+                    </td>
+                    <td{% if row.inconsistent %} style="background: #FDDFDE"{% endif %}>
+                        {% for group_number, lessons in row.non_lectures %}
+                            <span title="Група {{ group_number }}">{{ lessons }}</span>
+                            {% if not forloop.last %}
+                                /
+                            {% endif %}
+                        {% endfor %}
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

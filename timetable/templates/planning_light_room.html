@@ -1,0 +1,202 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<title>{% block title %}{{ room }} - {{ academic_term }}{% endblock %}</title>
+<meta name="description" content="">
+<meta name="author" content="">
+<link rel="shortcut icon" href="{% static "favicon.ico" %}">
+<link href="{% static "bootstrap.css" %}" rel="stylesheet">
+<script type="text/javascript" src="{% static "jquery.min.js" %}"></script>
+    <style type="text/css">
+        table.compact td {
+            padding: 0 1px 0 1px;
+        }
+        .column {
+            min-width: {{ column_width }}px;
+        }
+        .day-column {
+            min-width: 25px;
+        }
+        .time-column {
+            min-width: 45px;
+        }
+        .lesson {
+            color: #fff;
+            font-weight: bold;
+            text-align: center;
+            cursor: default;
+            width: {{ column_width }}px;
+        }
+        .free {
+            cursor: default;
+            width: {{ column_width }}px;
+        }
+        .meta-row {
+            display: none;
+        }
+        #cells {
+            overflow-x: auto;
+            overflow-y: auto;
+            display: inline-block;
+        }
+        #cells-header {
+            overflow-x: hidden;
+            display: inline-block;
+        }
+        #cells-corner {
+            display: inline-block;
+            width: 72px;
+        }
+        #cells-time {
+            display: inline-block;
+            width: 72px;
+            overflow-x: hidden;
+            overflow-y: hidden;
+        }
+        .non-fancy {
+            border-collapse: collapse;
+            border-radius: 0;
+            border: 0;
+            margin-bottom: 0;
+        }
+        .unloaded {
+            background: #ddd;
+        }
+        .selected {
+            background-color: #f00;
+        }
+        html, body {
+            overflow: hidden;
+        }
+        #top-menu {
+            height: 32px;
+        }
+    </style>
+    <script type="text/javascript" src="{% static "bootstrap-twipsy.js" %}"></script>
+    <script type="text/javascript" src="{% static "bootstrap-popover.js" %}"></script>
+    <script type="text/javascript">
+        $(function(){
+            var resize = function() {
+                var width = $(window).width() - 78 + "px";
+                var height = $(window).height() - 24 - $("#top-menu").height() + "px";
+                $("#cells").height(height);
+                $("#cells").width(width);
+                $("#cells-header").width(width);
+                $("#cells-time").height(height);
+            }
+            $(window).resize(resize);
+            resize();
+            $("#cells").scroll(function(){
+                $("#cells-time").scrollTop($("#cells").scrollTop());
+                $("#cells-header").scrollLeft($("#cells").scrollLeft());
+            });
+            $("#loading").hide();
+            $(".meta-row").show();
+            $.ajax({
+                "type": "GET",
+                "url": "/planning-light/room/"+{{ room.pk }}+"/ajax/"
+            }).done(function(json){
+                //console.log(json);
+                for (k in json){
+                    //console.log(k);
+                    var td = $('#'+k);
+                    td.addClass(json[k]['css_class']);
+                    td.attr('title', json[k]['title']);
+                    td.data('content', json[k]['content']);
+                    td.css('background-color', json[k]['background_color']);
+                    if (json[k]['html']) {
+                        td.html(json[k]['html']);
+                    }
+                    //$('#'+k).html(json[k]);
+                    //$('#'+k+' > .lesson').popover({"animate": false});
+                }
+                $('.unloaded').removeClass('unloaded');
+                if ($('.unloaded').length == 0) {
+                    $(".lesson").popover({"animate": false});
+                    $(".free").popover({"animate": false});
+                    $(".free").click(function(){
+                        var element = $(this);
+                        if (element.hasClass("selected")){
+                            element.removeClass("selected");
+                            //element.css("background-color", "inherit");
+                            element.css("background-image", "");
+                        }
+                        else{
+                            element.addClass("selected");
+                            //element.css("background-color", "#f00");
+                            element.css("background-image", "url('{% static "stripe_bg.png" %}')");
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+</head>
+<body>
+{% block content %}
+    <h3 id="loading">Завантаження…</h3>
+    <div class="meta-row" id="top-menu">
+        topbar
+    </div>
+    <div class="meta-row">
+        <div id="cells-corner">
+            <table class="bordered-table zebra-striped compact non-fancy">
+                <thead>
+                    <tr>
+                        <td class="day-column">&nbsp;</td>
+                        <td class="time-column">&nbsp;</td>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+        <div id="cells-header">
+            <table class="bordered-table zebra-striped compact non-fancy" style="width: auto">
+                <thead>
+                    <tr>
+                        {% for week_number in week_numbers %}
+                            <td class="column room-title unloaded">Тиждень {{ week_number }}</td>
+                        {% endfor %}
+                        <td class="column">&nbsp;</td>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+    <div class="meta-row">
+        <div id="cells-time">
+            <table class="bordered-table zebra-striped compact non-fancy">
+                <tbody>
+                    {% for cell in time_rows %}
+                        <tr>
+                            {% if cell.0 %}
+                                <td class="day-column" rowspan="{{ number_of_lessons_per_day }}">{{ cell.0 }}</td>
+                                <td class="time-column">{{ cell.1 }}</td>
+                            {% else %}
+                                <td class="time-column">{{ cell.1 }}</td>
+                            {% endif %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            &nbsp;
+        </div>
+        <div id="cells">
+            <table class="bordered-table zebra-striped compact non-fancy" style="width: auto">
+                <tbody>
+                    {% for row in rows %}
+                        <tr>
+                            {% for cell in row %}
+                                <td class="column" id="cell-{{ cell }}">
+                                    &nbsp;
+                                </td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}
+</body>

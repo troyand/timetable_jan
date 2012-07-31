@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% block title %}Розклад - Створити курс{% endblock %}
+{% block headadd %}
+    <link rel="stylesheet" type="text/css" href="{% static "chosen.css" %}" />
+    <script type="text/javascript" src="{% static "chosen.jquery.min.js" %}"></script>
+    <script type="text/javascript">
+        $(function() {
+            $("select").chosen();
+        });
+    </script>
+{% endblock %}
+{% block header %}Створити курс{% endblock %}
+{% block content %}
+    <form method="post" action="">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <input type="submit" value="Створити" />
+    </form>
+{% endblock %}

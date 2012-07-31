@@ -59,3 +59,21 @@ class FeedbackView(FormView):
 
     def get_success_url(self):
         return '/'
+
+
+class CourseCreateView(FormView):
+    form_class = CourseForm
+    #model = Course
+    context_object_name = 'course'
+
+    def get_success_url(self):
+        return self.request.path
+
+    def get_context_data(self, **kwargs):
+        context = super(CourseCreateView, self).get_context_data(**kwargs)
+        context['form'].fields['timetables'].queryset = Timetable.objects.filter(
+                academic_term__pk=4
+                )
+        print context
+        return context
+
