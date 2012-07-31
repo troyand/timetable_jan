@@ -542,6 +542,7 @@ def planning_light_room(request, room_id):
                 'time_rows': time_rows,
                 'week_numbers': week_numbers,
                 'room': room,
+                'academic_term': academic_term,
                 'number_of_lessons_per_day': len(lesson_times.keys()),
                 },
             context_instance=RequestContext(request)
@@ -659,6 +660,7 @@ def planning_room_ajax(request, room_id):
                             'content': u'%s - %s' % (
                                 cell_mapping[week_number].group.course.discipline.name,
                                 cell_mapping[week_number].group.number or u'лекція'),
+                            'html': cell_mapping[week_number].group.number or u'лекція',
                             }
                 else:
                     item = {
@@ -666,6 +668,7 @@ def planning_room_ajax(request, room_id):
                             'background_color': 'inherit',
                             'title': u'Тиждень %d' % week_number,
                             'content': u'Пара відсутня',
+                            'html': u'',
                             }
                 json_response['cell-%d-%d-%d' % (weekday, lesson_number, week_number)] = item
     return HttpResponse(json.dumps(json_response), mimetype="application/json")

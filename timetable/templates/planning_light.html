@@ -128,7 +128,9 @@
                 <thead>
                     <tr>
                         {% for room in sorted_rooms %}
-                            <td class="room-column room-title unloaded" data-room-id="{{ room.id }}">{{ room }}</td>
+                            <td class="room-column room-title unloaded" data-room-id="{{ room.id }}">
+                                <a href="/planning-light/room/{{ room.id }}/">{{ room }}</a>
+                            </td>
                         {% endfor %}
                         <td class="room-column">&nbsp;</td>
                     </tr>
