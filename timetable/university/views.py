@@ -19,46 +19,50 @@ import json
 
 from django.template.defaultfilters import register as rf
 
+
 @rf.filter(name='lookup')
 def lookup(dictionary, index):
     if index in dictionary:
         return dictionary[index]
     return None
 
+
 @rf.filter(name='vertical')
 def vertical(string):
     return ' '.join(list(string))
 
 promos = {
-        datetime.date(2012,4,19): [
-            ('img/promo/ultramarine.png', 'https://www.facebook.com/events/166568366799044/'),
-            ],
-        datetime.date(2012,4,20): [
-            ('img/promo/social_ship.png', 'http://vk.com/social_ship'),
-            ('img/promo/fsnst_day.png', 'http://vk.com/event37945333'),
-            ],
-        datetime.date(2012,4,26): [
-            ('img/promo/glasses_party.png', 'http://vk.com/event37852523'),
-            ],
-        datetime.date(2012,4,27): [
-            ('img/promo/vynnyi.png', 'http://vk.com/vynnyi'),
-            ],
-        datetime.date(2012,5,11): [
-            ('img/promo/perevtilnyi.png', 'http://vk.com/perevtilnyi'),
-            ],
-        datetime.date(2012,5,15): [
-            ('img/promo/d3-logo.png', ''),
-            ],
-        datetime.date(2012,5,16): [
-            ('img/promo/shockolad.png', 'https://www.facebook.com/events/348381305217123/'),
-            ],
-        datetime.date(2012,5,18): [
-            ('img/promo/fi_day.png', ''),
-            ],
-        datetime.date(2012,5,25): [
-            ('img/promo/konvorablyk.png', 'https://plazerazzi.org/konvorablyk'),
-            ],
-        }
+    datetime.date(2012, 4, 19): [
+        ('img/promo/ultramarine.png',
+         'https://www.facebook.com/events/166568366799044/'),
+    ],
+    datetime.date(2012, 4, 20): [
+        ('img/promo/social_ship.png', 'http://vk.com/social_ship'),
+        ('img/promo/fsnst_day.png', 'http://vk.com/event37945333'),
+    ],
+    datetime.date(2012, 4, 26): [
+        ('img/promo/glasses_party.png', 'http://vk.com/event37852523'),
+    ],
+    datetime.date(2012, 4, 27): [
+        ('img/promo/vynnyi.png', 'http://vk.com/vynnyi'),
+    ],
+    datetime.date(2012, 5, 11): [
+        ('img/promo/perevtilnyi.png', 'http://vk.com/perevtilnyi'),
+    ],
+    datetime.date(2012, 5, 15): [
+        ('img/promo/d3-logo.png', ''),
+    ],
+    datetime.date(2012, 5, 16): [
+        ('img/promo/shockolad.png',
+         'https://www.facebook.com/events/348381305217123/'),
+    ],
+    datetime.date(2012, 5, 18): [
+        ('img/promo/fi_day.png', ''),
+    ],
+    datetime.date(2012, 5, 25): [
+        ('img/promo/konvorablyk.png', 'https://plazerazzi.org/konvorablyk'),
+    ],
+}
 
 
 class ICALResponseMixin(object):
@@ -72,35 +76,37 @@ class ICALResponseMixin(object):
         for lesson in lessons:
             cal.add_component(lesson.icalendar_event())
         response = HttpResponse(
-                cal.as_string().replace(';VALUE=DATE', ''),
-                mimetype='text/calendar'
-                )
+            cal.as_string().replace(';VALUE=DATE', ''),
+            mimetype='text/calendar'
+        )
         response['Content-Disposition'] = 'attachment; filename=universitytimetabe.ics'
         return response
-        
+
 
 class BaseTimetableView(View):
     """
     Basic view for a timetable.
 
-    Fills context with some initial info: mapping with user's lessons, clashing lessons info,
-    groups which user wants to be shown, week user wants to be shown,
-    list with all of the user's lessons, first monday of studying.
+    Fills context with some initial info: mapping with user's lessons,
+    clashing lessons info, groups which user wants to be shown, week user
+    wants to be shown, list with all of the user's lessons, first monday of
+    studying.
     """
     def get(self, request, *args, **kwargs):
-        """Renders a page using a generated context in a response to a GET request."""
+        """Renders a page using a generated context in a response to a GET
+        request. """
         return self.render_to_response(self.get_context_data(**kwargs))
 
     def get_context_data(self, **kwargs):
         """Returns a context data for this request."""
         return self._get_initial_data()
-        
+
     def _get_initial_data(self):
         """
         Retrieves all initial data required for rendering a timetable page.
 
-        Returns a map with keys: 'mapping', 'user_group_list', 'clashing_lessons',
-        'week_to_show', 'lessons', 'first_monday'.
+        Returns a map with keys: 'mapping', 'user_group_list',
+        'clashing_lessons', 'week_to_show', 'lessons', 'first_monday'.
         """
         # Get captured params
         encoded_groups = self.kwargs.get("encoded_groups")
@@ -108,12 +114,14 @@ class BaseTimetableView(View):
         group_to_show = self.kwargs.get("group_to_show")
         # All user's groups (both lecture and practise).
         groups = []
-        # Which groups (lecture + practise) must be shown to a user in a timetable.
+        # Which groups (lecture + practise) must be shown to a user in a
+        # timetable.
         groups_to_show = []
-        # Which group the user has selected to show. 
+        # Which group the user has selected to show.
         group_to_show = group_to_show and int(group_to_show)
-        # Which groups must be shown to user in a filtering list (lecture groups
-        # aren't include here becaue they're paired with a practise ones)
+        # Which groups must be shown to user in a filtering list (lecture
+        # groups aren't included here because they're paired with
+        # a practice ones)
         user_group_list = []
         group_ids = [int(g) for g in encoded_groups.split('/')]
         for group_id in group_ids:
@@ -135,17 +143,17 @@ class BaseTimetableView(View):
                 pass
         if not group_to_show:
             groups_to_show = groups
-        mapping = {} # mapping[date][lesson_number]=Lesson()
+        mapping = {}  # mapping[date][lesson_number]=Lesson()
         lessons = []
         clashing_lessons = []
         for lesson in Lesson.objects.select_related().filter(
                 group__in=groups_to_show):
             mapping.setdefault(lesson.date, {})
-            if mapping[lesson.date].has_key(lesson.lesson_number):
+            if lesson.lesson_number in mapping[lesson.date]:
                 clashing_lessons.append((
-                        mapping[lesson.date][lesson.lesson_number],
-                        lesson,
-                        ))
+                    mapping[lesson.date][lesson.lesson_number],
+                    lesson,
+                ))
             else:
                 mapping[lesson.date][lesson.lesson_number] = lesson
             lessons.append(lesson)
@@ -153,8 +161,10 @@ class BaseTimetableView(View):
         # Find first monday of studying.
         if min(mapping.keys()).weekday() != 0:
             from datetime import timedelta
-            mapping[min(mapping.keys())-timedelta(days=min(mapping.keys()).weekday())]={}
-            #print 'First day of study is not Monday!' # add dummy days so that week starts on Monday
+            mapping[min(mapping.keys()) -
+                    timedelta(days=min(mapping.keys()).weekday())] = {}
+            # print 'First day of study is not Monday!'
+            # add dummy days so that week starts on Monday
         first_monday = min(mapping.keys())
 
         data = {}
@@ -166,11 +176,11 @@ class BaseTimetableView(View):
         data['first_monday'] = first_monday
         return data
 
-                
+
 class ICALView(ICALResponseMixin, BaseTimetableView):
     """View which produces an ical-file with a timetable."""
     pass
-        
+
 
 class TimetableView(TemplateResponseMixin, BaseTimetableView):
     """Main timetable view with some filtering options."""
@@ -184,58 +194,61 @@ class TimetableView(TemplateResponseMixin, BaseTimetableView):
         return context
 
     def _generate_context_data(self, context):
-        """Generates all information required by a template from a previously obtained context."""
+        """Generates all information required by a template from a previously
+        obtained context."""
         # Acquire initial info
         request = self.request
         mapping = context.get('mapping')
         groups = context.get('user_group_list')
         clashing_lessons = context.get('clashing_lessons') or []
+        number_of_weeks = int(math.ceil(
+            float((max(mapping.keys()) - min(mapping.keys())).days) / 7))
         week = context.get('week_to_show')
-        week = week and int(week)
+        week = week and self._sanitize_week(int(week), number_of_weeks)
         first_monday = context.get('first_monday')
-        
+
         week_mapping = {}
         week_date_mapping = {}
-        number_of_weeks = int(math.ceil(
-                float((max(mapping.keys()) - min(mapping.keys())).days) / 7))
+
         number_of_rows = 2
-        starting_week = self._sanitize_week(week or 1, number_of_weeks) 
-        finishing_week = self._sanitize_week(week or number_of_weeks, number_of_weeks)
+        starting_week = week or 1
+        finishing_week = week or number_of_weeks
         for week_number in range(starting_week, finishing_week + 1):
             week_mapping[week_number] = {}
             week_date_mapping[week_number] = {}
             for row in range(0, number_of_rows):
                 week_mapping[week_number][row] = {}
-                for i in range(0, 6/number_of_rows):
-                    weekday = row*(6/number_of_rows) + i
+                for i in range(0, 6 / number_of_rows):
+                    weekday = row * (6 / number_of_rows) + i
                     week_mapping[week_number][row][weekday] = {}
-                    date = first_monday + datetime.timedelta(days=
-                            7*(week_number-1) + weekday)
+                    date = first_monday + datetime.timedelta(
+                        days=7 * (week_number - 1) + weekday)
                     week_date_mapping[week_number][weekday] = date
-                    if not mapping.has_key(date):
+                    if not date in mapping:
                         mapping[date] = {}
                     for lesson_number in range(1, 8):
-                        if mapping[date].has_key(lesson_number):
+                        if lesson_number in mapping[date]:
                             week_mapping[week_number][row][weekday][lesson_number] = mapping[date][lesson_number]
                         else:
                             week_mapping[week_number][row][weekday][lesson_number] = None
 
         week_links = self._generate_week_links(number_of_weeks)
-        group_links, current_group_name = self._generate_group_links_and_name(groups)
+        group_links, current_group_name = self._generate_group_links_and_name(
+            groups)
 
         #pprint.pprint(mapping)
         return {
-                    'week_mapping': week_mapping,
-                    'week_date_mapping': week_date_mapping,
-                    'lesson_times': lesson_times,
-                    'lesson_numbers': range(1,8),
-                    'clashing_lessons': clashing_lessons,
-                    'week_links': week_links,
-                    'current_week': week or u'Всі тижні',
-                    'group_links': group_links,
-                    'current_group': current_group_name, 
-                    'promos': promos,
-                }
+            'week_mapping': week_mapping,
+            'week_date_mapping': week_date_mapping,
+            'lesson_times': lesson_times,
+            'lesson_numbers': range(1, 8),
+            'clashing_lessons': clashing_lessons,
+            'week_links': week_links,
+            'current_week': week or u'Всі тижні',
+            'group_links': group_links,
+            'current_group': current_group_name,
+            'promos': promos,
+        }
 
     def _sanitize_week(self, week, max_week):
         """Ensures that a week is in range [1, max_week]."""
@@ -248,10 +261,12 @@ class TimetableView(TemplateResponseMixin, BaseTimetableView):
         return result
 
     def _generate_week_links(self, number_of_weeks):
-        """Generates a list of links to timetable pages of a particular weeks."""
+        """
+        Generates a list of links to timetable pages of a particular weeks.
+        """
         request = self.request
         link_parts = re.split('(group/\d+/)', request.path)
-        all_weeks_link = re.sub(r'week/.+?/', u'', link_parts[0]) + 'weeks/' 
+        all_weeks_link = re.sub(r'week/.+?/', u'', link_parts[0]) + 'weeks/'
         all_weeks_link += link_parts[1] if len(link_parts) > 1 else u''
         week_links = [(u'Всі тижні', all_weeks_link)]
         for week_number in range(1, number_of_weeks + 1):
@@ -268,26 +283,29 @@ class TimetableView(TemplateResponseMixin, BaseTimetableView):
         return week_links
 
     def _generate_group_links_and_name(self, groups):
-        """Generates a list of links to timetable pages of particular courses and finds current group's name."""
+        """Generates a list of links to timetable pages of particular courses
+        and finds current group's name."""
         request = self.request
         current_group_number = re.search("group/(\d*)", request.path)
-        current_group_number = current_group_number and current_group_number.group(1)
+        current_group_number = (current_group_number and
+                                current_group_number.group(1))
         current_group_name = u'Всі пари'
         group_links = [(u'Всі пари', re.sub(r'/group/.*', '/', request.path))]
         for group in groups:
             group_full_name = group.course.discipline.name + u' - ' + \
-                              unicode(group.number) 
+                unicode(group.number)
             group_links.append(
                 (group_full_name,
-                 re.sub(r'group/.*', '', request.path) + u'group/' + \
+                 re.sub(r'group/.*', '', request.path) + u'group/' +
                  str(group.pk) + u'/'))
             if current_group_number and unicode(group.pk) == current_group_number:
                 current_group_name = group_full_name
         return group_links, current_group_name
 
-    
+
 class TimetableMainView(TimetableView):
-    """Main timetable view - opens a timetable filtering view for a current week."""
+    """Main timetable view - opens a timetable filtering view for a current
+    week."""
     def _generate_context_data(self, context):
         "Changes week_to_show in a context to a current week."
         today = datetime.date.today()
@@ -297,6 +315,7 @@ class TimetableMainView(TimetableView):
         days_diff = abs(today - context['first_monday']).days
         week = days_diff / 7 + 1
         context['week_to_show'] = week
+
         return super(TimetableMainView, self)._generate_context_data(context)
 
 
@@ -305,50 +324,55 @@ def index(request):
     academic_term_timetable_mapping = {}
     for timetable in timetables:
         academic_term_timetable_mapping.setdefault(
-                timetable.academic_term,
-                []).append(timetable)
+            timetable.academic_term,
+            []).append(timetable)
     academic_term_timetable_list = sorted(
-            academic_term_timetable_mapping.items(),
-            key=lambda x: x[0].start_date,
-            reverse=True
-            )
+        academic_term_timetable_mapping.items(),
+        key=lambda x: x[0].start_date,
+        reverse=True
+    )
     return render_to_response(
-            'index.html',
-            {
-                'academic_term_timetable_list': academic_term_timetable_list,
-                },
-            context_instance=RequestContext(request)
-            )
+        'index.html',
+        {
+            'academic_term_timetable_list': academic_term_timetable_list,
+        },
+        context_instance=RequestContext(request)
+    )
+
 
 def help(request):
     return render_to_response(
-            'help.html',
-            {},
-            context_instance=RequestContext(request)
-            )
+        'help.html',
+        {},
+        context_instance=RequestContext(request)
+    )
+
 
 def about(request):
     return render_to_response(
-            'about.html',
-            {},
-            context_instance=RequestContext(request)
-            )
+        'about.html',
+        {},
+        context_instance=RequestContext(request)
+    )
+
 
 def contacts(request):
     return render_to_response(
-            'contacts.html',
-            {},
-            context_instance=RequestContext(request)
-            )
+        'contacts.html',
+        {},
+        context_instance=RequestContext(request)
+    )
+
 
 def palette(size):
     import colorsys
     for i in range(size):
         rgb_tuple = colorsys.hsv_to_rgb(
-                float(i)/size,
-                1,
-                0.4 + 0.1 * (i % 7))
-        hexcolor = '#%02x%02x%02x' % tuple(map(lambda x: int(x*255), rgb_tuple))
+            float(i) / size,
+            1,
+            0.4 + 0.1 * (i % 7))
+        hexcolor = '#%02x%02x%02x' % tuple(
+            map(lambda x: int(x * 255), rgb_tuple))
         yield hexcolor
 
 def course_stats(request):
@@ -385,34 +409,34 @@ def course_stats(request):
 #@minified_response
 def planning(request):
     academic_term = AcademicTerm.objects.all()[2]
-    lessons = Lesson.objects.select_related('room', 'room__building', 'group', 'group__course__discipline').filter(
-            date__gte=academic_term.start_date
-            ).filter(
-            date__lt=academic_term.exams_start_date
-            ).filter(
+    lessons = Lesson.objects.select_related(
+        'room', 'room__building', 'group', 'group__course__discipline').filter(
+            date__gte=academic_term.start_date,
+            date__lt=academic_term.exams_start_date,
             room__building__number__gt=0
-            ).order_by('date')
+        ).order_by('date')
     # mapping[(1,1)][Room('1-225')]=[(1,Lesson('A')), (2,Lesson('A'))]
     rooms = set()
     mapping = {}
     course_ids = set()
     for lesson in lessons:
         date_timekey = (lesson.date.isoweekday(), lesson.lesson_number)
-        if not mapping.has_key(date_timekey):
+        if not date_timekey in mapping:
             mapping[date_timekey] = {}
-        if not mapping[date_timekey].has_key(lesson.room):
+        if not lesson.room in mapping[date_timekey]:
             mapping[date_timekey][lesson.room] = []
         rooms.add(lesson.room)
         course_ids.add(lesson.group.course_id)
         mapping[date_timekey][lesson.room].append(
-                (
-                    academic_term.get_week(lesson.date).week_number,
-                    lesson
-                    )
-                )
+            (
+                academic_term.get_week(lesson.date).week_number,
+                lesson
+            )
+        )
     course_colors = {}
     number_of_courses = len(course_ids)
-    for hexcolor, course_id in itertools.izip(palette(number_of_courses), course_ids):
+    for hexcolor, course_id in itertools.izip(
+            palette(number_of_courses), course_ids):
         course_colors[course_id] = hexcolor
     ##
     rows = []
@@ -424,35 +448,37 @@ def planning(request):
             #row_names.append('%s-%s' % (weekday, lesson_times[lesson_number][0]))
             row = []
             if lesson_number == 1:
-                time_rows.append((day_names[weekday], lesson_times[lesson_number][0]))
+                time_rows.append(
+                    (day_names[weekday], lesson_times[lesson_number][0]))
             else:
                 time_rows.append((None, lesson_times[lesson_number][0]))
             date_timekey = (weekday, lesson_number)
             for room in sorted_rooms:
                 cell = []
-                if mapping.has_key(date_timekey) and mapping[date_timekey].has_key(room):
+                if date_timekey in mapping and room in mapping[date_timekey]:
                     cell_mapping = dict(mapping[date_timekey][room])
-                    for week_number in range(1, academic_term.number_of_weeks+1):
+                    for week_number in range(
+                            1, academic_term.number_of_weeks + 1):
                         if week_number in cell_mapping:
                             cell.append(
-                                    {
-                                        'css_class': 'lesson',
-                                        'background_color': course_colors[cell_mapping[week_number].group.course_id],
-                                        'title': u'Тиждень %d' % week_number,
-                                        'content': u'%s - %s' % (
-                                            cell_mapping[week_number].group.course.discipline.name,
-                                            cell_mapping[week_number].group.number or u'лекція'),
-                                        }
-                                    )
+                                {
+                                    'css_class': 'lesson',
+                                    'background_color': course_colors[cell_mapping[week_number].group.course_id],
+                                    'title': u'Тиждень %d' % week_number,
+                                    'content': u'%s - %s' % (
+                                        cell_mapping[week_number].group.course.discipline.name,
+                                        cell_mapping[week_number].group.number or u'лекція'),
+                                }
+                            )
                         else:
                             cell.append(
-                                    {
-                                        'css_class': 'free',
-                                        'background_color': 'inherit',
-                                        'title': u'Тиждень %d' % week_number,
-                                        'content': u'Пара відсутня',
-                                        }
-                                    )
+                                {
+                                    'css_class': 'free',
+                                    'background_color': 'inherit',
+                                    'title': u'Тиждень %d' % week_number,
+                                    'content': u'Пара відсутня',
+                                }
+                            )
                 else:
                     pass
                     # the following is too slow, better just to leave cell empty
@@ -467,18 +493,18 @@ def planning(request):
             rows.append(row)
     px_per_day = 8
     return render_to_response(
-            'planning.html',
-            {
-                'number_of_weeks': academic_term.number_of_weeks,
-                'room_column_width': academic_term.number_of_weeks * px_per_day,
-                'rows': rows,
-                'time_rows': time_rows,
-                'px_per_day': px_per_day,
-                'sorted_rooms': sorted_rooms,
-                'number_of_lessons_per_day': len(lesson_times.keys()),
-                },
-            context_instance=RequestContext(request)
-            )
+        'planning.html',
+        {
+            'number_of_weeks': academic_term.number_of_weeks,
+            'room_column_width': academic_term.number_of_weeks * px_per_day,
+            'rows': rows,
+            'time_rows': time_rows,
+            'px_per_day': px_per_day,
+            'sorted_rooms': sorted_rooms,
+            'number_of_lessons_per_day': len(lesson_times.keys()),
+        },
+        context_instance=RequestContext(request)
+    )
 
 #@cache_page(60*60*24)
 #@minified_response
@@ -693,36 +719,39 @@ def profile(request):
         if student:
             student_form = StudentForm(instance=student)
     return render_to_response(
-            'profile.html',
-            {
-                'user_form': user_form,
-                'student_form': student_form,
-                },
-            context_instance=RequestContext(request)
-            )
+        'profile.html',
+        {
+            'user_form': user_form,
+            'student_form': student_form,
+        },
+        context_instance=RequestContext(request)
+    )
+
 
 def choose_subjects(request, timetable_id):
     timetable = get_object_or_404(Timetable, pk=timetable_id)
     course_groups = {}
     for course in timetable.courses.all():
-        course_groups[course] = sorted(course.group_set.filter(number__gt=0), key=lambda g: g.number)
+        course_groups[course] = sorted(
+            course.group_set.filter(number__gt=0), key=lambda g: g.number)
         if len(course_groups[course]) == 0:
             course_groups[course] = course.group_set.all()
     return render_to_response(
-            'choose_subjects.html',
-            {
-                'course_groups': course_groups,
-                'timetable': timetable,
-                },
-            context_instance=RequestContext(request)
-            )
+        'choose_subjects.html',
+        {
+            'course_groups': course_groups,
+            'timetable': timetable,
+        },
+        context_instance=RequestContext(request)
+    )
+
 
 def rooms_status(request, year, month, day):
     import datetime
     status_date = datetime.date(int(year), int(month), int(day))
     lessons = list(Lesson.objects.select_related().filter(
         date=status_date
-        ))
+    ))
     # mapping[building][lesson_number][room] = lesson
     mapping = {}
     # building_rooms[building] = set(room, room, room)
@@ -731,11 +760,12 @@ def rooms_status(request, year, month, day):
         building = lesson.room.building
         room = lesson.room
         building_rooms.setdefault(
-                building, set()).add(room)
+            building, set()).add(room)
         mapping.setdefault(building, {}).setdefault(
-                lesson.lesson_number, {})[room] = lesson
+            lesson.lesson_number, {})[room] = lesson
     building_tables = []
-    for building in sorted(building_rooms.keys(), key=lambda x: (x.number, x.label)):
+    for building in sorted(
+            building_rooms.keys(), key=lambda x: (x.number, x.label)):
         table = []
         rooms = sorted(building_rooms[building], key=lambda x: u'%s' % x)
         table.append([u''] + [u'%s' % r for r in rooms])
@@ -744,20 +774,21 @@ def rooms_status(request, year, month, day):
             for room in rooms:
                 try:
                     row.append(
-                            mapping[building][lesson_number][room]
-                            )
+                        mapping[building][lesson_number][room]
+                    )
                 except KeyError:
                     row.append(None)
             table.append(row)
         building_tables.append((building, table))
     return render_to_response(
-            'rooms_status.html',
-            {
-                'status_date': status_date,
-                'building_tables': building_tables,
-                },
-            context_instance=RequestContext(request)
-            )
+        'rooms_status.html',
+        {
+            'status_date': status_date,
+            'building_tables': building_tables,
+        },
+        context_instance=RequestContext(request)
+    )
+
 
 def lecturer_timetable(request):
     import locale
@@ -776,35 +807,37 @@ def lecturer_timetable(request):
         if len(departments) > 0:
             for department in departments:
                 department_lecturer_groups.setdefault(
-                        department, {})[lecturer] = lecturer_groups[lecturer]
+                    department, {})[lecturer] = lecturer_groups[lecturer]
         else:
             department = u"Інша"
             department_lecturer_groups.setdefault(
-                    department, {})[lecturer] = lecturer_groups[lecturer]
+                department, {})[lecturer] = lecturer_groups[lecturer]
     department_lecturer_groups_mapping = {}
     for department in department_lecturer_groups.keys():
         lecturer_groups_list = []
         lecturer_groups = department_lecturer_groups[department]
         for lecturer in sorted(
                 lecturer_groups.keys(),
-                cmp=lambda x,y : locale.strcoll(x.full_name, y.full_name)):
+                cmp=lambda x, y: locale.strcoll(x.full_name, y.full_name)):
             lecturer_groups_list.append(
-                    (
-                        lecturer, 
-                        '/'.join(map(unicode, lecturer_groups[lecturer]))
-                        )
-                    )
+                (
+                    lecturer,
+                    '/'.join(map(unicode, lecturer_groups[lecturer]))
+                )
+            )
         department_lecturer_groups_mapping[department] = lecturer_groups_list
     return render_to_response(
-            'lecturer_timetable.html',
-            {
-                'department_lecturer_groups_mapping': department_lecturer_groups_mapping,
-                },
-            context_instance=RequestContext(request)
-            )
+        'lecturer_timetable.html',
+        {
+            'department_lecturer_groups_mapping': department_lecturer_groups_mapping,
+        },
+        context_instance=RequestContext(request)
+    )
+
 
 def robots_txt(request):
     return HttpResponse("User-agent: *\nDisallow: /\n", mimetype="text/plain")
+
 
 def http_gone(request):
     return HttpResponse(status=410)

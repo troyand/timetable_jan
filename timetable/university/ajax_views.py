@@ -13,22 +13,26 @@ import json
 class AjaxAutocompleteMixin(object):
     def unicode_format_object(self, o):
         return unicode(o)
+
     def autocomplete_response(self, query):
         '''implementation should return json response
         in a more effective way (e.g. via icontains)'''
         query_upper = query.upper()
         object_unicode_pk_pairs = [
-                (self.unicode_format_object(o), o.pk) for o in self.model.objects.select_related().all()]
+            (self.unicode_format_object(o), o.pk)
+            for o in self.model.objects.select_related().all()]
         objects = filter(
-                lambda o: o[0].upper().startswith(query_upper), object_unicode_pk_pairs)
+            lambda o: o[0].upper().startswith(query_upper),
+            object_unicode_pk_pairs)
         json_response = {
-                'query': query,
-                'suggestions': [u for u, pk in objects],
-                'data': [pk for u, pk in objects],
-                }
+            'query': query,
+            'suggestions': [u for u, pk in objects],
+            'data': [pk for u, pk in objects],
+        }
         return HttpResponse(
-                json.dumps(json_response)
-                )
+            json.dumps(json_response)
+        )
+
     def get(self, request):
         try:
             return self.autocomplete_response(request.GET['query'])
@@ -38,23 +42,25 @@ class AjaxAutocompleteMixin(object):
 
 class UnifiedTimetableProcessView(FormView):
     class CSVUploadForm(forms.Form):
-        csv_file  = forms.FileField()
+        csv_file = forms.FileField()
     form_class = CSVUploadForm
 
     def get_context_data(self, **kwargs):
-        context = super(UnifiedTimetableProcessView, self).get_context_data(**kwargs)
+        context = super(UnifiedTimetableProcessView, self).get_context_data(
+            **kwargs)
         try:
             context['table'] = self.table
         except:
             context['table'] = []
         context['days'] = [u'ПН', u'ВТ', u'СР', u'ЧТ', u'ПТ', u'СБ']
-        context['times'] = [u'08:30-09:50', u'10:00-11:20', u'11:40-13:00', u'13:30-14:50',
-            u'15:00-16:20', u'16:30-17:50', u'18:00-19:20']
+        context['times'] = [u'08:30-09:50', u'10:00-11:20', u'11:40-13:00',
+                            u'13:30-14:50', u'15:00-16:20', u'16:30-17:50',
+                            u'18:00-19:20']
         return context
-
 
     def post(self, request):
         import csv
+
         def unicode_csv_reader(unicode_csv_data, dialect=csv.excel, **kwargs):
             # csv.py doesn't do Unicode; encode temporarily as UTF-8:
             csv_reader = csv.reader(utf_8_encoder(unicode_csv_data),
@@ -74,88 +80,102 @@ class UnifiedTimetableProcessView(FormView):
                 table.append([e.decode('utf-8') for e in line])
             self.table = table
         except MultiValueDictKeyError:
-            #TODO there was not csv file attached, may be some display some error message
+            # TODO there was not csv file attached, may be some display some
+            # error message
             pass
         return super(UnifiedTimetableProcessView, self).get(request)
 
 
 class ExtraCoursesAutocompleteView(AjaxAutocompleteMixin, BaseListView):
     model = Course
+
     def autocomplete_response(self, query):
         def suggestion_format(course):
             acad_t = course.academic_term
             timetables = course.timetable_set.select_related().all()
-            together_with = u','.join([u'%s-%d' % (t.major.faculty.abbr, t.year) for t in timetables])
+            together_with = u','.join([u'%s-%d' % (t.major.faculty.abbr,
+                                                   t.year)
+                                       for t in timetables])
             return u'%s (%s %s %d-%d, разом із %s)' % (
-                    course.discipline.name,
-                    acad_t.season,
-                    acad_t.kind,
-                    acad_t.year,
-                    acad_t.year + 1,
-                    together_with
-                    )
+                course.discipline.name,
+                acad_t.season,
+                acad_t.kind,
+                acad_t.year,
+                acad_t.year + 1,
+                together_with
+            )
         query_upper = query.upper()
+        model_objects = self.model.objects.select_related().all()
         unicode_course_pairs = [
-                (unicode(course.discipline.name), course)
-                for course in self.model.objects.select_related().all().order_by('-academic_term__start_date')]
-        objects = filter(
-                lambda course: query_upper in course[0].upper(), unicode_course_pairs)[:15]
+            (unicode(course.discipline.name), course)
+            for course in model_objects.order_by('-academic_term__start_date')
+        ]
+        objects = filter(lambda course: query_upper in course[0].upper(),
+                         unicode_course_pairs)[:15]
         from django.template.loader import get_template
         from django.template import Context
         choose_course_groups = get_template('choose_course_groups.html')
         json_response = {
-                'query': query,
-                'suggestions': [suggestion_format(c) for u, c in objects],
-                'data': [choose_course_groups.render(Context({
-                    'course': c,
-                    'groups': sorted(c.group_set.filter(number__gt=0), key=lambda g: g.number)
-                    })) for u, c in objects],
-                }
+            'query': query,
+            'suggestions': [suggestion_format(c) for u, c in objects],
+            'data': [choose_course_groups.render(Context({
+                'course': c,
+                'groups': sorted(c.group_set.filter(number__gt=0),
+                                 key=lambda g: g.number)
+            })) for u, c in objects],
+        }
         return HttpResponse(
-                json.dumps(json_response)
-                )
+            json.dumps(json_response)
+        )
 
 
 class RoomAutocompleteView(AjaxAutocompleteMixin, BaseListView):
     model = Room
+
     def autocomplete_response_(self, query):
         room_name_pk_pairs = [(unicode(r), r.pk) for r in Room.objects.all()]
         rooms = filter(lambda x: x[0].startswith(query), room_name_pk_pairs)
         json_response = {
-                'query': query,
-                'suggestions': [name for name, pk in rooms],
-                'data': [pk for name, pk in rooms],
-                }
+            'query': query,
+            'suggestions': [name for name, pk in rooms],
+            'data': [pk for name, pk in rooms],
+        }
         return HttpResponse(
-                json.dumps(json_response)
-                )
+            json.dumps(json_response)
+        )
+
 
 class LecturerAutocompleteView(AjaxAutocompleteMixin, BaseListView):
     model = Lecturer
+
     def unicode_format_object(self, o):
         return o.short_name()
+
     def autocomplete_response_(self, query):
-        lecturers = [(l.full_name, l.pk) for l in Lecturer.objects.filter(full_name__icontains=query)]
+        lecturers = [(l.full_name, l.pk) for l in
+                     Lecturer.objects.filter(full_name__icontains=query)]
         json_response = {
-                'query': query,
-                'suggestions': [name for name, pk in lecturers],
-                'data': [pk for name, pk in lecturers],
-                }
+            'query': query,
+            'suggestions': [name for name, pk in lecturers],
+            'data': [pk for name, pk in lecturers],
+        }
         return HttpResponse(
-                json.dumps(json_response)
-                )
+            json.dumps(json_response)
+        )
+
 
 class DisciplineAutocompleteView(AjaxAutocompleteMixin, BaseListView):
     model = Discipline
+
     def unicode_format_object(self, o):
         return o.name
 
 
-ajax_urls = patterns('',
+ajax_urls = patterns(
+    '',
     (r'^room/$', RoomAutocompleteView.as_view()),
     (r'^lecturer/$', LecturerAutocompleteView.as_view()),
     (r'^discipline/$', DisciplineAutocompleteView.as_view()),
     (r'^extra-courses/$', ExtraCoursesAutocompleteView.as_view()),
     (r'^test/$', TemplateView.as_view(template_name='autocomplete_test.html')),
 )
-
