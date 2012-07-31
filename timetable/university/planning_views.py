@@ -176,12 +176,9 @@ def planning(request, term):
     )
 
 
-class BasePlanningView(View):
+class BaseView(View):
     """
-    Base view for a planning.
-
-    Fills context with some initial info: term, number of weeks in it, rows and
-    columns for a planning table, number of lessons per day.
+    Base view - simple template for a request handlers.
     """
     def get(self, request, *args, **kwargs):
         """
@@ -191,21 +188,37 @@ class BasePlanningView(View):
         request.
         """
         context = self.get_context_data(**kwargs)
-        print context
         return self.render_to_response(context)
 
     def get_context_data(self, **kwargs):
         """Returns a context data for this request."""
-        context = self._get_initial_data()
+        context = self._get_initial_data(**kwargs)
         data = self._generate_context_data(context)
         context.update(data)
         return context
 
-    def render_to_response(context):
+    def render_to_response(self, context):
         """Renders a given context in a some manner."""
-        raise NotImplementedException
+        raise NotImplementedError
 
-    def _get_initial_data(self):
+    def _get_initial_data(self, **kwargs):
+        """
+        Retrieves all initial data required for rendering a planning page.
+        """
+        raise NotImplementedError
+
+    def _generate_context_data(self, context):
+        """
+        Generates additional required context data based on a given context.
+        """
+        raise NotImplementedError
+
+
+class TermExtractorMixin(object):
+    """
+    Extracts a 'term' parameter from a request.
+    """
+    def _get_initial_data(self, **kwargs):
         """
         Retrieves all initial data required for rendering a planning page.
 
@@ -215,7 +228,7 @@ class BasePlanningView(View):
         """
         data = {}
         # Get captured params
-        term = int(self.kwargs.get('term'))
+        term = int(kwargs.get('term'))
         if term < 0 or term >= AcademicTerm.objects.count():
             raise Http404
         academic_term = AcademicTerm.objects.all()[term]
@@ -223,6 +236,14 @@ class BasePlanningView(View):
         data['term'] = term
         return data
 
+
+class BasePlanningView(TermExtractorMixin, BaseView):
+    """
+    Base view for a table generation part of a planning.
+
+    Fills context with some initial info: term, number of weeks in it, rows and
+    columns for a planning table, number of lessons per day.
+    """
     def _generate_context_data(self, context):
         """
         Generates additional required context data based on a given context.
@@ -262,7 +283,7 @@ class BasePlanningView(View):
 
     def _get_columns(self, context):
         """Generates columns data source for a planning table."""
-        raise NotImplementedException
+        raise NotImplementedError
 
     def _get_column_name(self, column):
         """Returns a name for a given column."""
@@ -299,10 +320,10 @@ class PlanningLightRoomView(TemplateResponseMixin, BasePlanningView):
     """
     template_name = 'planning_light_room.html'
 
-    def _get_initial_data(self):
+    def _get_initial_data(self, **kwargs):
         """Adds room id to the initial data."""
-        context = super(PlanningLightRoomView, self)._get_initial_data()
-        context['room_id'] = self.kwargs.get('room_id')
+        context = super(PlanningLightRoomView, self)._get_initial_data(**kwargs)
+        context['room_id'] = kwargs.get('room_id')
         return context
 
     def _generate_context_data(self, context):
@@ -311,9 +332,7 @@ class PlanningLightRoomView(TemplateResponseMixin, BasePlanningView):
             context)
         column_width = 78
         context['column_width'] = column_width
-        room_id = context['room_id']
-        room = get_object_or_404(Room, pk=room_id)
-        context['room'] = room
+        context['room'] = get_object_or_404(Room, pk=context['room_id'])
         return context
 
     def _get_columns(self, context):
@@ -325,129 +344,120 @@ class PlanningLightRoomView(TemplateResponseMixin, BasePlanningView):
 
 color_palette = list(palette(400))
 
-#@cache_page(60*60*24)
-def planning_ajax(request, term, room_id):
-    term = int(term)
-    if term < 0 or term >= AcademicTerm.objects.count():
-        raise Http404
-    academic_term = AcademicTerm.objects.all()[term]
-    room = Room.objects.get(pk=room_id)
-    lessons = Lesson.objects.select_related('room', 'room__building', 'group', 'group__course__discipline').filter(
-            date__gte=academic_term.start_date
-            ).filter(
-            date__lt=academic_term.exams_start_date
-            ).filter(
-            room__pk=room_id
-            ).order_by('date')
-    # mapping[(1,1)][Room('1-225')]=[(1,Lesson('A')), (2,Lesson('A'))]
-    mapping = {}
-    course_ids = set()
-    for lesson in lessons:
-        date_timekey = (lesson.date.isoweekday(), lesson.lesson_number)
-        if not mapping.has_key(date_timekey):
-            mapping[date_timekey] = {}
-        if not mapping[date_timekey].has_key(lesson.room):
-            mapping[date_timekey][lesson.room] = []
-        course_ids.add(lesson.group.course_id)
-        mapping[date_timekey][lesson.room].append(
-                (
-                    academic_term.get_week(lesson.date).week_number,
-                    lesson
-                    )
-                )
-    json_response = {}
-    for weekday in range(1,7):
-        for lesson_number in lesson_times.keys():
-            date_timekey = (weekday, lesson_number)
-            cell = []
-            if mapping.has_key(date_timekey) and mapping[date_timekey].has_key(room):
-                cell_mapping = dict(mapping[date_timekey][room])
-                for week_number in range(1, academic_term.number_of_weeks+1):
-                    if week_number in cell_mapping:
-                        cell.append(
-                                {
-                                    'css_class': 'lesson',
-                                    'background_color': color_palette[cell_mapping[week_number].group.course_id % len(color_palette)],
-                                    'title': u'Тиждень %d' % week_number,
-                                    'content': u'%s - %s' % (
-                                        cell_mapping[week_number].group.course.discipline.name,
-                                        cell_mapping[week_number].group.number or u'лекція'),
-                                    }
-                                )
-                    else:
-                        cell.append(
-                                {
-                                    'css_class': 'free',
-                                    'background_color': 'inherit',
-                                    'title': u'Тиждень %d' % week_number,
-                                    'content': u'Пара відсутня',
-                                    }
-                                )
-            else:
-                pass
-            divs = ''.join(['<div class="%s" title="%s" data-content="%s" style="background: %s">&nbsp;</div>' % (
-                item['css_class'],
-                item['title'],
-                item['content'],
-                item['background_color'],
-                ) for item in cell])
-            if cell:
-                json_response['cell-%d-%d-%d' % (weekday, lesson_number, room.pk)] = divs
-    return HttpResponse(json.dumps(json_response), mimetype="application/json")
 
-def planning_room_ajax(request, term, room_id):
-    term = int(term)
-    if term < 0 or term >= AcademicTerm.objects.count():
-        raise Http404
-    academic_term = AcademicTerm.objects.all()[term]
-    room = Room.objects.get(pk=room_id)
-    lessons = Lesson.objects.select_related('room', 'room__building', 'group', 'group__course__discipline').filter(
-            date__gte=academic_term.start_date
-            ).filter(
-            date__lt=academic_term.exams_start_date
-            ).filter(
-            room__pk=room_id
+class BasePlanningAjaxView(TermExtractorMixin, BaseView):
+    def render_to_response(self, context):
+        """Renders a given context as a JSON-response."""
+        json_response = self._generate_json_response(context)
+        print 'oi'
+        return HttpResponse(json.dumps(json_response),
+                            mimetype="application/json")
+
+    def _get_initial_data(self, **kwargs):
+        """Adds room id to the initial data."""
+        context = super(BasePlanningAjaxView, self)._get_initial_data(**kwargs)
+        context['room_id'] = kwargs.get('room_id')
+        return context
+
+    def _generate_context_data(self, context):
+        academic_term = context['academic_term']
+        room_id = context['room_id']
+        context['room'] = Room.objects.get(pk=room_id)
+        lessons = Lesson.objects.select_related(
+            'room', 'room__building',
+            'group', 'group__course__discipline').filter(
+                date__gte=academic_term.start_date,
+                date__lt=academic_term.exams_start_date,
+                room__pk=room_id
             ).order_by('date')
-    # mapping[(1,1)][Room('1-225')]=[(1,Lesson('A')), (2,Lesson('A'))]
-    mapping = {}
-    course_ids = set()
-    for lesson in lessons:
-        date_timekey = (lesson.date.isoweekday(), lesson.lesson_number)
-        if not mapping.has_key(date_timekey):
-            mapping[date_timekey] = {}
-        if not mapping[date_timekey].has_key(lesson.room):
-            mapping[date_timekey][lesson.room] = []
-        course_ids.add(lesson.group.course_id)
-        mapping[date_timekey][lesson.room].append(
+        # mapping[(1,1)][Room('1-225')]=[(1,Lesson('A')), (2,Lesson('A'))]
+        mapping = {}
+        course_ids = set()
+        for lesson in lessons:
+            date_timekey = (lesson.date.isoweekday(), lesson.lesson_number)
+            if not mapping.has_key(date_timekey):
+                mapping[date_timekey] = {}
+            if not mapping[date_timekey].has_key(lesson.room):
+                mapping[date_timekey][lesson.room] = []
+            course_ids.add(lesson.group.course_id)
+            mapping[date_timekey][lesson.room].append(
                 (
                     academic_term.get_week(lesson.date).week_number,
                     lesson
-                    )
                 )
-    json_response = {}
-    for weekday in range(1,7):
-        for lesson_number in lesson_times.keys():
-            date_timekey = (weekday, lesson_number)
-            if mapping.has_key(date_timekey) and mapping[date_timekey].has_key(room):
-                cell_mapping = dict(mapping[date_timekey][room])
-            else:
-                cell_mapping = {}
+            )
+        context['mapping'] = mapping
+        return context
+
+    def _generate_json_response(self, context):
+        json_response = {}
+        for weekday in range(1,7):
+            for lesson_number in lesson_times.keys():
+                date_timekey = (weekday, lesson_number)
+                json_response = self._update_json_for_timedate(
+                    json_response, date_timekey, context)
+        return json_response
+
+    def _update_json_for_timeday(self, json_response, date_timekey, context):
+        raise NotImplementedError
+
+    def _generate_lesson_json(self, cell_mapping, week_number):
+        if week_number in cell_mapping:
+            item = {
+                'css_class': 'lesson',
+                'background_color': color_palette[cell_mapping[week_number].group.course_id % len(color_palette)],
+                'title': u'Тиждень %d' % week_number,
+                'content': u'%s - %s' % (
+                    cell_mapping[week_number].group.course.discipline.name,
+                    cell_mapping[week_number].group.number or u'лекція'),
+            }
+        else:
+            item = {
+                'css_class': 'free',
+                'background_color': 'inherit',
+                'title': u'Тиждень %d' % week_number,
+                'content': u'Пара відсутня',
+            }
+        return item
+
+
+class PlanningAjaxView(BasePlanningAjaxView):
+    def _update_json_for_timedate(self, json_response, date_timekey, context):
+        cell = []
+        mapping = context['mapping']
+        room = context['room']
+        academic_term = context['academic_term']
+        (weekday, lesson_number) = date_timekey
+        if mapping.has_key(date_timekey) and mapping[date_timekey].has_key(room):
+            cell_mapping = dict(mapping[date_timekey][room])
             for week_number in range(1, academic_term.number_of_weeks+1):
-                if week_number in cell_mapping:
-                    item = {
-                            'css_class': 'lesson',
-                            'background_color': color_palette[cell_mapping[week_number].group.course_id % len(color_palette)],
-                            'title': u'Тиждень %d' % week_number,
-                            'content': u'%s - %s' % (
-                                cell_mapping[week_number].group.course.discipline.name,
-                                cell_mapping[week_number].group.number or u'лекція'),
-                            }
-                else:
-                    item = {
-                            'css_class': 'free',
-                            'background_color': 'inherit',
-                            'title': u'Тиждень %d' % week_number,
-                            'content': u'Пара відсутня',
-                            }
-                json_response['cell-%d-%d-%d' % (weekday, lesson_number, week_number)] = item
-    return HttpResponse(json.dumps(json_response), mimetype="application/json")
+                cell.append(self._generate_lesson_json(
+                    cell_mapping, week_number))
+        else:
+            pass
+        divs = ''.join(['<div class="%s" title="%s" data-content="%s" style="background: %s">&nbsp;</div>' % (
+            item['css_class'],
+            item['title'],
+            item['content'],
+            item['background_color'],
+        ) for item in cell])
+
+        if cell:
+            json_response['cell-%d-%d-%d' % (weekday, lesson_number, room.pk)] = divs
+        return json_response
+
+
+class PlanningRoomAjaxView(BasePlanningAjaxView):
+    def _update_json_for_timedate(self, json_response, date_timekey, context):
+        mapping = context['mapping']
+        room = context['room']
+        academic_term = context['academic_term']
+        (weekday, lesson_number) = date_timekey
+        if mapping.has_key(date_timekey) and mapping[date_timekey].has_key(room):
+            cell_mapping = dict(mapping[date_timekey][room])
+        else:
+            cell_mapping = {}
+        for week_number in range(1, academic_term.number_of_weeks+1):
+            item = self._generate_lesson_json(cell_mapping, week_number)
+            json_response['cell-%d-%d-%d' % (weekday, lesson_number, week_number)] = item
+        return json_response

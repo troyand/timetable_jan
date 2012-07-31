@@ -7,7 +7,7 @@ from timetable.university.cb_views import *
 from django.views.generic import TemplateView
 from timetable.university.ajax_views import ajax_urls, UnifiedTimetableProcessView
 from timetable.university.views import ICALView, TimetableView, TimetableMainView
-from timetable.university.planning_views import PlanningLightView, PlanningLightRoomView
+from timetable.university.planning_views import PlanningLightView, PlanningLightRoomView, PlanningAjaxView, PlanningRoomAjaxView
 
 
 urlpatterns = patterns('',
@@ -23,12 +23,12 @@ urlpatterns = patterns('',
      'timetable.university.planning_views.planning'),
     url(r'^planning-light/(?P<term>\d+)/$',
         PlanningLightView.as_view(), name='planning-light'),
-    (r'^planning-light/(?P<term>\d+)/(?P<room_id>\d+)/ajax/$',
-     'timetable.university.planning_views.planning_ajax'),
+    url(r'^planning-light/(?P<term>\d+)/(?P<room_id>\d+)/ajax/$',
+        PlanningAjaxView.as_view(), name='planning-ajax'),
     url(r'^planning-light/(?P<term>\d+)/room/(?P<room_id>\d+)/$',
         PlanningLightRoomView.as_view(), name='planning-light-room'),
-    ('^planning-light/(?P<term>\d+)/room/(?P<room_id>\d+)/ajax/$',
-     'timetable.university.planning_views.planning_room_ajax'),
+    url('^planning-light/(?P<term>\d+)/room/(?P<room_id>\d+)/ajax/$',
+        PlanningRoomAjaxView.as_view(), name='planning-room-ajax'),
     (r'^choose-subjects/(?P<timetable_id>\d+)/$',
      'timetable.university.views.choose_subjects'),
     url(r'^render/(?P<encoded_groups>[\d/]+)/$',
@@ -52,8 +52,10 @@ urlpatterns = patterns('',
     (r'^robots.txt$', 'timetable.university.views.robots_txt'),
     (r'^[a-z0-9]+.ics$', 'timetable.university.views.http_gone'),
     (r'^accounts/profile/$', 'timetable.university.views.profile'),
-    url(r'^lesson/(?P<pk>\d+)/$', LessonDetailView.as_view(template_name="lesson.html"), name='lesson'),
-    url(r'^course/create/$', CourseCreateView.as_view(template_name="course.html"), name='course'),
+    url(r'^lesson/(?P<pk>\d+)/$',
+        LessonDetailView.as_view(template_name="lesson.html"), name='lesson'),
+    url(r'^course/create/$',
+        CourseCreateView.as_view(template_name="course.html"), name='course'),
     (r'^autocomplete/', include(ajax_urls)),
     (r'create-timetable/$',
      UnifiedTimetableProcessView.as_view(
