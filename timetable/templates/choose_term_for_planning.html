@@ -1,0 +1,57 @@
+{% extends "base.html" %}                                                      
+{% load staticfiles %}
+{% block title %}Розклад - Вибір семестру для планування{% endblock %} 
+{% block headadd %}
+<link rel="stylesheet" type="text/css" href="{% static "autocomplete.css" %}" />
+<script type="text/javascript">
+    function recomputeLink() {
+        var accumulator = "/";
+        $(".group-btn.primary").each(
+        function(i, btn){
+            if($(btn).attr("value") != ""){
+                accumulator += $(btn).attr("value") + '/';
+            }
+        });
+        $("#planning-link").attr("href", "/planning" + accumulator);
+        $("#planning-light-link").attr("href", "/planning-light" + accumulator);
+    }
+    $(function() {
+        var btnClickHandler = function(event){
+            event.preventDefault();
+            $(this).parent("div").children(".btn").removeClass("primary").removeClass("active");
+            $(this).addClass("primary").addClass("active");
+            recomputeLink();
+        }
+        $(".group-btn").click(btnClickHandler);
+        recomputeLink();
+    });
+</script>
+{% endblock %}
+{% block header %}Вибір семестру для планування{% endblock %}
+{% block content %}
+
+<div class="row add-margins">
+    <div class="span13">
+        {% for term in terms %}
+        <a href="#" class="btn {% if forloop.first %}primary active{% endif %} group-btn" value="{{ forloop.counter0 }}">
+            <strong>
+                {{ term }}
+            </strong>
+        </a>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="row add-margins">
+    <div class="span8">
+        <a class="btn success wide" href="/planning/" id="planning-link" target="_blank">
+            Показати планування
+        </a>
+    </div>
+    <div class="span8">
+        <a class="btn success wide" href="/planning-light/" id="planning-light-link" target="_blank">
+            Показати "легке" планування
+        </a>
+    </div>
+</div>
+{% endblock %}

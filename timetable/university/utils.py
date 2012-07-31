@@ -4,9 +4,9 @@ def collapse_weeks(week_list, academic_term):
             return '%d' % start
         else:
             return '%d-%d' % (
-                    start,
-                    end,
-                    )
+                start,
+                end,
+            )
     result_list = []
     tmp_start = None
     tmp_end = None
@@ -24,4 +24,3 @@ def collapse_weeks(week_list, academic_term):
             tmp_end = week
     result_list.append(format_weeks(tmp_start, tmp_end))
     return ','.join(result_list)
-

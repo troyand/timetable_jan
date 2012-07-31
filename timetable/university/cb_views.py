@@ -10,8 +10,8 @@ from django.core.mail import send_mail
 class LoginRequiredMixin(object):
     @method_decorator(login_required)
     def dispatch(self, request, *args, **kwargs):
-        return super(LoginRequiredMixin, self).dispatch(request, *args, **kwargs)
-
+        return super(LoginRequiredMixin, self).dispatch(
+            request, *args, **kwargs)
 
 
 class LessonDetailView(LoginRequiredMixin, UpdateView):
@@ -30,7 +30,7 @@ class LessonDetailView(LoginRequiredMixin, UpdateView):
         # check if user has permission to edit lesson
         #if self.object not in self.user.get_profile().student.lessons():
         #    return HttpResponseForbidden('Forbidden')
-        print self.object # unsaved/uncommitted object
+        print self.object  # unsaved/uncommitted object
         self.object.notify_subscribers(self.user)
         return super(LessonDetailView, self).form_valid(form)
 
@@ -40,19 +40,21 @@ class LessonDetailView(LoginRequiredMixin, UpdateView):
 
 class FeedbackView(FormView):
     form_class = FeedbackForm
+
     def form_valid(self, form):
         send_mail(
-                'Feedback',
-                'Sent from %s\n\nLiked:\n%s\n\nDisliked:\n%s\n\nWouldliked:\n%s' % (
-                    'https://beta.universitytimetable.org.ua/feedback/\n' + '='*40,
-                    form.cleaned_data['liked'],
-                    form.cleaned_data['disliked'],
-                    form.cleaned_data['wouldliked'],
-                    ),
-                'Timetable <noreply@universitytimetable.org.ua>',
-                ['web-dev@mail.usic.ukma.kiev.ua', 'troyanovsky@gmail.com'],
-                fail_silently=True
-                )
+            'Feedback',
+            'Sent from %s\n\nLiked:\n%s\n\nDisliked:\n%s\n\nWouldliked:\n%s' %
+            (
+                'https://beta.universitytimetable.org.ua/feedback/\n' + '=' * 40,
+                form.cleaned_data['liked'],
+                form.cleaned_data['disliked'],
+                form.cleaned_data['wouldliked'],
+            ),
+            'Timetable <noreply@universitytimetable.org.ua>',
+            ['web-dev@mail.usic.ukma.kiev.ua', 'troyanovsky@gmail.com'],
+            fail_silently=True
+        )
         return super(FeedbackView, self).form_valid(form)
 
     def get_success_url(self):
