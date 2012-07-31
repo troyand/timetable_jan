@@ -34,8 +34,8 @@
     <field type="IntegerField" name="number_of_weeks">12</field>
     <field type="IntegerField" name="tcp_week"><None></None></field>
     <field type="DateField" name="start_date">2012-01-09</field>
-    <field type="DateField" name="exams_start_date">2011-04-01</field>
-    <field type="DateField" name="exams_end_date">2011-04-14</field>
+    <field type="DateField" name="exams_start_date">2012-04-01</field>
+    <field type="DateField" name="exams_end_date">2012-04-14</field>
   </object>
   <object pk="1" model="university.faculty">
     <field to="university.university" name="university" rel="ManyToOneRel">1</field>
