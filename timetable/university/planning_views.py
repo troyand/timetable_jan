@@ -203,7 +203,7 @@ class BaseView(View):
 
     def _get_initial_data(self, **kwargs):
         """
-        Retrieves all initial data required for rendering a planning page.
+        Retrieves all initial data required for rendering a page.
         """
         raise NotImplementedError
 
@@ -299,7 +299,12 @@ class PlanningLightView(TemplateResponseMixin, BasePlanningView):
         px_per_day = 8
         context['px_per_day'] = px_per_day
         academic_term = context['academic_term']
-        context['room_column_width'] = academic_term.number_of_weeks * px_per_day
+        # TODO change this
+        room_column_width = academic_term.number_of_weeks * px_per_day
+        # increase value in order to make correct tables when number of weeks
+        # is small (~ 3-300ФПвН and 6 weeks)
+        room_column_width = 72 if room_column_width < 72 else room_column_width
+        context['room_column_width'] = room_column_width
         return super(PlanningLightView, self)._generate_context_data(context)
 
     def _get_columns(self, _):
@@ -344,15 +349,29 @@ class PlanningLightRoomView(TemplateResponseMixin, BasePlanningView):
 
 color_palette = list(palette(400))
 
-
-class BasePlanningAjaxView(TermExtractorMixin, BaseView):
+class JSONResponseMixin(object):
+    """Renders a page as a JSON response."""
     def render_to_response(self, context):
         """Renders a given context as a JSON-response."""
         json_response = self._generate_json_response(context)
-        print 'oi'
         return HttpResponse(json.dumps(json_response),
                             mimetype="application/json")
 
+    def _generate_json_response(self, context):
+        """Generates a data (map) required for a JSON response."""
+        raise NotImplementedError
+
+
+class BasePlanningAjaxView(JSONResponseMixin, TermExtractorMixin, BaseView):
+    """
+    Base view for an ajax part of a planning.
+
+    Fills context with some initial info: term, room, room+date:lesson mapping:
+    mapping[(1,1)][Room('1-225')]=[(1,Lesson('A')), (2,Lesson('A'))].
+
+    Returns an JSON response generated from a mapping using a child-class
+    implementation of a generation method.
+    """
     def _get_initial_data(self, **kwargs):
         """Adds room id to the initial data."""
         context = super(BasePlanningAjaxView, self)._get_initial_data(**kwargs)
@@ -360,6 +379,7 @@ class BasePlanningAjaxView(TermExtractorMixin, BaseView):
         return context
 
     def _generate_context_data(self, context):
+        """Adds room, mapping info to a context."""
         academic_term = context['academic_term']
         room_id = context['room_id']
         context['room'] = Room.objects.get(pk=room_id)
@@ -370,7 +390,6 @@ class BasePlanningAjaxView(TermExtractorMixin, BaseView):
                 date__lt=academic_term.exams_start_date,
                 room__pk=room_id
             ).order_by('date')
-        # mapping[(1,1)][Room('1-225')]=[(1,Lesson('A')), (2,Lesson('A'))]
         mapping = {}
         course_ids = set()
         for lesson in lessons:
@@ -390,18 +409,32 @@ class BasePlanningAjaxView(TermExtractorMixin, BaseView):
         return context
 
     def _generate_json_response(self, context):
+        """
+        Returns a map with pairs:
+        'cell-%d-%d-%d' % (weekday, lesson_number, room.pk): required info
+        """
         json_response = {}
         for weekday in range(1,7):
             for lesson_number in lesson_times.keys():
                 date_timekey = (weekday, lesson_number)
-                json_response = self._update_json_for_timedate(
+                json_response = self._update_json_for_timeday(
                     json_response, date_timekey, context)
         return json_response
 
     def _update_json_for_timeday(self, json_response, date_timekey, context):
+        """
+        Updates a given JSON response and returns an updated copy.
+
+        Adds information for a given week day and lesson number to a response.
+        """
         raise NotImplementedError
 
     def _generate_lesson_json(self, cell_mapping, week_number):
+        """
+        Generates a JSON-like representation for a lesson.
+
+        Info is generated for a a given week_number from a cell_mapping.
+        """
         if week_number in cell_mapping:
             item = {
                 'css_class': 'lesson',
@@ -422,7 +455,8 @@ class BasePlanningAjaxView(TermExtractorMixin, BaseView):
 
 
 class PlanningAjaxView(BasePlanningAjaxView):
-    def _update_json_for_timedate(self, json_response, date_timekey, context):
+    """Ajax part of a main planning view."""
+    def _update_json_for_timeday(self, json_response, date_timekey, context):
         cell = []
         mapping = context['mapping']
         room = context['room']
@@ -448,7 +482,8 @@ class PlanningAjaxView(BasePlanningAjaxView):
 
 
 class PlanningRoomAjaxView(BasePlanningAjaxView):
-    def _update_json_for_timedate(self, json_response, date_timekey, context):
+    """Ajax part of a room planning view."""
+    def _update_json_for_timeday(self, json_response, date_timekey, context):
         mapping = context['mapping']
         room = context['room']
         academic_term = context['academic_term']
