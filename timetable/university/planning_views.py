@@ -16,12 +16,12 @@ import json
 def choose_term_for_planning(request):
     """Renders a page with a chooser of term for term planning."""
     return render_to_response(
-            'choose_term_for_planning.html',
-            {
-                'terms': AcademicTerm.objects.all(),
-            },
-            context_instance=RequestContext(request)
-            )
+        'choose_term_for_planning.html',
+        {
+            'terms': AcademicTerm.objects.all(),
+        },
+        context_instance=RequestContext(request)
+    )
 
 
 def palette(size):
@@ -39,8 +39,12 @@ def palette(size):
 def course_stats(request):
     from django.db.models import Count
     academic_term = AcademicTerm.objects.all()[2]
-    groups = Group.objects.select_related('course', 'course__discipline').defer('course__discipline__description').filter(course__academic_term=academic_term
-            ).annotate(lesson_count=Count('lesson')).order_by('course', 'number')
+    groups = Group.objects.select_related(
+        'course', 'course__discipline').defer(
+            'course__discipline__description').filter(
+                course__academic_term=academic_term
+            ).annotate(
+                lesson_count=Count('lesson')).order_by('course', 'number')
     mapping = {}
     # mapping[Course] = {0: 13, 1: 6, 2: 6}
     for group in groups:
@@ -56,15 +60,17 @@ def course_stats(request):
             'name': course.discipline.name,
             'lectures': mapping[course].get(0, 0),
             'inconsistent': inconsistent,
-            'non_lectures': [(k,v) for k, v in sorted(mapping[course].items()) if k != 0]
+            'non_lectures': [(k, v)
+                             for k, v in sorted(mapping[course].items())
+                             if k != 0]
             })
     return render_to_response(
-            'course_stats.html',
-            {
-                'rows': rows,
-                },
-            context_instance=RequestContext(request)
-            )
+        'course_stats.html',
+        {
+            'rows': rows,
+        },
+        context_instance=RequestContext(request)
+    )
 
 
 @cache_page(60 * 60 * 24)
@@ -112,7 +118,7 @@ def planning(request, term):
     time_rows = []
     sorted_rooms = sorted(rooms, key=lambda x: u'%s' % x)
     #print sorted_rooms
-    for weekday in range(1,7):
+    for weekday in range(1, 7):
         for lesson_number in lesson_times.keys():
             #row_names.append('%s-%s' % (weekday, lesson_times[lesson_number][0]))
             row = []
@@ -229,9 +235,7 @@ class TermExtractorMixin(object):
         data = {}
         # Get captured params
         term = int(kwargs.get('term'))
-        if term < 0 or term >= AcademicTerm.objects.count():
-            raise Http404
-        academic_term = AcademicTerm.objects.all()[term]
+        academic_term = get_object_or_404(AcademicTerm, pk=term)
         data['academic_term'] = academic_term
         data['term'] = term
         return data
@@ -256,10 +260,11 @@ class BasePlanningView(TermExtractorMixin, BaseView):
         rows = []
         time_rows = []
         columns = self._get_columns(context)
-        for weekday in range(1,7):
+        for weekday in range(1, 7):
             for lesson_number in lesson_times.keys():
                 if lesson_number == 1:
-                    time_rows.append((day_names[weekday], lesson_times[lesson_number][0]))
+                    time_rows.append(
+                        (day_names[weekday], lesson_times[lesson_number][0]))
                 else:
                     time_rows.append((None, lesson_times[lesson_number][0]))
                 rows.append(
@@ -300,10 +305,9 @@ class PlanningLightView(TemplateResponseMixin, BasePlanningView):
         context['px_per_day'] = px_per_day
         academic_term = context['academic_term']
         # TODO change this
-        room_column_width = academic_term.number_of_weeks * px_per_day
         # increase value in order to make correct tables when number of weeks
         # is small (~ 3-300ФПвН and 6 weeks)
-        room_column_width = 72 if room_column_width < 72 else room_column_width
+        room_column_width = academic_term.number_of_weeks * px_per_day
         context['room_column_width'] = room_column_width
         return super(PlanningLightView, self)._generate_context_data(context)
 
@@ -327,7 +331,8 @@ class PlanningLightRoomView(TemplateResponseMixin, BasePlanningView):
 
     def _get_initial_data(self, **kwargs):
         """Adds room id to the initial data."""
-        context = super(PlanningLightRoomView, self)._get_initial_data(**kwargs)
+        context = super(PlanningLightRoomView, self)._get_initial_data(
+            **kwargs)
         context['room_id'] = kwargs.get('room_id')
         return context
 
@@ -348,6 +353,7 @@ class PlanningLightRoomView(TemplateResponseMixin, BasePlanningView):
 
 
 color_palette = list(palette(400))
+
 
 class JSONResponseMixin(object):
     """Renders a page as a JSON response."""
@@ -394,9 +400,9 @@ class BasePlanningAjaxView(JSONResponseMixin, TermExtractorMixin, BaseView):
         course_ids = set()
         for lesson in lessons:
             date_timekey = (lesson.date.isoweekday(), lesson.lesson_number)
-            if not mapping.has_key(date_timekey):
+            if not date_timekey in mapping:
                 mapping[date_timekey] = {}
-            if not mapping[date_timekey].has_key(lesson.room):
+            if not lesson.room in mapping[date_timekey]:
                 mapping[date_timekey][lesson.room] = []
             course_ids.add(lesson.group.course_id)
             mapping[date_timekey][lesson.room].append(
@@ -414,7 +420,7 @@ class BasePlanningAjaxView(JSONResponseMixin, TermExtractorMixin, BaseView):
         'cell-%d-%d-%d' % (weekday, lesson_number, room.pk): required info
         """
         json_response = {}
-        for weekday in range(1,7):
+        for weekday in range(1, 7):
             for lesson_number in lesson_times.keys():
                 date_timekey = (weekday, lesson_number)
                 json_response = self._update_json_for_timeday(
@@ -462,9 +468,9 @@ class PlanningAjaxView(BasePlanningAjaxView):
         room = context['room']
         academic_term = context['academic_term']
         (weekday, lesson_number) = date_timekey
-        if mapping.has_key(date_timekey) and mapping[date_timekey].has_key(room):
+        if date_timekey in mapping and room in mapping[date_timekey]:
             cell_mapping = dict(mapping[date_timekey][room])
-            for week_number in range(1, academic_term.number_of_weeks+1):
+            for week_number in range(1, academic_term.number_of_weeks + 1):
                 cell.append(self._generate_lesson_json(
                     cell_mapping, week_number))
         else:
@@ -488,11 +494,11 @@ class PlanningRoomAjaxView(BasePlanningAjaxView):
         room = context['room']
         academic_term = context['academic_term']
         (weekday, lesson_number) = date_timekey
-        if mapping.has_key(date_timekey) and mapping[date_timekey].has_key(room):
+        if date_timekey in mapping and room in mapping[date_timekey]:
             cell_mapping = dict(mapping[date_timekey][room])
         else:
             cell_mapping = {}
-        for week_number in range(1, academic_term.number_of_weeks+1):
+        for week_number in range(1, academic_term.number_of_weeks + 1):
             item = self._generate_lesson_json(cell_mapping, week_number)
             json_response['cell-%d-%d-%d' % (weekday, lesson_number, week_number)] = item
         return json_response

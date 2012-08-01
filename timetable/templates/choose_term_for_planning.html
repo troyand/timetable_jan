@@ -33,7 +33,7 @@
 <div class="row add-margins">
     <div class="span13">
         {% for term in terms %}
-        <a href="#" class="btn {% if forloop.first %}primary active{% endif %} group-btn" value="{{ forloop.counter0 }}">
+        <a href="#" class="btn {% if forloop.first %}primary active{% endif %} group-btn" value="{{ term.id }}">
             <strong>
                 {{ term }}
             </strong>
