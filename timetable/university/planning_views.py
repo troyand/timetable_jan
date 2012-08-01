@@ -496,3 +496,13 @@ class PlanningRoomAjaxView(BasePlanningAjaxView):
             item = self._generate_lesson_json(cell_mapping, week_number)
             json_response['cell-%d-%d-%d' % (weekday, lesson_number, week_number)] = item
         return json_response
+
+    def _generate_lesson_json(self, cell_mapping, week_number):
+        """Adds a name of a lesson to its JSON representation."""
+        item = super(PlanningRoomAjaxView, self)._generate_lesson_json(
+            cell_mapping, week_number)
+        if week_number in cell_mapping:
+            item['html'] = cell_mapping[week_number].group.number or u'лекція'
+        else:
+            item['html'] = u''
+        return item

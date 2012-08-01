@@ -1,6 +1,6 @@
 #-*- coding: utf-8 -*-
 
-from django.forms import ModelForm, Form, CharField, Textarea, ValidationError
+from django.forms import ModelForm, Form, CharField, Textarea, ModelChoiceField, ModelMultipleChoiceField, ValidationError
 from timetable.university.models import *
 
 
@@ -55,3 +55,8 @@ class FeedbackForm(Form):
 
     def clean_wouldliked(self):
         return self.ensure_min_width(self.cleaned_data['wouldliked'])
+
+
+class CourseForm(Form):
+    discipline = ModelChoiceField(queryset=Discipline.objects.all())
+    timetables = ModelMultipleChoiceField(queryset=Timetable.objects.all())

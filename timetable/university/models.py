@@ -391,10 +391,11 @@ class Timetable(models.Model):
     academic_term = models.ForeignKey(AcademicTerm)
 
     def __unicode__(self):
-        return u'%s %d р.н.' % (
-            self.major.name,
-            self.year,
-        )
+        return u'%s %s %d р.н.' % (
+                self.major.name,
+                self.major.kind,
+                self.year,
+                )
 
 
 class Group(models.Model):

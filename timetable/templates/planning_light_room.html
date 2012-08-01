@@ -3,7 +3,7 @@
 <html lang="uk">
 <head>
 <meta charset="utf-8">
-<title>{% block title %}Розклад{% endblock %}</title>
+<title>{% block title %}{{ room }} - {{ academic_term }}{% endblock %}</title>
 <meta name="description" content="">
 <meta name="author" content="">
 <link rel="shortcut icon" href="{% static "favicon.ico" %}">
@@ -23,6 +23,9 @@
             min-width: 45px;
         }
         .lesson {
+            color: #fff;
+            font-weight: bold;
+            text-align: center;
             cursor: default;
             width: {{ column_width }}px;
         }
@@ -67,6 +70,9 @@
         html, body {
             overflow: hidden;
         }
+        #top-menu {
+            height: 32px;
+        }
     </style>
     <script type="text/javascript" src="{% static "bootstrap-twipsy.js" %}"></script>
     <script type="text/javascript" src="{% static "bootstrap-popover.js" %}"></script>
@@ -74,7 +80,7 @@
         $(function(){
             var resize = function() {
                 var width = $(window).width() - 78 + "px";
-                var height = $(window).height() - 24 + "px";
+                var height = $(window).height() - 24 - $("#top-menu").height() + "px";
                 $("#cells").height(height);
                 $("#cells").width(width);
                 $("#cells-header").width(width);
@@ -100,6 +106,9 @@
                     td.attr('title', json[k]['title']);
                     td.data('content', json[k]['content']);
                     td.css('background-color', json[k]['background_color']);
+                    if (json[k]['html']) {
+                        td.html(json[k]['html']);
+                    }
                     //$('#'+k).html(json[k]);
                     //$('#'+k+' > .lesson').popover({"animate": false});
                 }
@@ -128,6 +137,9 @@
 <body>
 {% block content %}
     <h3 id="loading">Завантаження…</h3>
+    <div class="meta-row" id="top-menu">
+        topbar
+    </div>
     <div class="meta-row">
         <div id="cells-corner">
             <table class="bordered-table zebra-striped compact non-fancy">
