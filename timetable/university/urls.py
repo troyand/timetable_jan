@@ -2,9 +2,8 @@
 
 from django.conf.urls.defaults import patterns, include, url
 from django.conf import settings
-from django.views.generic.simple import redirect_to
 from timetable.university.cb_views import *
-from django.views.generic import TemplateView
+from django.views.generic import TemplateView, RedirectView
 from timetable.university.ajax_views import ajax_urls, UnifiedTimetableProcessView
 from timetable.university.views import ICALView, TimetableView, TimetableMainView
 from timetable.university.planning_views import PlanningLightView, PlanningLightRoomView, PlanningAjaxView, PlanningRoomAjaxView
@@ -18,8 +17,8 @@ urlpatterns = patterns('',
     (r'^course-stats/$', 'timetable.university.planning_views.course_stats'),
     (r'^planning/$',
      'timetable.university.planning_views.choose_term_for_planning'),
-    (r'^planning-light/$', redirect_to,
-     {'url': '/planning/', 'permanent': False}),
+    url(r'^planning-light/$',
+        RedirectView.as_view(url='/planning/', permanent=False)),
     (r'^planning/(?P<term>\d+)/$',
      'timetable.university.planning_views.planning'),
     url(r'^planning-light/(?P<term>\d+)/$',
