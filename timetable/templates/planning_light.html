@@ -91,7 +91,7 @@
                 console.log($(value).data("room-id"));
                 $.ajax({
                     "type": "GET",
-                    "url": "/planning-light/"+$(value).data("room-id")+"/"
+                    "url": "/planning-light/"+{{ term }}+"/"+$(value).data("room-id")+"/ajax/"
                 }).done(function(json){
                     //console.log(json);
                     for (k in json){
@@ -127,9 +127,9 @@
             <table class="bordered-table zebra-striped compact non-fancy">
                 <thead>
                     <tr>
-                        {% for room in sorted_rooms %}
+                        {% for room in columns %}
                             <td class="room-column room-title unloaded" data-room-id="{{ room.id }}">
-                                <a href="/planning-light/room/{{ room.id }}/">{{ room }}</a>
+                                <a href="/planning-light/{{ term }}/room/{{ room.id }}">{{ room }}</a>
                             </td>
                         {% endfor %}
                         <td class="room-column">&nbsp;</td>
