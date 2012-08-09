@@ -301,12 +301,12 @@ class PlanningLightView(TemplateResponseMixin, BasePlanningView):
 
     def _generate_context_data(self, context):
         """Adds some specific info for term planning overview to context."""
-        px_per_day = 8
-        context['px_per_day'] = px_per_day
         academic_term = context['academic_term']
-        # TODO change this
-        # increase value in order to make correct tables when number of weeks
-        # is small (~ 3-300ФПвН and 6 weeks)
+        if academic_term.number_of_weeks < 10:
+            px_per_day = 12
+        else:
+            px_per_day = 8
+        context['px_per_day'] = px_per_day
         room_column_width = academic_term.number_of_weeks * px_per_day
         context['room_column_width'] = room_column_width
         return super(PlanningLightView, self)._generate_context_data(context)
@@ -340,9 +340,12 @@ class PlanningLightRoomView(TemplateResponseMixin, BasePlanningView):
         """Adds some specific info for room planning to context."""
         context = super(PlanningLightRoomView, self)._generate_context_data(
             context)
-        column_width = 78
+        column_width = 28
         context['column_width'] = column_width
         context['room'] = get_object_or_404(Room, pk=context['room_id'])
+        #FIXME second room stubbed for some time
+        context['rooms'] = list(enumerate([context['room'], Room.objects.get(pk=1)], 2))
+        context['all_rooms'] = Room.objects.all()
         return context
 
     def _get_columns(self, context):
@@ -508,7 +511,7 @@ class PlanningRoomAjaxView(BasePlanningAjaxView):
         item = super(PlanningRoomAjaxView, self)._generate_lesson_json(
             cell_mapping, week_number)
         if week_number in cell_mapping:
-            item['html'] = cell_mapping[week_number].group.number or u'лекція'
+            item['html'] = cell_mapping[week_number].group.number or u'л'
         else:
             item['html'] = u''
         return item

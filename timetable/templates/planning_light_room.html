@@ -16,6 +16,9 @@
         .column {
             min-width: {{ column_width }}px;
         }
+        .column-padding {
+            background-color: #f00 !important;
+        }
         .day-column {
             min-width: 25px;
         }
@@ -28,6 +31,14 @@
             text-align: center;
             cursor: default;
             width: {{ column_width }}px;
+        }
+        .week-title {
+            font-weight: bold;
+            text-align: center;
+        }
+        .room-header {
+            text-align: center;
+            font-weight: bold;
         }
         .free {
             cursor: default;
@@ -65,7 +76,7 @@
             background: #ddd;
         }
         .selected {
-            background-color: #f00;
+            background-image: url('{% static "stripe_bg.png" %}');
         }
         html, body {
             overflow: hidden;
@@ -94,42 +105,58 @@
             });
             $("#loading").hide();
             $(".meta-row").show();
-            $.ajax({
-                "type": "GET",
-                "url": "/planning-light/"+{{ term }}+"/room/"+{{ room.pk }}+"/ajax/"
-            }).done(function(json){
-                //console.log(json);
-                for (k in json){
-                    //console.log(k);
-                    var td = $('#'+k);
-                    td.addClass(json[k]['css_class']);
-                    td.attr('title', json[k]['title']);
-                    td.data('content', json[k]['content']);
-                    td.css('background-color', json[k]['background_color']);
-                    if (json[k]['html']) {
-                        td.html(json[k]['html']);
+            function ajax_room_load(term, room_pk, window_number) {
+                $('.loaded.window-'+window_number).addClass('unloaded');
+                $('.loaded.window-'+window_number).removeClass('loaded');
+                $(".lesson.free").data("popover", null);
+                $(".lesson.free").unbind("click");
+                $.ajax({
+                    "type": "GET",
+                    "url": "/planning-light/"+term+"/room/"+room_pk+"/ajax/"
+                }).done(function(json){
+                    //console.log(json);
+                    for (k in json){
+                        //console.log(k);
+                        var td = $('#window-'+window_number+'-'+k);
+                        td.addClass(json[k]['css_class']);
+                        td.attr('title', json[k]['title']);
+                        td.data('content', json[k]['content']);
+                        td.css('background-color', json[k]['background_color']);
+                        if (json[k]['html']) {
+                            td.html(json[k]['html']);
+                        }
+                        else {
+                            td.html("");
+                        }
+                        //$('#'+k).html(json[k]);
+                        //$('#'+k+' > .lesson').popover({"animate": false});
                     }
-                    //$('#'+k).html(json[k]);
-                    //$('#'+k+' > .lesson').popover({"animate": false});
-                }
-                $('.unloaded').removeClass('unloaded');
-                if ($('.unloaded').length == 0) {
-                    $(".lesson").popover({"animate": false});
-                    $(".free").popover({"animate": false});
-                    $(".free").click(function(){
-                        var element = $(this);
-                        if (element.hasClass("selected")){
-                            element.removeClass("selected");
-                            //element.css("background-color", "inherit");
-                            element.css("background-image", "");
-                        }
-                        else{
-                            element.addClass("selected");
-                            //element.css("background-color", "#f00");
-                            element.css("background-image", "url('{% static "stripe_bg.png" %}')");
-                        }
-                    });
-                }
+                    $('.unloaded.window-'+window_number).addClass('loaded');
+                    $('.unloaded.window-'+window_number).removeClass('unloaded');
+                    if ($('.unloaded').length == 0) {
+                        console.log("refreshing");
+                        $(".popover").remove();
+                        $(".lesson.free").popover({"animate": false});
+                        $(".free").click(function(){
+                            var element = $(this);
+                            if (element.hasClass("selected")){
+                                element.removeClass("selected");
+                                //element.css("background-color", "inherit");
+                            }
+                            else{
+                                element.addClass("selected");
+                                //element.css("background-color", "#f00");
+                            }
+                        });
+                    }
+                });
+            }
+            {% for room_number, room in rooms %}
+                ajax_room_load({{ term }}, {{ room.pk }}, {{ room_number }});
+            {% endfor %}
+            $("select.room").change(function() {
+                var select = $(this);
+                ajax_room_load({{ term }}, select.val(), select.data("window"));
             });
         });
     </script>
@@ -145,8 +172,12 @@
             <table class="bordered-table zebra-striped compact non-fancy">
                 <thead>
                     <tr>
-                        <td class="day-column">&nbsp;</td>
+                        <td class="day-column"><select class="dummy" style="width:10px;visibility:hidden;"><option>&nbsp;</option></select></td>
                         <td class="time-column">&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td class="day-column">&nbsp;</td>
+                        <td class="time-column">Тижд</td>
                     </tr>
                 </thead>
             </table>
@@ -155,10 +186,24 @@
             <table class="bordered-table zebra-striped compact non-fancy" style="width: auto">
                 <thead>
                     <tr>
-                        {% for week_number in columns %}
-                            <td class="column room-title unloaded">Тиждень {{ week_number }}</td>
+                        {% for room_number, room in rooms %}
+                            <td class="room-header window-{{ room_number }}" colspan={{ number_of_weeks }}>
+                                <select class="room" data-window="{{ room_number }}">
+                                    {% for room_option in all_rooms %}
+                                        <option value="{{ room_option.pk }}"{% if room == room_option %}selected="selected"{% endif %}>{{ room_option }}</option>
+                                    {% endfor %}
+                                </select>
+                            </td>
+                            <td class="column-padding">&nbsp;</td>
                         {% endfor %}
-                        <td class="column">&nbsp;</td>
+                    </tr>
+                    <tr>
+                        {% for room_number, room in rooms %}
+                            {% for week_number in columns %}
+                                <td class="column week-title unloaded window-{{ room_number }}">{{ week_number }}</td>
+                            {% endfor %}
+                            <td class="column-padding">&nbsp;</td>
+                        {% endfor %}
                     </tr>
                 </thead>
             </table>
@@ -187,10 +232,13 @@
                 <tbody>
                     {% for row in rows %}
                         <tr>
-                            {% for cell in row %}
-                                <td class="column" id="cell-{{ cell }}">
-                                    &nbsp;
-                                </td>
+                            {% for room_number, room in rooms %}
+                                {% for cell in row %}
+                                    <td class="column" id="window-{{ room_number }}-cell-{{ cell }}" class="window-{{ room_number }}">
+                                        &nbsp;
+                                    </td>
+                                {% endfor %}
+                                <td class="column-padding">&nbsp;</td>
                             {% endfor %}
                         </tr>
                     {% endfor %}
