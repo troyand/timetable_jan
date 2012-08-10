@@ -6,7 +6,7 @@ from timetable.university.cb_views import *
 from django.views.generic import TemplateView, RedirectView
 from timetable.university.ajax_views import ajax_urls, UnifiedTimetableProcessView
 from timetable.university.views import ICALView, TimetableView, TimetableMainView
-from timetable.university.planning_views import PlanningLightView, PlanningLightRoomView, PlanningAjaxView, PlanningRoomAjaxView
+from timetable.university.planning_views import PlanningLightView, PlanningLightRoomView, PlanningAjaxView, PlanningRoomAjaxView, PlanningRoomAjaxLecturerView
 
 
 urlpatterns = patterns('',
@@ -29,6 +29,8 @@ urlpatterns = patterns('',
         PlanningLightRoomView.as_view(), name='planning-light-room'),
     url('^planning-light/(?P<term>\d+)/room/(?P<room_id>\d+)/ajax/$',
         PlanningRoomAjaxView.as_view(), name='planning-room-ajax'),
+    url('^planning-light/(?P<term>\d+)/lecturer/(?P<group_id>\d+)/ajax/$',
+        PlanningRoomAjaxLecturerView.as_view(), name='planning-room-ajax-lecturer'),
     (r'^choose-subjects/(?P<timetable_id>\d+)/$',
      'timetable.university.views.choose_subjects'),
     url(r'^render/(?P<encoded_groups>[\d/]+)/$',

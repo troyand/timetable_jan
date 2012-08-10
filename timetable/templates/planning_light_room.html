@@ -32,6 +32,16 @@
             cursor: default;
             width: {{ column_width }}px;
         }
+        .free {
+            color: #fff;
+            font-weight: bold;
+            text-align: center;
+            cursor: default;
+            width: {{ column_width }}px;
+        }
+        .lecturer-busy {
+            color: #000;
+        }
         .week-title {
             font-weight: bold;
             text-align: center;
@@ -39,10 +49,6 @@
         .room-header {
             text-align: center;
             font-weight: bold;
-        }
-        .free {
-            cursor: default;
-            width: {{ column_width }}px;
         }
         .meta-row {
             display: none;
@@ -75,14 +81,18 @@
         .unloaded {
             background: #ddd;
         }
-        .selected {
+        .selected.free {
             background-image: url('{% static "stripe_bg.png" %}');
+        }
+        .selected.lesson {
+            background-image: url('{% static "stripe_bg_dark.png" %}');
         }
         html, body {
             overflow: hidden;
         }
         #top-menu {
-            height: 32px;
+            height: 30px;
+            padding: 4px;
         }
     </style>
     <script type="text/javascript" src="{% static "bootstrap-twipsy.js" %}"></script>
@@ -105,11 +115,29 @@
             });
             $("#loading").hide();
             $(".meta-row").show();
+            function unbind_clicks() {
+                $(".cell").removeClass("selected");
+                $(".cell").unbind("click");
+            }
+            function bind_clicks() {
+                var selector = ".lesson.lecturer-free, .free.lecturer-free";
+                if ($("#add-button").hasClass("active")) {
+                    selector = ".free.lecturer-free";
+                }
+                $(selector).click(function(){
+                    var element = $(this);
+                    if (element.hasClass("selected")){
+                        element.removeClass("selected");
+                    }
+                    else{
+                        element.addClass("selected");
+                    }
+                });
+            }
             function ajax_room_load(term, room_pk, window_number) {
                 $('.loaded.window-'+window_number).addClass('unloaded');
                 $('.loaded.window-'+window_number).removeClass('loaded');
-                $(".lesson.free").data("popover", null);
-                $(".lesson.free").unbind("click");
+                unbind_clicks();
                 $.ajax({
                     "type": "GET",
                     "url": "/planning-light/"+term+"/room/"+room_pk+"/ajax/"
@@ -118,9 +146,12 @@
                     for (k in json){
                         //console.log(k);
                         var td = $('#window-'+window_number+'-'+k);
+                        td.removeClass("lesson");
+                        td.removeClass("free");
                         td.addClass(json[k]['css_class']);
-                        td.attr('title', json[k]['title']);
-                        td.data('content', json[k]['content']);
+                        // lightweight native tooltip with content in title attr
+                        td.attr('title', json[k]['content']);
+                        //td.data('content', json[k]['content']);
                         td.css('background-color', json[k]['background_color']);
                         if (json[k]['html']) {
                             td.html(json[k]['html']);
@@ -134,20 +165,7 @@
                     $('.unloaded.window-'+window_number).addClass('loaded');
                     $('.unloaded.window-'+window_number).removeClass('unloaded');
                     if ($('.unloaded').length == 0) {
-                        console.log("refreshing");
-                        $(".popover").remove();
-                        $(".lesson.free").popover({"animate": false});
-                        $(".free").click(function(){
-                            var element = $(this);
-                            if (element.hasClass("selected")){
-                                element.removeClass("selected");
-                                //element.css("background-color", "inherit");
-                            }
-                            else{
-                                element.addClass("selected");
-                                //element.css("background-color", "#f00");
-                            }
-                        });
+                        bind_clicks();
                     }
                 });
             }
@@ -158,6 +176,41 @@
                 var select = $(this);
                 ajax_room_load({{ term }}, select.val(), select.data("window"));
             });
+            $("select.course").change(function() {
+                var option = $(this).children(":selected");
+                $("select.group").children().remove();
+                $.each(option.data("groups"), function(index, value) {
+                    var text = value[0];
+                    if (text == 0) {
+                        text = "л"
+                    }
+                    $("select.group")
+                    .append($("<option></option")
+                    .attr("value", value[1])
+                    .text(text));
+                });
+                $("select.group").change();
+            });
+            $("select.course").change();
+            $("select.group").change(function() {
+                var option = $(this).children(":selected");
+                unbind_clicks();
+                $.ajax({
+                    "type": "GET",
+                    "url": "/planning-light/"+{{ term }}+"/lecturer/"+option.val()+"/ajax/"
+                }).done(function(json){
+                    for (k in json){
+                        {% for room_number, room in rooms %}
+                            var td = $('#window-'+{{ room_number }}+'-'+k);
+                            td.removeClass("lecturer-busy");
+                            td.removeClass("lecturer-free");
+                            td.addClass(json[k]['css_class']);
+                        {% endfor %}
+                    }
+                    bind_clicks();
+                });
+            });
+            $("select.group").change();
         });
     </script>
 </head>
@@ -165,7 +218,16 @@
 {% block content %}
     <h3 id="loading">Завантаження…</h3>
     <div class="meta-row" id="top-menu">
-        topbar
+        <button id="add-button" class="btn success active mode-button">Додавання</button>
+        <button id="move-button" class="btn primary mode-button">Переміщення</button>
+        <button id="del-button" class="btn danger mode-button">Видалення</button>
+        <select class="course">
+            {% for course, groups in all_courses %}
+                <option value="{{ course.pk }}" data-groups="{{ groups }}">{{ course }}</option>
+            {% endfor %}
+        </select>
+        <select class="group mini">
+        </select>
     </div>
     <div class="meta-row">
         <div id="cells-corner">
@@ -234,7 +296,7 @@
                         <tr>
                             {% for room_number, room in rooms %}
                                 {% for cell in row %}
-                                    <td class="column" id="window-{{ room_number }}-cell-{{ cell }}" class="window-{{ room_number }}">
+                                    <td class="column window-{{ room_number }} cell" id="window-{{ room_number }}-cell-{{ cell }}">
                                         &nbsp;
                                     </td>
                                 {% endfor %}
