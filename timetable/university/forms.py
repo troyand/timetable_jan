@@ -1,6 +1,6 @@
 #-*- coding: utf-8 -*-
 
-from django.forms import ModelForm, Form, CharField, Textarea, ModelChoiceField, ModelMultipleChoiceField, ValidationError
+from django.forms import *
 from timetable.university.models import *
 
 
@@ -58,5 +58,26 @@ class FeedbackForm(Form):
 
 
 class CourseForm(Form):
-    discipline = ModelChoiceField(queryset=Discipline.objects.all())
-    timetables = ModelMultipleChoiceField(queryset=Timetable.objects.all())
+    discipline = ModelChoiceField(
+            queryset=Discipline.objects.all(),
+            label=u'Диципліна',
+            )
+    timetables = ModelMultipleChoiceField(
+            queryset=Timetable.objects.all(),
+            label=u'Спеціальності',
+            )
+    number_of_groups = IntegerField(
+            label=u'Кількість груп',
+            )
+    lecture_group_absent = BooleanField(
+            label=u'Відсутні лекції',
+            )
+    number_of_lectures = IntegerField(
+            label=u'Кількість лекцій',
+            )
+    number_of_nonlectures = IntegerField(
+            label=u'Кількість нелекційних занять',
+            )
+    credits = FloatField(
+            label=u'Кількість кредитів',
+            )
