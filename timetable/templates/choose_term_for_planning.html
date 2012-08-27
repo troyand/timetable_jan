@@ -32,26 +32,17 @@
 
 <div class="row add-margins">
     <div class="span13">
-        {% for term in terms %}
-        <a href="#" class="btn {% if forloop.first %}primary active{% endif %} group-btn" value="{{ term.id }}">
-            <strong>
-                {{ term }}
-            </strong>
-        </a>
-        {% endfor %}
+        <ul>
+            {% for term in terms %}
+                <li>
+                {{ term }} - 
+                <a href="/planning-light/{{ term.id }}/">Загальний план</a> - 
+                <a href="/planning-light/{{ term.id }}/add/">Додавання пар</a> - 
+                <a href="/planning-light/{{ term.id }}/delete/">Видалення пар</a>
+                </li>
+            {% endfor %}
+        </ul>
     </div>
 </div>
 
-<div class="row add-margins">
-    <div class="span8">
-        <a class="btn success wide" href="/planning/" id="planning-link" target="_blank">
-            Показати планування
-        </a>
-    </div>
-    <div class="span8">
-        <a class="btn success wide" href="/planning-light/" id="planning-light-link" target="_blank">
-            Показати "легке" планування
-        </a>
-    </div>
-</div>
 {% endblock %}

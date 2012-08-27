@@ -55,6 +55,10 @@ class AcademicTerm(models.Model):
 
     class Week:
         def __init__(self, academic_term, week_number):
+            if week_number < 0 or week_number > academic_term.number_of_weeks:
+                raise ValueError(u'Invalid week number %d for %s' % (
+                    week_number, academic_term)
+                    )
             self.academic_term = academic_term
             self.week_number = week_number
 
@@ -382,6 +386,21 @@ class Course(models.Model):
         return u'%s' % (
             self.discipline,
         )
+
+    def full_description(self):
+        timetables = self.timetable_set.select_related('major__faculty').all()
+        together_with = u','.join(set([u'%s-%d' % (t.major.name,
+                                               t.year)
+                                   for t in timetables]))
+        return u'%s (%s)' % (
+            self.discipline.name,
+            #self.academic_term.season,
+            #self.academic_term.kind,
+            #self.academic_term.year,
+            #self.academic_term.year + 1,
+            together_with
+        )
+
 
 
 class Timetable(models.Model):

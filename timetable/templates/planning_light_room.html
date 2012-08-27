@@ -3,7 +3,7 @@
 <html lang="uk">
 <head>
 <meta charset="utf-8">
-<title>{% block title %}{{ room }} - {{ academic_term }}{% endblock %}</title>
+<title>{% block title %}{{ academic_term }}{% endblock %}</title>
 <meta name="description" content="">
 <meta name="author" content="">
 <link rel="shortcut icon" href="{% static "favicon.ico" %}">
@@ -14,16 +14,17 @@
             padding: 0 1px 0 1px;
         }
         .column {
+            height: 23px;
             min-width: {{ column_width }}px;
         }
         .column-padding {
-            background-color: #f00 !important;
         }
         .day-column {
             min-width: 25px;
         }
         .time-column {
             min-width: 45px;
+            height: 23px;
         }
         .lesson {
             color: #fff;
@@ -87,6 +88,9 @@
         .selected.lesson {
             background-image: url('{% static "stripe_bg_dark.png" %}');
         }
+        .course {
+            width: 400px;
+        }
         html, body {
             overflow: hidden;
         }
@@ -98,10 +102,48 @@
     <script type="text/javascript" src="{% static "bootstrap-twipsy.js" %}"></script>
     <script type="text/javascript" src="{% static "bootstrap-popover.js" %}"></script>
     <script type="text/javascript">
+        // https://docs.djangoproject.com/en/dev/ref/contrib/csrf/
+        jQuery(document).ajaxSend(function(event, xhr, settings) {
+            function getCookie(name) {
+                var cookieValue = null;
+                if (document.cookie && document.cookie != '') {
+                    var cookies = document.cookie.split(';');
+                    for (var i = 0; i < cookies.length; i++) {
+                        var cookie = jQuery.trim(cookies[i]);
+                        // Does this cookie string begin with the name we want?
+                        if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }
+            function sameOrigin(url) {
+                // url could be relative or scheme relative or absolute
+                var host = document.location.host; // host + port
+                var protocol = document.location.protocol;
+                var sr_origin = '//' + host;
+                var origin = protocol + sr_origin;
+                // Allow absolute or scheme relative URLs to same origin
+                return (url == origin || url.slice(0, origin.length + 1) == origin + '/') ||
+                (url == sr_origin || url.slice(0, sr_origin.length + 1) == sr_origin + '/') ||
+                // or any other URL that isn't scheme relative or absolute i.e relative.
+                !(/^(\/\/|http:|https:).*/.test(url));
+            }
+            function safeMethod(method) {
+                return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+            }
+
+            if (!safeMethod(settings.type) && sameOrigin(settings.url)) {
+                xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+            }
+        });
+
         $(function(){
             var resize = function() {
                 var width = $(window).width() - 78 + "px";
-                var height = $(window).height() - 24 - $("#top-menu").height() + "px";
+                var height = $(window).height() - $("#top-meta-row").height() - 8 - $("#top-menu").height() + "px";
                 $("#cells").height(height);
                 $("#cells").width(width);
                 $("#cells-header").width(width);
@@ -115,32 +157,12 @@
             });
             $("#loading").hide();
             $(".meta-row").show();
-            function unbind_clicks() {
-                $(".cell").removeClass("selected");
-                $(".cell").unbind("click");
-            }
-            function bind_clicks() {
-                var selector = ".lesson.lecturer-free, .free.lecturer-free";
-                if ($("#add-button").hasClass("active")) {
-                    selector = ".free.lecturer-free";
-                }
-                $(selector).click(function(){
-                    var element = $(this);
-                    if (element.hasClass("selected")){
-                        element.removeClass("selected");
-                    }
-                    else{
-                        element.addClass("selected");
-                    }
-                });
-            }
             function ajax_room_load(term, room_pk, window_number) {
                 $('.loaded.window-'+window_number).addClass('unloaded');
                 $('.loaded.window-'+window_number).removeClass('loaded');
-                unbind_clicks();
                 $.ajax({
                     "type": "GET",
-                    "url": "/planning-light/"+term+"/room/"+room_pk+"/ajax/"
+                    "url": "/planning-light/"+term+"/room/"+room_pk+"/{% block js_room_type %}add{% endblock %}/ajax/"
                 }).done(function(json){
                     //console.log(json);
                     for (k in json){
@@ -159,13 +181,15 @@
                         else {
                             td.html("");
                         }
+                        if (td.hasClass("lecturer-busy")) {
+                            td.children("input").attr("disabled", true);
+                        }
                         //$('#'+k).html(json[k]);
                         //$('#'+k+' > .lesson').popover({"animate": false});
                     }
                     $('.unloaded.window-'+window_number).addClass('loaded');
                     $('.unloaded.window-'+window_number).removeClass('unloaded');
                     if ($('.unloaded').length == 0) {
-                        bind_clicks();
                     }
                 });
             }
@@ -176,6 +200,7 @@
                 var select = $(this);
                 ajax_room_load({{ term }}, select.val(), select.data("window"));
             });
+            {% block js %}
             $("select.course").change(function() {
                 var option = $(this).children(":selected");
                 $("select.group").children().remove();
@@ -194,23 +219,61 @@
             $("select.course").change();
             $("select.group").change(function() {
                 var option = $(this).children(":selected");
-                unbind_clicks();
                 $.ajax({
                     "type": "GET",
                     "url": "/planning-light/"+{{ term }}+"/lecturer/"+option.val()+"/ajax/"
                 }).done(function(json){
-                    for (k in json){
+                    $("#lesson-count").html(json["lesson_count"]);
+                    $("#lecturer-name").html(json["lecturer"]);
+                    for (k in json["cells"]){
                         {% for room_number, room in rooms %}
                             var td = $('#window-'+{{ room_number }}+'-'+k);
+                            td.children("input").removeAttr("disabled");
+                            if (json["cells"][k]["css_class"] == "lecturer-busy") {
+                                td.children("input").attr("disabled", true);
+                                td.children("input").prop("checked", false);
+                            }
                             td.removeClass("lecturer-busy");
                             td.removeClass("lecturer-free");
-                            td.addClass(json[k]['css_class']);
+                            td.addClass(json["cells"][k]['css_class']);
                         {% endfor %}
                     }
-                    bind_clicks();
                 });
             });
             $("select.group").change();
+            $("#add-button").click(function(){
+                console.log("adding");
+                var data = {};
+                var cells = [];
+                var checkboxes = $("input:checked");
+                $.each(checkboxes, function(index, element){
+                    console.log($(element).parent().attr("id"));
+                    cells.push($(element).parent().attr("id"));
+                });
+                console.log(cells);
+                data["cells"] = cells;
+                data["group"] = $("select.group").val();
+                $.each($("select.room"), function(index, element){
+                    data["window-" + $(element).data("window")] = $(element).val();
+                });
+                console.log(data);
+                $.ajax({
+                    url: "/planning/{{ academic_term.pk }}/add/lessons/",
+                    type: "POST",
+                    success: function(){
+                        console.log("ajax ok");
+                        $("select.room").change();
+                        $("select.group").change();
+                    },
+                    error: function(xhr, ajaxOptions, thrownError){
+                        console.log(xhr, ajaxOptions, thrownError);
+                        console.log(xhr.responseText["error"]);
+                    },
+                    data: data
+                });
+
+            });
+            {% endblock %}
         });
     </script>
 </head>
@@ -218,23 +281,27 @@
 {% block content %}
     <h3 id="loading">Завантаження…</h3>
     <div class="meta-row" id="top-menu">
-        <button id="add-button" class="btn success active mode-button">Додавання</button>
-        <button id="move-button" class="btn primary mode-button">Переміщення</button>
-        <button id="del-button" class="btn danger mode-button">Видалення</button>
-        <select class="course">
-            {% for course, groups in all_courses %}
-                <option value="{{ course.pk }}" data-groups="{{ groups }}">{{ course }}</option>
-            {% endfor %}
-        </select>
-        <select class="group mini">
-        </select>
+        {% block top_menu %}
+            <select class="course">
+                {% for course, groups in all_courses %}
+                    <option value="{{ course.pk }}" data-groups="{{ groups }}">{{ course.full_description }}</option>
+                {% endfor %}
+            </select>
+            <select class="group mini">
+            </select>
+            <span style="min-width:260px; display: inline-block;">Кількість пар <span id="lesson-count">?</span> (<span id="lecturer-name"></span>)</span>
+            <button id="add-button" class="btn success mode-button">Додати</button>
+        {% endblock %}
     </div>
-    <div class="meta-row">
+    <div class="meta-row" id="top-meta-row">
         <div id="cells-corner">
             <table class="bordered-table zebra-striped compact non-fancy">
                 <thead>
                     <tr>
-                        <td class="day-column"><select class="dummy" style="width:10px;visibility:hidden;"><option>&nbsp;</option></select></td>
+                        <td class="day-column">
+                            <!--insert an invisible select to set the height-->
+                            <select class="dummy" style="width:10px;visibility:hidden;"><option>&nbsp;</option></select>
+                        </td>
                         <td class="time-column">&nbsp;</td>
                     </tr>
                     <tr>

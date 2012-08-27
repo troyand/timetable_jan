@@ -8,6 +8,7 @@ from django.views.generic.base import TemplateResponseMixin
 from timetable.university.models import *
 from timetable.university.forms import *
 from django.contrib.auth.decorators import login_required
+from planning_views import palette
 import math
 import datetime
 import re
@@ -162,6 +163,13 @@ class BaseTimetableView(View):
             # add dummy days so that week starts on Monday
         first_monday = min(mapping.keys())
 
+        # lesson color infor
+        color_palette = list(palette(401))
+        course_colors = {}
+        for group in groups_to_show:
+            course_colors[group.course_id] = color_palette[
+                    group.course_id % len(color_palette)]
+
         data = {}
         data['mapping'] = mapping
         data['user_group_list'] = user_group_list
@@ -169,6 +177,7 @@ class BaseTimetableView(View):
         data['week_to_show'] = week_to_show
         data['lessons'] = lessons
         data['first_monday'] = first_monday
+        data['course_colors'] = course_colors
         return data
 
 
@@ -456,7 +465,10 @@ def lecturer_timetable(request):
     import locale
     locale.setlocale(locale.LC_ALL, "en_US.utf8")
     #add filtering for only current academic term
-    groups = Group.objects.select_related().all()
+    #groups = Group.objects.prefetch_related('lecturer__departments').select_related().all()
+    groups = Group.objects.select_related(
+                    'lecturer__person'
+                    ).all()
     # department_lecturer_groups[department][lecturer] = set(group_id1, group_id2)
     department_lecturer_groups = {}
     # lecturer_groups[lecturer] = set(group_id1, group_id2)

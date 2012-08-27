@@ -1,0 +1,30 @@
+{% extends "planning_light_room.html" %}
+{% block js_room_type %}delete{% endblock %}
+{% block js %}
+    $("#delete-button").click(function(){
+        var data = {};
+        var cells = [];
+        var checkboxes = $("input:checked");
+        $.each(checkboxes, function(index, element){
+            console.log($(element).data("lesson-id"));
+            cells.push($(element).data("lesson-id"));
+        });
+        data["cells"] = cells;
+        $.ajax({
+            url: "/planning/{{ academic_term.pk }}/delete/lessons/",
+            type: "POST",
+            success: function(){
+                console.log("ajax ok");
+                $("select.room").change();
+            },
+            error: function(xhr, ajaxOptions, thrownError){
+                console.log(xhr, ajaxOptions, thrownError);
+                console.log(xhr.responseText["error"]);
+            },
+            data: data
+        });
+    });
+{% endblock %}
+{% block top_menu %}
+    <button id="delete-button" class="btn danger mode-button">Видалити</button>
+{% endblock %}

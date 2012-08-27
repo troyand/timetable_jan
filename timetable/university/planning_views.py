@@ -1,16 +1,23 @@
 #-*- coding: utf-8 -*-
 
-from django.http import HttpResponse, Http404
+from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseNotAllowed, HttpResponseForbidden, Http404
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
 from django.views.generic import View
 from django.views.generic.base import TemplateResponseMixin
 from timetable.university.models import *
 from django.views.decorators.cache import cache_page
+from django.contrib.auth.decorators import login_required
+from django.utils.decorators import method_decorator
 from htmlmin.decorators import minified_response
 import math
 import itertools
 import json
+from django.db import transaction, IntegrityError
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 
 def choose_term_for_planning(request):
@@ -26,14 +33,23 @@ def choose_term_for_planning(request):
 
 def palette(size):
     import colorsys
+    for i in range(2, size/2 + 1):
+        if size % i == 0:
+            raise Exception(
+                    'Palette size must be a prime number. '
+                    '%d has a divisor %d' % (size, i)
+                    )
+    base_element = 3
+    current_element = base_element
     for i in range(size):
         rgb_tuple = colorsys.hsv_to_rgb(
-            float(i) / size,
+            float(current_element) / size,
             1,
-            0.4 + 0.1 * (i % 7))
+            0.4 + 0.1 * (current_element % 7))
         hexcolor = '#%02x%02x%02x' % tuple(
             map(lambda x: int(x * 255), rgb_tuple))
         yield hexcolor
+        current_element = (current_element * base_element) % size
 
 
 def course_stats(request):
@@ -235,7 +251,10 @@ class TermExtractorMixin(object):
         data = {}
         # Get captured params
         term = int(kwargs.get('term'))
-        academic_term = get_object_or_404(AcademicTerm, pk=term)
+        academic_term = get_object_or_404(
+                AcademicTerm.objects.select_related(),
+                pk=term
+                )
         data['academic_term'] = academic_term
         data['term'] = term
         return data
@@ -329,23 +348,21 @@ class PlanningLightRoomView(TemplateResponseMixin, BasePlanningView):
     """
     template_name = 'planning_light_room.html'
 
-    def _get_initial_data(self, **kwargs):
-        """Adds room id to the initial data."""
-        context = super(PlanningLightRoomView, self)._get_initial_data(
-            **kwargs)
-        context['room_id'] = kwargs.get('room_id')
-        return context
+    @method_decorator(login_required)
+    def dispatch(self, request, *args, **kwargs):
+        return super(PlanningLightRoomView, self).dispatch(request, *args, **kwargs)
 
     def _generate_context_data(self, context):
         """Adds some specific info for room planning to context."""
         context = super(PlanningLightRoomView, self)._generate_context_data(
             context)
-        column_width = 38
+        column_width = 34
         context['column_width'] = column_width
-        context['room'] = get_object_or_404(Room, pk=context['room_id'])
-        #FIXME second room stubbed for some time
+        #FIXME change to smth more elaborate (user-dependent/...)
         context['rooms'] = list(enumerate(
-            [context['room'], Room.objects.get(pk=1)], 2))
+            [Room.objects.get(number=100, building__number=4),
+            Room.objects.get(number=317, building__number=4)]
+            ))
         context['all_rooms'] = Room.objects.select_related(
                 'building', 'building__university').all()
         context['all_courses'] = []
@@ -363,7 +380,10 @@ class PlanningLightRoomView(TemplateResponseMixin, BasePlanningView):
         return week_numbers
 
 
-color_palette = list(palette(400))
+class PlanningLightRoomDeleteView(PlanningLightRoomView):
+    template_name = 'planning_light_room_delete.html'
+
+color_palette = list(palette(401))
 
 
 class JSONResponseMixin(object):
@@ -517,14 +537,30 @@ class PlanningRoomAjaxView(BasePlanningAjaxView):
             json_response['cell-%d-%d-%d' % (weekday, lesson_number, week_number)] = item
         return json_response
 
+
+class PlanningRoomAddLessonsAjaxView(PlanningRoomAjaxView):
     def _generate_lesson_json(self, cell_mapping, week_number):
         """Adds a name of a lesson to its JSON representation."""
-        item = super(PlanningRoomAjaxView, self)._generate_lesson_json(
+        item = super(PlanningRoomAddLessonsAjaxView, self)._generate_lesson_json(
             cell_mapping, week_number)
         if week_number in cell_mapping:
             item['html'] = cell_mapping[week_number].group.number or u'л'
         else:
-            item['html'] = u'-'
+            item['html'] = u'<input type="checkbox">'
+        return item
+
+
+class PlanningRoomDeleteLessonsAjaxView(PlanningRoomAjaxView):
+    def _generate_lesson_json(self, cell_mapping, week_number):
+        """Adds a name of a lesson to its JSON representation."""
+        item = super(PlanningRoomDeleteLessonsAjaxView, self)._generate_lesson_json(
+            cell_mapping, week_number)
+        if week_number in cell_mapping:
+            item['html'] = u'<input type="checkbox" data-lesson-id="%d">' % (
+                    cell_mapping[week_number].pk,
+                    )
+        else:
+            item['html'] = u''
         return item
 
 
@@ -533,7 +569,9 @@ class PlanningRoomAjaxLecturerView(JSONResponseMixin, TermExtractorMixin, BaseVi
         """Adds room id to the initial data."""
         context = super(PlanningRoomAjaxLecturerView, self)._get_initial_data(**kwargs)
         context['group_id'] = kwargs.get('group_id')
-        context['lecturer'] = Group.objects.get(pk=context['group_id']).lecturer
+        group = Group.objects.get(pk=context['group_id'])
+        context['lesson_count'] = group.lesson_set.count()
+        context['lecturer'] = group.lecturer
         return context
 
     def _get_lessons(self, context):
@@ -557,16 +595,149 @@ class PlanningRoomAjaxLecturerView(JSONResponseMixin, TermExtractorMixin, BaseVi
                 lesson.lesson_number,
                 academic_term.get_week(lesson.date).week_number)] = lesson
         json_response = {}
+        json_response['lesson_count'] = context['lesson_count']
+        json_response['lecturer'] = context['lecturer'].short_name()
+        json_response['cells'] = {}
         for weekday in range(1, 7):
             for lesson_number in lesson_times.keys():
                 for week_number in range(1, academic_term.number_of_weeks + 1):
                     key = (weekday, lesson_number, week_number)
                     if key in mapping:
-                        json_response['cell-%d-%d-%d' % key] = {
+                        json_response['cells']['cell-%d-%d-%d' % key] = {
                                 'css_class': 'lecturer-busy',
                                 }
                     else:
-                        json_response['cell-%d-%d-%d' % key] = {
+                        json_response['cells']['cell-%d-%d-%d' % key] = {
                                 'css_class': 'lecturer-free',
                                 }
         return json_response
+
+
+class PlanningAddLessonsAjaxView(View, TermExtractorMixin):
+    def post(self, request, *args, **kwargs):
+        if not request.user.is_authenticated():
+            return HttpResponseForbidden('Forbidden')
+        context = self._get_initial_data(**kwargs)
+        rooms = {}
+        academic_term = context['academic_term']
+        with transaction.commit_manually():
+            try:
+                for i in [0, 1]:
+                    room_id = request.POST['window-%s' % i]
+                    rooms[i] = get_object_or_404(
+                            Room.objects.select_related('building'),
+                            pk=room_id
+                            )
+                group = get_object_or_404(
+                        Group,
+                        pk=request.POST['group']
+                        )
+                # TODO check if the user is authorized to add lessons
+                # for this group (e.g. if they have course permissions)
+                cells = request.POST.getlist('cells[]')
+                for cell in cells:
+                    parts = cell.split('-')
+                    window_number = int(parts[1])
+                    day_number = int(parts[3])
+                    lesson_number = int(parts[4])
+                    week_number = int(parts[5])
+                    l = Lesson.objects.create(
+                            group=group,
+                            room=rooms[window_number],
+                            date=academic_term[week_number][day_number-1],
+                            lesson_number=lesson_number,
+                            )
+                    logger.info(u'%s added %s (lesson id=%d, course id=%d)' % (
+                        request.user,
+                        l,
+                        l.pk,
+                        l.group.course.pk
+                        )
+                        )
+                transaction.commit()
+                return HttpResponse(
+                        'ok'
+                        )
+            except KeyError:
+                transaction.rollback()
+                return HttpResponseBadRequest(
+                        'key error'
+                        )
+            except IndexError:
+                transaction.rollback()
+                return HttpResponseBadRequest(
+                        'index error'
+                        )
+            except ValueError:
+                transaction.rollback()
+                return HttpResponseBadRequest(
+                        'value error'
+                        )
+            except IntegrityError:
+                transaction.rollback()
+                return HttpResponseBadRequest(
+                        'db integrity error'
+                        )
+            except:
+                transaction.rollback()
+                raise
+
+    def get(self, request, *args, **kwargs):
+        return HttpResponseNotAllowed('Method not allowed')
+
+    def put(self, request, *args, **kwargs):
+        return HttpResponseNotAllowed('Method not allowed')
+
+    def delete(self, request, *args, **kwargs):
+        return HttpResponseNotAllowed('Method not allowed')
+
+class PlanningDeleteLessonsAjaxView(PlanningAddLessonsAjaxView):
+    def post(self, request, *args, **kwargs):
+        if not request.user.is_authenticated():
+            return HttpResponseForbidden('Forbidden')
+        context = self._get_initial_data(**kwargs)
+        with transaction.commit_manually():
+            try:
+                # TODO check if the user is authorized to delete the lessons
+                # (e.g. if they have course permissions)
+                cells = request.POST.getlist('cells[]')
+                for cell in cells:
+                    l = get_object_or_404(
+                            Lesson,
+                            pk=cell,
+                            )
+                    logger.info(u'%s deleted %s (lesson id=%d, course id=%d)' % (
+                        request.user,
+                        l,
+                        l.pk,
+                        l.group.course.pk
+                        )
+                        )
+                    l.delete()
+                transaction.commit()
+                return HttpResponse(
+                        'ok'
+                        )
+            except KeyError:
+                transaction.rollback()
+                return HttpResponseBadRequest(
+                        'key error'
+                        )
+            except IndexError:
+                transaction.rollback()
+                return HttpResponseBadRequest(
+                        'index error'
+                        )
+            except ValueError:
+                transaction.rollback()
+                return HttpResponseBadRequest(
+                        'value error'
+                        )
+            except IntegrityError:
+                transaction.rollback()
+                return HttpResponseBadRequest(
+                        'db integrity error'
+                        )
+            except:
+                transaction.rollback()
+                raise

@@ -6,7 +6,7 @@ from timetable.university.cb_views import *
 from django.views.generic import TemplateView, RedirectView
 from timetable.university.ajax_views import ajax_urls, UnifiedTimetableProcessView
 from timetable.university.views import ICALView, TimetableView, TimetableMainView
-from timetable.university.planning_views import PlanningLightView, PlanningLightRoomView, PlanningAjaxView, PlanningRoomAjaxView, PlanningRoomAjaxLecturerView
+from timetable.university.planning_views import PlanningLightView, PlanningLightRoomView, PlanningLightRoomDeleteView, PlanningAjaxView, PlanningRoomAddLessonsAjaxView, PlanningRoomDeleteLessonsAjaxView, PlanningRoomAjaxLecturerView, PlanningAddLessonsAjaxView, PlanningDeleteLessonsAjaxView
 
 
 urlpatterns = patterns('',
@@ -23,12 +23,20 @@ urlpatterns = patterns('',
      'timetable.university.planning_views.planning'),
     url(r'^planning-light/(?P<term>\d+)/$',
         PlanningLightView.as_view(), name='planning-light'),
+    url(r'^planning/(?P<term>\d+)/add/lessons/$',
+        PlanningAddLessonsAjaxView.as_view(), name='planning-add-lessons'),
+    url(r'^planning/(?P<term>\d+)/delete/lessons/$',
+        PlanningDeleteLessonsAjaxView.as_view(), name='planning-delete-lessons'),
     url(r'^planning-light/(?P<term>\d+)/(?P<room_id>\d+)/ajax/$',
         PlanningAjaxView.as_view(), name='planning-ajax'),
-    url(r'^planning-light/(?P<term>\d+)/room/(?P<room_id>\d+)/$',
+    url(r'^planning-light/(?P<term>\d+)/add/$',
         PlanningLightRoomView.as_view(), name='planning-light-room'),
-    url('^planning-light/(?P<term>\d+)/room/(?P<room_id>\d+)/ajax/$',
-        PlanningRoomAjaxView.as_view(), name='planning-room-ajax'),
+    url(r'^planning-light/(?P<term>\d+)/delete/$',
+        PlanningLightRoomDeleteView.as_view(), name='planning-light-room-delete'),
+    url('^planning-light/(?P<term>\d+)/room/(?P<room_id>\d+)/add/ajax/$',
+        PlanningRoomAddLessonsAjaxView.as_view(), name='planning-room-ajax'),
+    url('^planning-light/(?P<term>\d+)/room/(?P<room_id>\d+)/delete/ajax/$',
+        PlanningRoomDeleteLessonsAjaxView.as_view(), name='planning-room-ajax'),
     url('^planning-light/(?P<term>\d+)/lecturer/(?P<group_id>\d+)/ajax/$',
         PlanningRoomAjaxLecturerView.as_view(), name='planning-room-ajax-lecturer'),
     (r'^choose-subjects/(?P<timetable_id>\d+)/$',

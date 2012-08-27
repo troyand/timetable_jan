@@ -122,11 +122,13 @@
                                         <span class="details">
                                             <strong>{{ lesson.room }}</strong>, 
                                             <em>{{ lesson.group.lecturer.short_name }}</em>
-                                            {% if lesson.group.number == 0 %}
-                                                <span class="label">лекція</span>
-                                            {% else %}
-                                                <span class="label">практика-{{ lesson.group.number }}</span>
-                                            {% endif %}
+                                            <span class="label" style="background-color:{{ course_colors|lookup:lesson.group.course_id}}">
+                                                {% if lesson.group.number == 0 %}
+                                                    лекція
+                                                {% else %}
+                                                    практика-{{ lesson.group.number }}
+                                                {% endif %}
+                                            </span>
                                         </span>
                                     {% endif %}
                                 {% endwith %}

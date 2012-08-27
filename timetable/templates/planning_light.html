@@ -129,7 +129,7 @@
                     <tr>
                         {% for room in columns %}
                             <td class="room-column room-title unloaded" data-room-id="{{ room.id }}">
-                                <a href="/planning-light/{{ term }}/room/{{ room.id }}">{{ room }}</a>
+                                {{ room }}
                             </td>
                         {% endfor %}
                         <td class="room-column">&nbsp;</td>
