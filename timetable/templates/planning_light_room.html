@@ -242,7 +242,7 @@
             });
             $("select.group").change();
             $("#add-button").click(function(){
-                console.log("adding");
+                //console.log("adding");
                 var data = {};
                 var cells = [];
                 var checkboxes = $("input:checked");
@@ -250,24 +250,24 @@
                     console.log($(element).parent().attr("id"));
                     cells.push($(element).parent().attr("id"));
                 });
-                console.log(cells);
+                //console.log(cells);
                 data["cells"] = cells;
                 data["group"] = $("select.group").val();
                 $.each($("select.room"), function(index, element){
                     data["window-" + $(element).data("window")] = $(element).val();
                 });
-                console.log(data);
+                //console.log(data);
                 $.ajax({
                     url: "/planning/{{ academic_term.pk }}/add/lessons/",
                     type: "POST",
                     success: function(){
-                        console.log("ajax ok");
+                        //console.log("ajax ok");
                         $("select.room").change();
                         $("select.group").change();
                     },
                     error: function(xhr, ajaxOptions, thrownError){
-                        console.log(xhr, ajaxOptions, thrownError);
-                        console.log(xhr.responseText["error"]);
+                        //console.log(xhr, ajaxOptions, thrownError);
+                        //console.log(xhr.responseText["error"]);
                     },
                     data: data
                 });
