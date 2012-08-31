@@ -52,9 +52,9 @@ def palette(size):
         current_element = (current_element * base_element) % size
 
 
-def course_stats(request):
+def course_stats(request, term):
     from django.db.models import Count
-    academic_term = AcademicTerm.objects.all()[2]
+    academic_term = get_object_or_404(AcademicTerm, id=int(term))
     groups = Group.objects.select_related(
         'course', 'course__discipline').defer(
             'course__discipline__description').filter(
