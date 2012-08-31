@@ -45,11 +45,17 @@ def analyze_table(table):
 def create_room_mapping(rooms, university):
     mapping = {}
     for room_str in rooms:
-        building_number, room_name = room_str.split('-')
+        building_name, room_name = room_str.split('-')
+        building_number = filter(lambda x: x.isdigit(), building_name)
+        if building_number:
+            building_number = int(building_number)
+        else:
+            building_number = None
+        building_label = filter(lambda x: not x.isdigit(), building_name) or None
         room_number = filter(lambda x: x.isdigit(), room_name)
         room_label = filter(lambda x: not x.isdigit(), room_name) or None
         building, created = Building.objects.get_or_create(
-                number=int(building_number), university=university)
+                number=building_number, label=building_label, university=university)
         if created:
             logging.warn('Created building %s' % building)
         room, created = Room.objects.get_or_create(
@@ -111,7 +117,7 @@ def create_lecturer_mapping(lecturers):
     return mapping
 
 
-def expand_weeks(weeks):
+def expand_weeks(weeks, academic_term):
     result = []
     for part in weeks.split(','):
         if '-' in part:
@@ -121,6 +127,8 @@ def expand_weeks(weeks):
                     )
         else:
             result += [int(part)]
+    if academic_term.tcp_week in result:
+        result.remove(academic_term.tcp_week)
     return result
 
 
@@ -141,7 +149,7 @@ def populate_timetable(timetable, academic_term, table, room_mapping, course_map
             group_number = int(group_str)
             group, created = Group.objects.get_or_create(course=course, number=group_number, lecturer=lecturer)
             room = room_mapping[room_str]
-            for week in expand_weeks(weeks_str):
+            for week in expand_weeks(weeks_str, academic_term):
                 try:
                     Lesson.objects.create(
                             group=group,
