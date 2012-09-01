@@ -1,6 +1,10 @@
 {% extends "base.html" %}
+{% load staticfiles %}
 {% block title %}Персональний онлайн-розклад{% endblock %}
-{% block header %}Вибір спеціальності та року навчання{% endblock %}
+{% block header %}
+    <img src="{% static "img/landing_page_img.png" %}">
+    Дивіться розклад онлайн, експортуйте до календаря
+{% endblock %}
 {% block content %}
     <h4><a href="/feedback/"><u>Залиште відгук про наш ресурс</u></a><h4>
     {% for academic_term, timetables in academic_term_timetable_list %}
