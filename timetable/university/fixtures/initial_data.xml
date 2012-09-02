@@ -347,7 +347,7 @@
   </object>
   <object pk="30" model="university.major">
     <field to="university.faculty" name="faculty" rel="ManyToOneRel">3</field>
-    <field type="CharField" name="code">8.05010203</field>
+    <field type="CharField" name="code">8.05010301</field>
     <field type="CharField" name="name">Програмне забезпечення систем</field>
     <field type="CharField" name="kind">маґістр</field>
   </object>
