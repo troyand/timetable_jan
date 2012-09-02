@@ -15,17 +15,22 @@ echo $short_academic_term_id
 #python import_timetable.py -f timetable/unified_docs/2012_2013_osin_fls_6.csv -y 1 -c 8.03040201 -i -t $long_academic_term_id
 
 # FI
-python import_timetable.py -f timetable/unified_docs/2012_2013_osin_cs_1.csv -y 1 -c 6.050103 -i -t $long_academic_term_id
-#python import_timetable.py -f timetable/unified_docs/2012_2013_osin_cs_2.csv -y 2 -c 6.050103 -i -t $long_academic_term_id
+#python import_timetable.py -f timetable/unified_docs/2012_2013_osin_cs_1.csv -y 1 -c 6.050103 -i -t $long_academic_term_id
+python import_timetable.py -f timetable/unified_docs/2012_2013_osin_cs_2.csv -y 2 -c 6.050103 -i -t $long_academic_term_id
 #python import_timetable.py -f timetable/unified_docs/2012_2013_osin_cs_3.csv -y 3 -c 6.050103 -i -t $long_academic_term_id
 #python import_timetable.py -f timetable/unified_docs/2012_2013_osin_cs_4.csv -y 4 -c 6.050103 -i -t $short_academic_term_id
 #python import_timetable.py -f timetable/unified_docs/2012_2013_osin_cs_5.csv -y 1 -c 7.05010101 -i -t $long_academic_term_id
 #
-python import_timetable.py -f timetable/unified_docs/2012_2013_osin_math_1.csv -y 1 -c 6.040301 -i -t $long_academic_term_id
-python add_courses.py -f 6.050103 -y 1 -t 6.040301 -z 1 -n "Англійська мова" -a 4
-python add_courses.py -f 6.050103 -y 1 -t 6.040301 -z 1 -n "Застосування принципів Болонського процесу в НаУКМА" -a 4
-python add_courses.py -f 6.050103 -y 1 -t 6.040301 -z 1 -n "Українська мова" -a 4
-#python import_timetable.py -f timetable/unified_docs/2012_2013_osin_math_2.csv -y 2 -c 6.040301 -i -t $long_academic_term_id
+#python import_timetable.py -f timetable/unified_docs/2012_2013_osin_math_1.csv -y 1 -c 6.040301 -i -t $long_academic_term_id
+#python add_courses.py -f 6.050103 -y 1 -t 6.040301 -z 1 -n "Англійська мова" -a 4
+#python add_courses.py -f 6.050103 -y 1 -t 6.040301 -z 1 -n "Застосування принципів Болонського процесу в НаУКМА" -a 4
+#python add_courses.py -f 6.050103 -y 1 -t 6.040301 -z 1 -n "Українська мова" -a 4
+python import_timetable.py -f timetable/unified_docs/2012_2013_osin_math_2.csv -y 2 -c 6.040301 -i -t $long_academic_term_id
+python add_courses.py -f 6.050103 -y 2 -t 6.040301 -z 2 -n "Українська мова (за професійним спрямуванням)" -a 4
+python add_courses.py -f 6.050103 -y 2 -t 6.040301 -z 2 -n "Англійська мова" -a 4
+python add_courses.py -f 6.050103 -y 2 -t 6.040301 -z 2 -n "Процедурне програмування (на базі Сі/Сі++)" -a 4
+python add_courses.py -f 6.050103 -y 2 -t 6.040301 -z 2 -n "Психологія соціального впливу та успіху" -a 4
+python add_courses.py -f 6.050103 -y 2 -t 6.040301 -z 2 -n "Основи економічної теорії" -a 4
 #python import_timetable.py -f timetable/unified_docs/2012_2013_osin_math_3.csv -y 3 -c 6.040301 -i -t $long_academic_term_id
 #python import_timetable.py -f timetable/unified_docs/2012_2013_osin_math_4.csv -y 4 -c 6.040301 -i -t $short_academic_term_id
 #python import_timetable.py -f timetable/unified_docs/2012_2013_osin_mathm_1.csv -y 1 -c 8.04030101 -i -t $long_academic_term_id
