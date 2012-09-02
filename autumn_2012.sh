@@ -41,20 +41,20 @@ python import_timetable.py -f timetable/unified_docs/2012_2013_osin_mathm_1.csv 
 
 python import_timetable.py -f timetable/unified_docs/2012_2013_osin_iust_1.csv -y 1 -c 8.05010101 -i -t $long_academic_term_id
 python add_courses.py -f 7.05010101 -y 1 -t 8.05010101 -z 1 -n "Прикладне програмування" -a 5
-python add_courses.py -f 7.05010101 -y 1 -t 8.05010101 -z 1 -n "Основи системного аналізу об’єктів і процесів комп’ютерізації" -a 5
+python add_courses.py -f 7.05010101 -y 1 -t 8.05010101 -z 1 -n "Основи системного аналізу об’єктів і процесів комп’ютеризації" -a 5
 python add_courses.py -f 7.05010101 -y 1 -t 8.05010101 -z 1 -n "Архітектура інформаційних управляючих систем" -a 5
 python add_courses.py -f 7.05010101 -y 1 -t 8.05010101 -z 1 -n "Теорія прийняття рішень та керування-2" -a 5
 python import_timetable.py -f timetable/unified_docs/2012_2013_osin_iust_2.csv -y 2 -c 8.05010101 -i -t $long_academic_term_id
 
 python import_timetable.py -f timetable/unified_docs/2012_2013_osin_smpr_1.csv -y 1 -c 8.04030302 -i -t $long_academic_term_id
 python add_courses.py -f 8.05010101 -y 1 -t 8.04030302 -z 1 -n "Англійська мова" -a 5
-python add_courses.py -f 7.05010101 -y 1 -t 8.04030302 -z 1 -n "Основи системного аналізу об’єктів і процесів комп’ютерізації" -a 5
+python add_courses.py -f 7.05010101 -y 1 -t 8.04030302 -z 1 -n "Основи системного аналізу об’єктів і процесів комп’ютеризації" -a 5
 python add_courses.py -f 7.05010101 -y 1 -t 8.04030302 -z 1 -n "Теорія прийняття рішень та керування-2" -a 5
 python import_timetable.py -f timetable/unified_docs/2012_2013_osin_smpr_2.csv -y 2 -c 8.04030302 -i -t $long_academic_term_id
 python add_courses.py -f 8.05010101 -y 2 -t 8.04030302 -z 2 -n "Філософія (поглиблений курс)" -a 5
 
 python import_timetable.py -f timetable/unified_docs/2012_2013_osin_pzas_1.csv -y 1 -c 8.05010203 -i -t $long_academic_term_id
-python add_courses.py -f 8.05010101 -y 1 -t 8.05010301 -z 1 -n "Англійська мова" -a 5
+python add_courses.py -f 8.05010101 -y 1 -t 8.05010203 -z 1 -n "Англійська мова" -a 5
 python import_timetable.py -f timetable/unified_docs/2012_2013_osin_pzas_2.csv -y 2 -c 8.05010203 -i -t $long_academic_term_id
-python add_courses.py -f 8.05010101 -y 2 -t 8.05010301 -z 2 -n "Філософія (поглиблений курс)" -a 5
+python add_courses.py -f 8.05010101 -y 2 -t 8.05010203 -z 2 -n "Філософія (поглиблений курс)" -a 5
 python import_timetable.py -f timetable/unified_docs/2012_2013_osin_pzas_3.csv -y 3 -c 8.05010203 -i -t $short_academic_term_id
