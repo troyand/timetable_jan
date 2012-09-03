@@ -468,7 +468,9 @@ def lecturer_timetable(request):
     #groups = Group.objects.prefetch_related('lecturer__departments').select_related().all()
     groups = Group.objects.select_related(
                     'lecturer__person'
-                    ).all()
+                    ).filter(
+                            course__academic_term__year__exact=2012
+                            )
     # department_lecturer_groups[department][lecturer] = set(group_id1, group_id2)
     department_lecturer_groups = {}
     # lecturer_groups[lecturer] = set(group_id1, group_id2)
