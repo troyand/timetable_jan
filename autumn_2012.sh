@@ -54,7 +54,6 @@ python import_timetable.py -f timetable/unified_docs/2012_2013_osin_smpr_2.csv -
 python add_courses.py -f 8.05010101 -y 2 -t 8.04030302 -z 2 -n "Філософія (поглиблений курс)" -a 5
 
 python import_timetable.py -f timetable/unified_docs/2012_2013_osin_pzas_1.csv -y 1 -c 8.05010203 -i -t $long_academic_term_id
-python add_courses.py -f 8.05010101 -y 1 -t 8.05010203 -z 1 -n "Англійська мова" -a 5
 python import_timetable.py -f timetable/unified_docs/2012_2013_osin_pzas_2.csv -y 2 -c 8.05010203 -i -t $long_academic_term_id
 python add_courses.py -f 8.05010101 -y 2 -t 8.05010203 -z 2 -n "Філософія (поглиблений курс)" -a 5
 python import_timetable.py -f timetable/unified_docs/2012_2013_osin_pzas_3.csv -y 3 -c 8.05010203 -i -t $short_academic_term_id
