@@ -29,7 +29,6 @@ python import_timetable.py -f timetable/unified_docs/2012_2013_osin_math_2.csv -
 python add_courses.py -f 6.050103 -y 2 -t 6.040301 -z 2 -n "Українська мова (за професійним спрямуванням)" -a 5
 python add_courses.py -f 6.050103 -y 2 -t 6.040301 -z 2 -n "Англійська мова" -a 5
 python add_courses.py -f 6.050103 -y 2 -t 6.040301 -z 2 -n "Процедурне програмування (на базі Сі/Сі++)" -a 5
-python add_courses.py -f 6.050103 -y 2 -t 6.040301 -z 2 -n "Психологія соціального впливу та успіху" -a 5
 python add_courses.py -f 6.050103 -y 2 -t 6.040301 -z 2 -n "Основи економічної теорії" -a 5
 python import_timetable.py -f timetable/unified_docs/2012_2013_osin_math_3.csv -y 3 -c 6.040301 -i -t $long_academic_term_id
 python add_courses.py -f 6.050103 -y 3 -t 6.040301 -z 3 -n "Філософія" -a 5
@@ -54,7 +53,6 @@ python import_timetable.py -f timetable/unified_docs/2012_2013_osin_smpr_2.csv -
 python add_courses.py -f 8.05010101 -y 2 -t 8.04030302 -z 2 -n "Філософія (поглиблений курс)" -a 5
 
 python import_timetable.py -f timetable/unified_docs/2012_2013_osin_pzas_1.csv -y 1 -c 8.05010203 -i -t $long_academic_term_id
-python add_courses.py -f 8.05010101 -y 1 -t 8.05010203 -z 1 -n "Англійська мова" -a 5
 python import_timetable.py -f timetable/unified_docs/2012_2013_osin_pzas_2.csv -y 2 -c 8.05010203 -i -t $long_academic_term_id
 python add_courses.py -f 8.05010101 -y 2 -t 8.05010203 -z 2 -n "Філософія (поглиблений курс)" -a 5
 python import_timetable.py -f timetable/unified_docs/2012_2013_osin_pzas_3.csv -y 3 -c 8.05010203 -i -t $short_academic_term_id
