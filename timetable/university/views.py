@@ -73,7 +73,7 @@ class ICALResponseMixin(object):
             cal.add_component(lesson.icalendar_event())
         response = HttpResponse(
             cal.as_string().replace(';VALUE=DATE', ''),
-            mimetype='text/calendar'
+            mimetype='text/calendar; charset=UTF-8'
         )
         response['Content-Disposition'] = 'attachment; filename=universitytimetabe.ics'
         return response
