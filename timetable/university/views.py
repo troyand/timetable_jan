@@ -512,7 +512,7 @@ def lecturer_timetable(request):
 
 
 def robots_txt(request):
-    return HttpResponse("User-agent: *\nDisallow: /\n", mimetype="text/plain")
+    return HttpResponse("User-agent: *\nAllow: /ical/\nDisallow: /\n", mimetype="text/plain")
 
 
 def http_gone(request):
