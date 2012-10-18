@@ -10,6 +10,12 @@
             float: right;
             padding-left: 2px;
         }
+        .comments {
+            float: right;
+        }
+        .icon-comments-alt, .icon-comment-alt {
+            font-size: 16px;
+        }
     </style>
     <script type="text/javascript">
         $(function(){
@@ -129,6 +135,13 @@
                                                     практика-{{ lesson.group.number }}
                                                 {% endif %}
                                             </span>
+                                            <span class="comments">
+                                                {% if lesson.group.number == 0 %}
+                                                    <i class="icon-comment-alt"></i>
+                                                {% else %}
+                                                    {{ lesson_number }} <i class="icon-comments-alt"></i>
+                                                {% endif %}
+                                                </span>
                                         </span>
                                     {% endif %}
                                 {% endwith %}
