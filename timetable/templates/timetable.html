@@ -12,12 +12,54 @@
         }
         .comments {
             float: right;
+            cursor: pointer;
         }
         .icon-comments-alt, .icon-comment-alt {
             font-size: 16px;
         }
+        .comment-date {
+            font-size: 9px;
+        }
+        .comment-ip {
+            font-size: 9px;
+        }
+        .comment-info {
+            width: 90px;
+        }
+        #new-post-text {
+            width: 100%;
+        }
     </style>
+    <script type="text/javascript" src="{% static "js/bootstrap-modal.js" %}"></script>
+    <script type="text/javascript" src="{% static "crsf.js" %}"></script>
     <script type="text/javascript">
+        function loadCommentsForLessonId(lessonId, showModal) {
+            $.get('/comments/lesson/get/'+lessonId+'/', function(data) {
+                $('#comments-modal').html(data);
+                if (showModal) {
+                    $("#comments-modal").modal({
+                        "show": true,
+                        "backdrop": true,
+                        "keyboard": true
+                    });
+                }
+                $("#comment-post").click(function() {
+                    $.ajax({
+                        data: $("#comment-form").serialize(),
+                        type: "POST",
+                        url: '/comments/lesson/post/'+lessonId+'/',
+                        success: function(response) {
+                            $("#modal-footer-notification").html('<div class="alert-message success">Повідомлення надіслано</div>');
+                            loadCommentsForLessonId(lessonId, false);
+                        },
+                        error: function(xhr, ajaxOptions, thrownError){
+                            $("#modal-footer-notification").html('<div class="alert-message error">'+xhr.responseText+'</div>');
+                        }
+                    });
+                    return false;
+                });
+            });
+        }
         $(function(){
             var today = new Date();
             if (today.getDay() == 0) {
@@ -27,6 +69,11 @@
             var today_element_id = "#date-" + today.getFullYear().toString() + "-" + (today.getMonth()+1).toString() + "-" + today.getDate().toString();
             //$('html, body').animate({scrollTop: $(today_element_id).offset().top - 80}, 2000);
             $(today_element_id).closest('tr').children('td').css('background-color', '#d5d5d5');
+            $(".comments").click(function() {
+                var lessonId = $(this).data("lesson");
+                loadCommentsForLessonId(lessonId, true);
+                //$(".modal-body").html($(this).data("lesson"));
+            });
         });
     </script>
 {% endblock %}
@@ -118,7 +165,7 @@
                                 <td>
                                     {% if lesson %}
                                         <span class="subject">
-                                            {% if user.is_authenticated %}
+                                            {% if user.is_staff %}
                                                 <a href="/lesson/{{ lesson.pk }}/">{{ lesson.group.course.discipline.name }}</a>
                                             {% else %}
                                                 {{ lesson.group.course.discipline.name }}
@@ -135,13 +182,15 @@
                                                     практика-{{ lesson.group.number }}
                                                 {% endif %}
                                             </span>
-                                            <span class="comments">
-                                                {% if lesson.group.number == 0 %}
-                                                    <i class="icon-comment-alt"></i>
-                                                {% else %}
-                                                    {{ lesson_number }} <i class="icon-comments-alt"></i>
-                                                {% endif %}
-                                                </span>
+                                            <a class="comments" data-lesson="{{ lesson.pk }}">
+                                                {% with comment_count=comment_counts|lookup:lesson.pk %}
+                                                    {% if comment_count == 0 %}
+                                                        <i class="icon-comment-alt"></i>
+                                                    {% else %}
+                                                        {{ comment_count }} <i class="icon-comments-alt"></i>
+                                                    {% endif %}
+                                                {% endwith %}
+                                            </a>
                                         </span>
                                     {% endif %}
                                 {% endwith %}
@@ -153,5 +202,7 @@
         {% endfor %}
     </tbody>
     </table>
+    <div id="comments-modal" class="modal hide fade">
+    </div>
 {% endblock %}
 

@@ -1,0 +1,38 @@
+<div class="modal-header">
+    <a href="#" class="close">&times;</a>
+    <h3>{{ lesson.group.course.discipline.name }}</h3>
+    <h5>{{ lesson.date|date:"j E Y" }}</h5>
+</div>
+<div class="modal-body">
+    {% if comments %}
+        <table class="bordered-table zebra-striped">
+            {% for comment in comments %}
+                <tr>
+                    <td class="comment-info">
+                        <div class="comment-author">
+                            {% if comment.author %}
+                                <strong>{{ comment.author }}</strong>
+                            {% else %}
+                            <i>Анонім</i> <span class="comment-ip">{{ comment.ip_two_octets }}</span>
+                            {% endif %}
+                        </div>
+                        <div class="comment-date">
+                            {{ comment.added|date:"Y-n-j H:i:s" }}
+                        </div>
+                    </td>
+                    <td class="comment-text">{{ comment.comment }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <p>Коментарів немає</p>
+    {% endif %}
+</div>
+<div class="modal-footer">
+    <div id="modal-footer-notification"></div>
+    <div>Нове повідомлення</div>
+    <form id="comment-form">
+        <textarea id="new-post-text" name="new-post-text"></textarea>
+    </form>
+    <a href="#" id="comment-post" class="btn primary">Відправити</a>
+</div>

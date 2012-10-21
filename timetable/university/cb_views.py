@@ -1,6 +1,7 @@
 from django.views.generic import DetailView, CreateView, DeleteView, UpdateView, FormView
 from django.http import HttpResponseForbidden
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.core.exceptions import PermissionDenied
 from django.utils.decorators import method_decorator
 from timetable.university.models import *
 from timetable.university.forms import *
@@ -14,7 +15,25 @@ class LoginRequiredMixin(object):
             request, *args, **kwargs)
 
 
-class LessonDetailView(LoginRequiredMixin, UpdateView):
+def staff_member_required(f):
+    def check_perms(user):
+        if user.is_staff:
+            return True
+        elif user.is_authenticated():
+            raise PermissionDenied
+        else:
+            return False
+    return user_passes_test(check_perms)(f)
+
+
+class StaffMemberRequiredMixin(object):
+    @method_decorator(staff_member_required)
+    def dispatch(self, request, *args, **kwargs):
+        return super(StaffMemberRequiredMixin, self).dispatch(
+            request, *args, **kwargs)
+
+
+class LessonDetailView(StaffMemberRequiredMixin, UpdateView):
     model = Lesson
     form_class = LessonForm
     context_object_name = "lesson"

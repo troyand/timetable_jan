@@ -11,6 +11,7 @@ urlpatterns = patterns('',
      {'url': '/static/favicon.ico'}),
     (r'^accounts/login/$', 'django.contrib.auth.views.login'),
     (r'^accounts/logout/$', 'django.contrib.auth.views.logout'),
+    (r'^comments', include('timetable.comments.urls')),
     (r'^', include('timetable.university.urls')),
 
     # Examples:

@@ -12,6 +12,7 @@ from planning_views import palette
 import math
 import datetime
 import re
+from django.db.models import Count
 
 from django.template.defaultfilters import register as rf
 
@@ -154,6 +155,12 @@ class BaseTimetableView(View):
                 mapping[lesson.date][lesson.lesson_number] = lesson
             lessons.append(lesson)
 
+        # get comment counts in a single query
+        comment_counts = dict(
+                [(l.pk, l.num_comments) for l in Lesson.objects.filter(
+                    pk__in=[ls.pk for ls in lessons]
+                    ).annotate(num_comments=Count('lessoncomment')).order_by('-num_comments')])
+
         # Find first monday of studying.
         if min(mapping.keys()).weekday() != 0:
             from datetime import timedelta
@@ -178,6 +185,7 @@ class BaseTimetableView(View):
         data['lessons'] = lessons
         data['first_monday'] = first_monday
         data['course_colors'] = course_colors
+        data['comment_counts'] = comment_counts
         return data
 
 

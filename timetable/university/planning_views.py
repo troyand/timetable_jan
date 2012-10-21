@@ -615,7 +615,7 @@ class PlanningRoomAjaxLecturerView(JSONResponseMixin, TermExtractorMixin, BaseVi
 
 class PlanningAddLessonsAjaxView(View, TermExtractorMixin):
     def post(self, request, *args, **kwargs):
-        if not request.user.is_authenticated():
+        if not request.user.is_staff:
             return HttpResponseForbidden('Forbidden')
         context = self._get_initial_data(**kwargs)
         rooms = {}
@@ -693,7 +693,7 @@ class PlanningAddLessonsAjaxView(View, TermExtractorMixin):
 
 class PlanningDeleteLessonsAjaxView(PlanningAddLessonsAjaxView):
     def post(self, request, *args, **kwargs):
-        if not request.user.is_authenticated():
+        if not request.user.is_staff:
             return HttpResponseForbidden('Forbidden')
         context = self._get_initial_data(**kwargs)
         with transaction.commit_manually():
