@@ -329,6 +329,12 @@ class TimetableMainView(TimetableView):
         else:
             days_diff = abs(today - first_monday).days
             week = days_diff / 7 + 1
+        # if the TCP week is the same for all the courses in the shown timetable
+        # and if the week_to_show is the same as the TCP week
+        # then the week_to_show should be moved forward to the next week
+        tcp_weeks = set([group.course.academic_term.tcp_week for group in context['user_group_list']])
+        if len(tcp_weeks) == 1 and week == list(tcp_weeks)[0]:
+            week += 1
         context['week_to_show'] = week
         return super(TimetableMainView, self)._generate_context_data(context)
 
