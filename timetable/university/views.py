@@ -130,8 +130,8 @@ class BaseTimetableView(View):
                 groups_to_show.append(group)
             # add lecture group if it is present
             try:
-                lecture_group = group.course.group_set.get(number=0)
-                groups.append(lecture_group)
+                lecture_groups = group.course.group_set.filter(number=0)
+                groups.extend(lecture_groups)
                 # Add lecture group if user has choosen related practise one
                 # as a filtering option.
                 if group_to_show and group_id == group_to_show:
