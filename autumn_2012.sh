@@ -73,6 +73,6 @@ python add_courses.py -f 6.030101 -y 1 -t 6.030104 -z 1 -n "Українська
 python add_courses.py -f 6.030101 -y 1 -t 6.130102 -z 1 -n "Українська мова" -a $long_academic_term_id
 python add_courses.py -f 6.030104 -y 1 -t 6.130102 -z 1 -n "Інформатика-1" -a $long_academic_term_id
 
-python import_timetable.py -f timetable/unified_docs/2012_2013_osin_sociology_2.csv -y 1 -c 6.030101 -i -t $long_academic_term_id
-python import_timetable.py -f timetable/unified_docs/2012_2013_osin_politology_2.csv -y 1 -c 6.030104 -i -t $long_academic_term_id
+python import_timetable.py -f timetable/unified_docs/2012_2013_osin_sociology_2.csv -y 2 -c 6.030101 -i -t $long_academic_term_id
+python import_timetable.py -f timetable/unified_docs/2012_2013_osin_politology_2.csv -y 2 -c 6.030104 -i -t $long_academic_term_id
 python add_courses.py -f 6.030101 -y 2 -t 6.030104 -z 2 -n "Українська мова (за професійним спрямуванням)" -a $long_academic_term_id
