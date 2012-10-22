@@ -59,3 +59,16 @@ python import_timetable.py -f timetable/unified_docs/2012_2013_osin_pzas_3.csv -
 
 # FES
 python import_timetable.py -f timetable/unified_docs/2012_2013_osin_fes_4.csv -y 4 -c 6.030501 -i -t $long_academic_term_id
+
+# FSSST
+python import_timetable.py -f timetable/unified_docs/2012_2013_osin_sociology_1.csv -y 1 -c 6.030101 -i -t $long_academic_term_id
+python import_timetable.py -f timetable/unified_docs/2012_2013_osin_politology_1.csv -y 1 -c 6.030104 -i -t $long_academic_term_id
+python import_timetable.py -f timetable/unified_docs/2012_2013_osin_socrob_1.csv -y 1 -c 6.130102 -i -t $long_academic_term_id
+
+python add_courses.py -f 6.030101 -y 1 -t 6.030104 -z 1 -n "Філософія" -a $long_academic_term_id
+python add_courses.py -f 6.030101 -y 1 -t 6.130102 -z 1 -n "Філософія" -a $long_academic_term_id
+python add_courses.py -f 6.030101 -y 1 -t 6.030104 -z 1 -n "Історія України" -a $long_academic_term_id
+python add_courses.py -f 6.030101 -y 1 -t 6.130102 -z 1 -n "Історія України" -a $long_academic_term_id
+python add_courses.py -f 6.030101 -y 1 -t 6.030104 -z 1 -n "Українська мова" -a $long_academic_term_id
+python add_courses.py -f 6.030101 -y 1 -t 6.130102 -z 1 -n "Українська мова" -a $long_academic_term_id
+python add_courses.py -f 6.030104 -y 1 -t 6.130102 -z 1 -n "Інформатика-1" -a $long_academic_term_id
