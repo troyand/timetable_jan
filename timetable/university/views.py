@@ -135,7 +135,7 @@ class BaseTimetableView(View):
                 # Add lecture group if user has choosen related practise one
                 # as a filtering option.
                 if group_to_show and group_id == group_to_show:
-                    groups_to_show.append(lecture_group)
+                    groups_to_show.extend(lecture_groups)
             except Group.DoesNotExist:
                 pass
         if not group_to_show:
