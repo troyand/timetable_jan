@@ -84,6 +84,8 @@ python add_courses.py -f 6.030101 -y 3 -t 6.130102 -z 3 -n "Психологія
 python add_courses.py -f 6.030101 -y 3 -t 6.030104 -z 3 -n "Загальна психологія" -a $long_academic_term_id
 python add_courses.py -f 6.030101 -y 3 -t 6.130102 -z 3 -n "Загальна психологія" -a $long_academic_term_id
 
-python import_timetable.py -f timetable/unified_docs/2012_2013_osin_sociology_4.csv -y 4 -c 6.030101 -i -t $short_academic_term_id
-python import_timetable.py -f timetable/unified_docs/2012_2013_osin_politology_4.csv -y 4 -c 6.030104 -i -t $short_academic_term_id
-python import_timetable.py -f timetable/unified_docs/2012_2013_osin_socrob_4.csv -y 4 -c 6.130102 -i -t $short_academic_term_id
+python import_timetable.py -f timetable/unified_docs/2012_2013_osin_sociology_4.csv -y 4 -c 6.030101 -i -t $long_academic_term_id
+python import_timetable.py -f timetable/unified_docs/2012_2013_osin_politology_4.csv -y 4 -c 6.030104 -i -t $long_academic_term_id
+python import_timetable.py -f timetable/unified_docs/2012_2013_osin_socrob_4.csv -y 4 -c 6.130102 -i -t $long_academic_term_id
+python add_courses.py -f 6.030101 -y 4 -t 6.030104 -z 4 -n "Загальна психологія" -a $long_academic_term_id
+python add_courses.py -f 6.030101 -y 3 -t 6.130102 -z 4 -n "Психологія управління" -a $long_academic_term_id
