@@ -46,9 +46,6 @@ promos = {
     datetime.date(2012, 5, 11): [
         ('img/promo/perevtilnyi.png', 'http://vk.com/perevtilnyi'),
     ],
-    datetime.date(2012, 5, 15): [
-        ('img/promo/d3-logo.png', ''),
-    ],
     datetime.date(2012, 5, 16): [
         ('img/promo/shockolad.png',
          'https://www.facebook.com/events/348381305217123/'),
@@ -58,6 +55,12 @@ promos = {
     ],
     datetime.date(2012, 5, 25): [
         ('img/promo/konvorablyk.png', 'https://plazerazzi.org/konvorablyk'),
+    ],
+    datetime.date(2012, 11, 16): [
+        ('img/promo/fen_day2012.png', 'https://www.facebook.com/events/269956266457982/'),
+    ],
+    datetime.date(2012, 11, 30): [
+        ('img/promo/acquaintance2012.png', 'https://www.facebook.com/events/279273655508706/'),
     ],
 }
 
