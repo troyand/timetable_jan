@@ -65,6 +65,12 @@ promos = {
     datetime.date(2012, 11, 30): [
         ('img/promo/acquaintance2012.png', 'https://www.facebook.com/events/279273655508706/'),
     ],
+    datetime.date(2012, 12, 6): [
+        ('img/promo/kvartyrnyk.png', 'https://www.facebook.com/events/501276519893204/'),
+    ],
+    datetime.date(2012, 12, 7): [
+        ('img/promo/sb15.png', 'https://www.facebook.com/events/497830043594671/'),
+    ],
 }
 
 
