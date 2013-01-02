@@ -1,0 +1,175 @@
+{% extends "base.html" %}                                                      
+{% load staticfiles %}
+{% block title %}Створити розклад{% endblock %} 
+{% block headadd %}
+    <link rel="stylesheet" type="text/css" href="{% static "autocomplete.css" %}" />
+    <script type="text/javascript" src="{% static "jquery.autocomplete-min.js" %}"></script>
+    <script type="text/javascript">
+        $(function() {
+            var rebindAutocomplete = function(node){
+                node.find(".room").autocomplete({
+                    serviceUrl:"/autocomplete/room/",
+                    minChars:1,
+                });
+                node.find(".lecturer").autocomplete({
+                    serviceUrl:"/autocomplete/lecturer/",
+                    minChars:1,
+                });
+                node.find(".course").autocomplete({
+                    serviceUrl:"/autocomplete/discipline/",
+                    minChars:1,
+                });
+                node.find(".icon-trash-container").click(function(){
+                    node.remove();
+                });
+                node.find(".icon-cut-container").click(function(){
+                    $(".cut").removeClass("cut");
+                    $(".copied").removeClass("copied");
+                    $(".paste-button").css("display", "inline-block");
+                    node.addClass("cut");
+                });
+                node.find(".icon-copy-container").click(function(){
+                    $(".cut").removeClass("cut");
+                    $(".copied").removeClass("copied");
+                    $(".paste-button").css("display", "inline-block");
+                    node.addClass("copied");
+                });
+            }
+            $.each($(".lesson-container"), function(index, value) {
+                rebindAutocomplete($(value));
+            });
+        });
+    </script>
+    <style>
+        .day {
+            width: 35px;
+        }
+        .time {
+            width: 50px;
+        }
+        .lesson-container {
+            background-color: #ddd;
+            display: inline-block;
+            padding: 5px;
+        }
+        .cut {
+            background-color: #a1eeee;
+        }
+        .copied {
+            background-color: #a1ee80;
+        }
+        .controls {
+            float: right;
+            display: inline;
+            margin-left: 5px;
+        }
+        .input-container {
+            display: inline;
+            float: left;
+        }
+        .button-container {
+            display: inline-block;
+            padding: 5px;
+            height: 60px;
+        }
+        .row-button {
+            display: inline;
+            float: left;
+            font-size: 50px;
+            margin-top: 20px;
+            color: #fff;
+        }
+        .add-button {
+            background-color: #a1ee80;
+        }
+        .paste-button {
+            background-color: #a1eeee;
+            display: none;
+        }
+        input {
+            margin-top: 2px;
+        }
+        .icon-cut-container:hover {
+            cursor: pointer;
+            color: #00f;
+        }
+        .icon-copy-container:hover {
+            cursor: pointer;
+            color: #0f0;
+        }
+        .icon-trash-container:hover {
+            cursor: pointer;
+            color: #f00;
+        }
+    </style>
+{% endblock %}
+{% block header %}Створити розклад{% endblock %}
+{% block content %}
+    <table class="bordered-table zebra-striped">
+        <tr>
+            <th class="day">
+                День
+            </th>
+            <th class="time">
+                Час
+            </th>
+            <th class="lesson-items">
+                Пари
+            </th>
+        </tr>
+        {% for day in days %}
+            {% for time_split in times_split %}
+                <tr>
+                    <td class="day">
+                        {% if forloop.counter0 == 0 %}
+                            <h3>
+                                {{ day }}
+                            </h3>
+                        {% endif %}
+                    </td>
+                    <td class="time">
+                        <h3>
+                            {{ time_split.0 }}
+                        </h3>
+                    </td>
+                    <td class="lesson-items">
+                        {% for i in "ab" %}
+                            <div class="lesson-container">
+                                <div class="input-container">
+                                    <input class="course" style="width:215px" placeholder="Курс">
+                                    <br>
+                                    <input class="room" style="width:66px" placeholder="Аудиторія">
+                                    <input class="group" style="width:46px" placeholder="Група">
+                                    <input class="weeks" style="width:75px" placeholder="Тижні">
+                                </div>
+                                <div class="controls">
+                                    <div class="icon-cut-container">
+                                        <i class="icon-cut"></i>
+                                    </div>
+                                    <div class="icon-copy-container">
+                                        <i class="icon-copy icon-large"></i>
+                                    </div>
+                                    <div class="icon-trash-container">
+                                        <i class="icon-trash icon-large"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                        <div class="button-container paste-button">
+                            <div class="row-button">
+                                <i class="icon-paste"></i>
+                            </div>
+                        </div>
+                        <div class="button-container add-button">
+                            <div class="row-button">
+                                +
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            {% endfor %}
+        {% endfor %}
+        <tr>
+        </tr>
+    </table>
+{% endblock %}

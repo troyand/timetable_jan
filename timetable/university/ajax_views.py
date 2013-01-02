@@ -86,6 +86,25 @@ class UnifiedTimetableProcessView(FormView):
         return super(UnifiedTimetableProcessView, self).get(request)
 
 
+class CreateTimetableView(FormView):
+    class CSVUploadForm(forms.Form):
+        csv_file = forms.FileField()
+    form_class = CSVUploadForm
+
+    def get_context_data(self, **kwargs):
+        context = super(
+                CreateTimetableView,
+                self
+                ).get_context_data(**kwargs)
+        context['days'] = [u'ПН', u'ВТ', u'СР', u'ЧТ', u'ПТ', u'СБ']
+        context['times'] = [u'08:30-09:50', u'10:00-11:20', u'11:40-13:00',
+                            u'13:30-14:50', u'15:00-16:20', u'16:30-17:50',
+                            u'18:00-19:20']
+        context['times_split'] = [time.split('-') for time in context['times']]
+        context['times_len'] = len(context['times'])
+        return context
+
+
 class ExtraCoursesAutocompleteView(AjaxAutocompleteMixin, BaseListView):
     model = Course
 

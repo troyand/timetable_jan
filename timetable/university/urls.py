@@ -4,7 +4,7 @@ from django.conf.urls.defaults import patterns, include, url
 from django.conf import settings
 from timetable.university.cb_views import *
 from django.views.generic import TemplateView, RedirectView
-from timetable.university.ajax_views import ajax_urls, UnifiedTimetableProcessView
+from timetable.university.ajax_views import ajax_urls, UnifiedTimetableProcessView, CreateTimetableView
 from timetable.university.views import ICALView, TimetableView, TimetableMainView
 from timetable.university.planning_views import PlanningLightView, PlanningLightRoomView, PlanningLightRoomDeleteView, PlanningAjaxView, PlanningRoomAddLessonsAjaxView, PlanningRoomDeleteLessonsAjaxView, PlanningRoomAjaxLecturerView, PlanningAddLessonsAjaxView, PlanningDeleteLessonsAjaxView
 
@@ -70,5 +70,8 @@ urlpatterns = patterns('',
     (r'create-timetable/$',
      UnifiedTimetableProcessView.as_view(
          template_name='create_timetable.html')),
+    (r'create-timetable-2/$',
+     CreateTimetableView.as_view(
+         template_name='create_timetable_2.html')),
     url(r'^feedback/$', FeedbackView.as_view(template_name='feedback.html')),
 )
