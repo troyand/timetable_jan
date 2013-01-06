@@ -15,7 +15,7 @@ if sys.argv[1] == 'long':
             kind=u'семестр',
             season=u'весняний',
             number_of_weeks=15,
-            tcp_week=None,
+            tcp_week=8,
             start_date='2013-01-14',
             exams_start_date='2013-04-29',
             exams_end_date='2012-05-10',
