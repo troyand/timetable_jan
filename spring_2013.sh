@@ -14,3 +14,4 @@ python import_timetable.py -f timetable/unified_docs/2012_2013_vesna_fls_4.csv -
 python import_timetable.py -f timetable/unified_docs/2012_2013_vesna_fls_5.csv -y 1 -c 7.03040201 -i -t $long_academic_term_id
 python import_timetable.py -f timetable/unified_docs/2012_2013_vesna_fls_6.csv -y 1 -c 8.03040201 -i -t $long_academic_term_id
 
+python add_courses.py -f 6.6.030401 -y 3 -t 6.6.030401 -z 2 -n "Політологія" -a $long_academic_term_id
