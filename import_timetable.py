@@ -44,7 +44,10 @@ def analyze_table(table):
 
 def create_room_mapping(rooms, university):
     mapping = {}
+    mapping[''] = None
     for room_str in rooms:
+        if room_str == u'':
+            continue
         building_name, room_name = room_str.split('-')
         building_number = filter(lambda x: x.isdigit(), building_name)
         if building_number:
