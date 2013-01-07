@@ -17,3 +17,7 @@ python import_timetable.py -f timetable/unified_docs/2012_2013_vesna_fls_6.csv -
 python add_courses.py -f 6.030401 -y 3 -t 6.030401 -z 2 -n "Політологія" -a $long_academic_term_id
 python add_courses.py -f 7.03040201 -y 1 -t 8.03040201 -z 1 -n "Цивільний захист" -a $long_academic_term_id
 python add_courses.py -f 7.03040201 -y 1 -t 8.03040201 -z 1 -n "Охорона праці в галузі" -a $long_academic_term_id
+
+python import_timetable.py -f timetable/unified_docs/2012_2013_vesna_sociology_3.csv -y 3 -c 6.030101 -i -t $long_academic_term_id
+python import_timetable.py -f timetable/unified_docs/2012_2013_vesna_politology_3.csv -y 3 -c 6.030104 -i -t $long_academic_term_id
+python import_timetable.py -f timetable/unified_docs/2012_2013_vesna_socrob_3.csv -y 3 -c 6.130102 -i -t $long_academic_term_id
