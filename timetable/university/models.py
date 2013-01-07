@@ -452,12 +452,12 @@ def student_group_membership_post_save(sender, instance, created,
 
 class Lesson(models.Model):
     group = models.ForeignKey(Group)
-    room = models.ForeignKey(Room, verbose_name=u'аудиторія')
+    room = models.ForeignKey(Room, null=True, blank=True, verbose_name=u'аудиторія')
     date = models.DateField(verbose_name=u'дата')
     lesson_number = models.IntegerField(verbose_name=u'номер пари')
 
-    class Meta:
-        unique_together = ('room', 'date', 'lesson_number')
+    #class Meta:
+    #    unique_together = ('room', 'date', 'lesson_number')
 
     def __unicode__(self):
         return '%s %d %s - %d' % (
