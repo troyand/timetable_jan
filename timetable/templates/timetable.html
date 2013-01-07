@@ -173,7 +173,7 @@
                                         </span>
                                         <br>
                                         <span class="details">
-                                            <strong>{{ lesson.room }}</strong>, 
+                                            <strong>{% if lesson.room %}{{ lesson.room }}{% else %}?{% endif %}</strong>,
                                             <em>{{ lesson.group.lecturer.short_name }}</em>
                                             <span class="label" style="background-color:{{ course_colors|lookup:lesson.group.course_id}}">
                                                 {% if lesson.group.number == 0 %}

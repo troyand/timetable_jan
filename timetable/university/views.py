@@ -456,6 +456,8 @@ def rooms_status(request, year, month, day):
     for lesson in lessons:
         building = lesson.room.building
         room = lesson.room
+        if not room:
+            continue
         building_rooms.setdefault(
             building, set()).add(room)
         mapping.setdefault(building, {}).setdefault(
