@@ -79,6 +79,7 @@
 {% endblock %}
 {% block header %}Персональний розклад{% endblock %}
 {% block content %}
+    {% csrf_token %}
     {% if clashing_lessons %}
         <div class="alert-message block-message error">
             <h3>У розкладі виявлено такі накладки:</h3>
