@@ -526,7 +526,8 @@ class Lesson(models.Model):
         else:
             summary_str = u'%s' % self.group.course.discipline.name
         event.add('summary', summary_str)
-        event.add('location', unicode(self.room))
+        if self.room:
+            event.add('location', unicode(self.room))
         event.add('dtstart', dtstart)
         event.add('dtend', dtend)
         event['uid'] = 'lesson-%d@universitytimetable.org.ua' % self.id
