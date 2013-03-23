@@ -1,5 +1,5 @@
 django==1.4
-icalendar==2.2
+icalendar>=3.3
 python-dateutil>=2.0
 -e hg+http://bitbucket.org/andrewgodwin/south/@64fdcc52cd01#egg=South
 python-ldap

@@ -84,8 +84,12 @@ class ICALResponseMixin(object):
         cal.add('version', '2.0')
         for lesson in lessons:
             cal.add_component(lesson.icalendar_event())
+        try:
+            cal_string = cal.to_ical().replace(';VALUE=DATE', '')
+        except AttributeError:
+            cal_string = cal.as_string().replace(';VALUE=DATE', '')
         response = HttpResponse(
-            cal.as_string().replace(';VALUE=DATE', ''),
+            cal_string,
             mimetype='text/calendar; charset=UTF-8'
         )
         response['Content-Disposition'] = 'attachment; filename=universitytimetabe.ics'

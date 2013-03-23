@@ -501,14 +501,13 @@ class Lesson(models.Model):
 
     def icalendar_event(self):
         import icalendar
-        from dateutil.tz import tzlocal
-        #import pytz
+        import pytz
         lesson_start_time, lesson_end_time = lesson_times[self.lesson_number]
         lesson_start_hour, lesson_start_minute = map(int,
                                                      lesson_start_time.split(':'))
         lesson_end_hour, lesson_end_minute = map(int,
                                                  lesson_end_time.split(':'))
-        tz = tzlocal()  # pytz.timezone('Europe/Kiev')
+        tz = pytz.timezone('Europe/Kiev')
         dtstart = datetime.datetime.combine(self.date, datetime.time(
             lesson_start_hour,
             lesson_start_minute,
@@ -519,13 +518,14 @@ class Lesson(models.Model):
             tzinfo=tz))
         event = icalendar.Event()
         if self.group.number != 0:
-            summary_str = u'%s-%d' % (
+            summary_str = u'%s (група %d)' % (
                 self.group.course.discipline.name,
                 self.group.number,
             )
         else:
-            summary_str = u'%s' % self.group.course.discipline.name
+            summary_str = u'%s (лекція)' % self.group.course.discipline.name
         event.add('summary', summary_str)
+        event.add('description', u'Викладач: %s' % self.group.lecturer)
         if self.room:
             event.add('location', unicode(self.room))
         event.add('dtstart', dtstart)
