@@ -525,7 +525,7 @@ class Lesson(models.Model):
         else:
             summary_str = u'%s (лекція)' % self.group.course.discipline.name
         event.add('summary', summary_str)
-        event.add('description', u'Викладач: %s' % self.group.lecturer)
+        event.add('description', u'Викладач: %s' % self.group.lecturer.short_name())
         if self.room:
             event.add('location', unicode(self.room))
         event.add('dtstart', dtstart)
