@@ -100,6 +100,10 @@ class ICALResponseMixin(object):
                 event.add('description', u'%s' % academic_term)
                 event.add('dtstart', week_start_date)
                 event.add('dtend', week_end_date)
+                event['uid'] = 'week-%d-academic-term-%d@universitytimetable.org.ua' % (
+                        week_number,
+                        academic_term_id,
+                        )
                 cal.add_component(event)
         for lesson in lessons:
             cal.add_component(lesson.icalendar_event())
