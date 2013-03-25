@@ -85,7 +85,7 @@ class ICALResponseMixin(object):
         for lesson in lessons:
             cal.add_component(lesson.icalendar_event())
         try:
-            cal_string = cal.to_ical().replace(';VALUE=DATE', '')
+            cal_string = cal.to_ical()
         except AttributeError:
             cal_string = cal.as_string().replace(';VALUE=DATE', '')
         response = HttpResponse(
