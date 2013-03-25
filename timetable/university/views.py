@@ -85,6 +85,22 @@ class ICALResponseMixin(object):
         cal = icalendar.Calendar()
         cal.add('prodid', '-//USIC timetable//')
         cal.add('version', '2.0')
+        academic_terms = set([l.group.course.academic_term_id for l in lessons])
+        for academic_term_id in academic_terms:
+            academic_term = AcademicTerm.objects.get(id=academic_term_id)
+            for week_number in range(1, academic_term.number_of_weeks + 1):
+                week_start_date = academic_term[week_number][0]
+                week_end_date = academic_term[week_number][6]
+                event = icalendar.Event()
+                if week_number == academic_term.tcp_week:
+                    summary = u'%d тиждень - ТСР' % week_number
+                else:
+                    summary = u'%d тиждень' % week_number
+                event.add('summary', summary)
+                event.add('description', u'%s' % academic_term)
+                event.add('dtstart', week_start_date)
+                event.add('dtend', week_end_date)
+                cal.add_component(event)
         for lesson in lessons:
             cal.add_component(lesson.icalendar_event())
         try:
