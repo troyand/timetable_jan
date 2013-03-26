@@ -90,7 +90,7 @@ class ICALResponseMixin(object):
             academic_term = AcademicTerm.objects.get(id=academic_term_id)
             for week_number in range(1, academic_term.number_of_weeks + 1):
                 week_start_date = academic_term[week_number][0]
-                week_end_date = academic_term[week_number][6]
+                week_end_date = academic_term[week_number][7]
                 event = icalendar.Event()
                 if week_number == academic_term.tcp_week:
                     summary = u'%d тиждень - ТСР' % week_number
