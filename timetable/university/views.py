@@ -88,6 +88,12 @@ promos = {
     datetime.date(2013, 5, 23): [
         ('img/promo/tsei.png', 'https://vk.com/tseikorablyk'),
     ],
+    datetime.date(2013, 6, 15): [
+        ('img/promo/flower_ballroom_party_2013.png', 'https://vk.com/kvitkovyi_bal'),
+    ],
+    datetime.date(2013, 6, 18): [
+        ('img/promo/miss_2013.png', 'https://www.facebook.com/events/146530922206084/'),
+    ],
 }
 
 
