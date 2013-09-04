@@ -1,6 +1,6 @@
 #!/bin/bash
 
-academic_term_id=`python autumn_2012.py`
+academic_term_id=`python autumn_2013.py`
 
 
 # FLS
