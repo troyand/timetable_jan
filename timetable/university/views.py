@@ -544,7 +544,7 @@ def lecturer_timetable(request):
     groups = Group.objects.select_related(
                     'lecturer__person'
                     ).filter(
-                            course__academic_term__year__exact=2012
+                            course__academic_term__year__exact=2013
                             )
     # department_lecturer_groups[department][lecturer] = set(group_id1, group_id2)
     department_lecturer_groups = {}
