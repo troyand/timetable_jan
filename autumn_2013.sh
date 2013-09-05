@@ -14,7 +14,7 @@ python import_timetable.py -f timetable/unified_docs/2013_2014_osin_fls_6.csv -y
 # FI
 python import_timetable.py -f timetable/unified_docs/2013_2014_osin_cs_1.csv -y 1 -c 6.050103 -i -t $academic_term_id
 
-python import_timetable.py -f timetable/unified_docs/2012_2013_osin_math_1.csv -y 1 -c 6.040301 -i -t $academic_term_id
+python import_timetable.py -f timetable/unified_docs/2013_2014_osin_math_1.csv -y 1 -c 6.040301 -i -t $academic_term_id
 python add_courses.py -f 6.050103 -y 1 -t 6.040301 -z 1 -n "Англійська мова" -a $academic_term_id
 python add_courses.py -f 6.050103 -y 1 -t 6.040301 -z 1 -n "Застосування принципів Болонського процесу в НаУКМА" -a $academic_term_id
 python add_courses.py -f 6.050103 -y 1 -t 6.040301 -z 1 -n "Українська мова" -a $academic_term_id
