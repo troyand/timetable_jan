@@ -31,3 +31,5 @@ python add_courses.py -f 6.050103 -y 3 -t 6.040301 -z 3 -n "Філософія" 
 
 python import_timetable.py -f timetable/unified_docs/2013_2014_osin_cs_4.csv -y 4 -c 6.050103 -i -t $academic_term_id
 python import_timetable.py -f timetable/unified_docs/2013_2014_osin_math_4.csv -y 4 -c 6.040301 -i -t $academic_term_id
+
+python import_timetable.py -f timetable/unified_docs/2013_2014_osin_cs_5.csv -y 1 -c 7.05010101 -i -t $academic_term_id
